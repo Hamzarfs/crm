@@ -1,10 +1,11 @@
 <x-admin>
-    @section('title', 'Create Employee')
+    @section('title', 'Employees')
     <div class="row justify-content-center">
         <div class="col-md-10">
             <div class="card">
                 <div class="card-primary">
                     <div class="card-header">
+                        <h3 class="card-title">Create Employee</h3>
                         <div class="card-tools">
                             <a href="{{ route('admin.employee.index') }}" class="btn btn-info btn-sm">Back</a>
                         </div>

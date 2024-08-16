@@ -37,8 +37,8 @@
                         <tr>
                             <td>{{ $employee->id }}</td>
                             <td>
-                                <a href="javascript:void(0)" class="picture-modal" data-name="{{ $employee->name }}">
-                                    <img src="{{ $employee->avatar ?? 'https://placehold.co/50' }}" alt="picture"
+                                <a href="javascript:void(0)" @if($employee->avatar) class="picture-modal" @endif data-name="{{ $employee->name }}">
+                                    <img src="{{ $employee->avatar ? asset("$employee->avatar") : 'https://placehold.co/50' }}" alt="picture"
                                         class="picture">
                                 </a>
                             </td>
@@ -49,7 +49,7 @@
                                 <div class="d-flex align-items-center">
                                     <a
                                         href="{{ route('admin.employee.edit', $employee->id) }}"class="btn btn-sm btn-primary">Edit</a>
-                                    <a href="#" class="btn btn-sm btn-secondary mx-2">Upload Documents</a>
+                                    <a href="{{ route('admin.employee.uploadDocumentsView', $employee->id) }}" class="btn btn-sm btn-secondary mx-2">Upload Documents</a>
                                     <a href="javascript:void(0)" class="btn btn-sm btn-danger delete-btn" id="{{ $employee->id }}">Delete</a>
                                 </div>
                             </td>
@@ -118,9 +118,9 @@
             $('.delete-btn').click(function() {
                 if(confirm('Are you sure you want to delete?')) {
                     const form = $('#delete-form')
-    
+
                     form.attr('action', form.attr('action').replace('11111', this.id))
-    
+
                     form.submit()
                 }
             })

@@ -10,7 +10,7 @@ use Illuminate\Http\UploadedFile;
 class ImageService
 {
     /**
-     * @var Filesystem 
+     * @var Filesystem
      */
     protected $disk;
 
@@ -112,6 +112,6 @@ class ImageService
 
         $newFullPath = $file->storeAs($dir, $newFilename);
 
-        return $this->disk->url($newFullPath);
+        return "storage/$newFullPath";
     }
 }
