@@ -15,7 +15,8 @@ return new class extends Migration
         Schema::create('user_details', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(User::class);
-            $table->string('name');
+            $table->string('key');
+            $table->text('value');
             $table->timestamps();
         });
     }

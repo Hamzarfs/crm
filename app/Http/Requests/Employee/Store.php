@@ -26,6 +26,8 @@ class Store extends FormRequest
             'email' => ['required', 'email', 'unique:users'],
             'phone' => ['required', 'numeric'],
             'picture' => ['image'],
+            'details' => ['nullable', 'array'],
+            'details.*' => ['nullable', 'string'],
         ];
     }
 }

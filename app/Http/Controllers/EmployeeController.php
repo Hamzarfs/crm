@@ -9,6 +9,8 @@ use App\Models\Employee\Document;
 use App\Models\User;
 use App\Services\Employee\DocumentService;
 use App\Services\ImageService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class EmployeeController extends Controller
 {
@@ -31,6 +33,28 @@ class EmployeeController extends Controller
         return view('admin.employee.create');
     }
 
+    protected function addEmployeeDetails(User $employee, array $data)
+    {
+        DB::beginTransaction();
+        try {
+            foreach ($data as $key => $value) {
+                if (!is_null($value)) {
+                    $employee->details()->updateOrCreate([
+                        'key' => $key
+                    ], [
+                        'value' => $value
+                    ]);
+                }
+            }
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error($th->getMessage());
+            Log::error($th->getTraceAsString());
+            throw $th;
+        }
+        DB::commit();
+    }
+
     public function store(EmployeeStoreRequest $request)
     {
         $data = $request->validated();
@@ -50,13 +74,24 @@ class EmployeeController extends Controller
 
         $user->assignRole('employee');
 
+        $this->addEmployeeDetails($user, $data['details']);
+
         return redirect()->route('admin.employee.index')->with('success', 'Employee added successfully!');
     }
 
-    public function edit(User $user)
+    public function edit(User $employee)
     {
+        $employee->append('employee_details');
+
         return view('admin.employee.edit', [
-            'employee' => $user,
+            'employee' => (object)$employee->only([
+                'id',
+                'name',
+                'email',
+                'phonenumber',
+                'avatar',
+                'employee_details'
+            ]),
         ]);
     }
 
@@ -76,6 +111,8 @@ class EmployeeController extends Controller
         }
 
         $user->save();
+
+        $this->addEmployeeDetails($user, $data['details']);
 
         return redirect()->route('admin.employee.index')->with('success', 'Employee updated successfully!');
     }

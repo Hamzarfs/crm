@@ -10,6 +10,14 @@
             width: 50px;
             height: 50px;
         }
+
+        .action-btns a {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 @endsection
 
@@ -37,20 +45,34 @@
                         <tr>
                             <td>{{ $employee->id }}</td>
                             <td>
-                                <a href="javascript:void(0)" @if($employee->avatar) class="picture-modal" @endif data-name="{{ $employee->name }}">
-                                    <img src="{{ $employee->avatar ? asset("$employee->avatar") : 'https://placehold.co/50' }}" alt="picture"
-                                        class="picture">
+                                <a href="javascript:void(0)"
+                                    @if ($employee->avatar) class="picture-modal" @endif
+                                    data-name="{{ $employee->name }}">
+                                    <img src="{{ $employee->avatar ? asset("$employee->avatar") : 'https://placehold.co/50' }}"
+                                        alt="picture" class="picture">
                                 </a>
                             </td>
                             <td>{{ $employee->name }}</td>
                             <td>{{ $employee->email }}</td>
                             <td>{{ $employee->phonenumber }}</td>
                             <td>
-                                <div class="d-flex align-items-center">
+                                <div class="d-flex align-items-center action-btns">
                                     <a
-                                        href="{{ route('admin.employee.edit', $employee->id) }}"class="btn btn-sm btn-primary">Edit</a>
-                                    <a href="{{ route('admin.employee.uploadDocumentsView', $employee->id) }}" class="btn btn-sm btn-secondary mx-2">Upload Documents</a>
-                                    <a href="javascript:void(0)" class="btn btn-sm btn-danger delete-btn" id="{{ $employee->id }}">Delete</a>
+                                        href="{{ route('admin.employee.show', $employee->id) }}"class="btn btn-sm btn-info rounded-circle disabled">
+                                        <i class="fa fa-eye"></i>
+                                    </a>
+                                    <a
+                                        href="{{ route('admin.employee.edit', $employee->id) }}"class="btn btn-sm btn-primary rounded-circle mx-2">
+                                        <i class="fa fa-edit"></i>
+                                    </a>
+                                    <a href="{{ route('admin.employee.uploadDocumentsView', $employee->id) }}"
+                                        class="btn btn-sm btn-secondary mr-2 rounded-circle">
+                                        <i class="fas fa-file-upload"></i>
+                                    </a>
+                                    <a href="javascript:void(0)" class="btn btn-sm btn-danger delete-btn rounded-circle"
+                                        id="{{ $employee->id }}">
+                                        <i class="fa fa-trash"></i>
+                                    </a>
                                 </div>
                             </td>
                         </tr>
@@ -72,7 +94,7 @@
         @method('DELETE')
     </form>
 
-    <!-- Modal -->
+    {{-- Picture Modal --}}
     <div class="modal fade" id="pictureModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -116,11 +138,9 @@
             })
 
             $('.delete-btn').click(function() {
-                if(confirm('Are you sure you want to delete?')) {
+                if (confirm('Are you sure you want to delete?')) {
                     const form = $('#delete-form')
-
                     form.attr('action', form.attr('action').replace('11111', this.id))
-
                     form.submit()
                 }
             })

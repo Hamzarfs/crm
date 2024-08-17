@@ -26,6 +26,8 @@ class Update extends FormRequest
             'email' => ['required', 'email', "unique:users,email,{$this->route('employee')->id}"],
             'phone' => ['required', 'numeric'],
             'picture' => ['image'],
+            'details' => ['nullable', 'array'],
+            'details.*' => ['nullable', 'string'],
         ];
     }
 }
