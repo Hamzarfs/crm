@@ -14,7 +14,7 @@
             </a>
         </li>
         @role('admin')
-            <li class="nav-item">
+            {{-- <li class="nav-item">
                 <a href="{{ route('admin.user.index') }}"
                     class="nav-link {{ Route::is('admin.user.index') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-user"></i>
@@ -22,16 +22,7 @@
                         <span class="badge badge-warning right">{{ $userCount }}</span>
                     </p>
                 </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('admin.employee.index') }}"
-                    class="nav-link {{ Route::is('admin.employee.index') ? 'active' : '' }}">
-                    <i class="nav-icon fas fa-user"></i>
-                    <p>Employees
-                        <span class="badge badge-warning right">{{ $employeesCount }}</span>
-                    </p>
-                </a>
-            </li>
+            </li> --}}
             <li class="nav-item">
                 <a href="{{ route('admin.role.index') }}"
                     class="nav-link {{ Route::is('admin.role.index') ? 'active' : '' }}">
@@ -69,12 +60,30 @@
                 </a>
             </li> --}}
         @endrole
-        <li class="nav-item">
-            <a href="#"
-                class="nav-link {{ Route::is('') ? 'active' : '' }}">
-                <i class="nav-icon fas fa-id-card"></i>
-                <p>Sales</p>
-            </a>
-        </li>
+
+
+
+        @role('admin|hr')
+            <li class="nav-item">
+                <a href="{{ route('admin.employee.index') }}"
+                    class="nav-link {{ Route::is('admin.employee.index') ? 'active' : '' }}">
+                    <i class="nav-icon fas fa-user"></i>
+                    <p>Employees
+                        <span class="badge badge-warning right">{{ $employeesCount }}</span>
+                    </p>
+                </a>
+            </li>
+        @endrole
+
+
+
+        @role('admin|employee')
+            <li class="nav-item">
+                <a href="#" class="nav-link {{ Route::is('') ? 'active' : '' }}">
+                    <i class="nav-icon fas fa-id-card"></i>
+                    <p>Sales</p>
+                </a>
+            </li>
+        @endrole
     </ul>
 </nav>
