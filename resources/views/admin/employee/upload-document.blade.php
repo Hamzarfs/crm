@@ -183,6 +183,10 @@
                                 .submit()
                         }
                     })
+
+                    $(function() {
+                        $('table.table').DataTable()
+                    })
                 </script>
             @endsection
 

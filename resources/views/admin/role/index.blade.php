@@ -21,7 +21,7 @@
             </div>
         </div>
         <div class="card-body">
-            <table class="table table-striped" id="roleTable">
+            <table class="table table-striped table-hover" id="roleTable">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -36,10 +36,14 @@
                             <td>{{ $role->created_at->format('h:i A d-m-Y') }}</td>
                             <td>
                                 <div class="d-flex align-items-center action-btns">
-                                    <a href="{{ route('admin.role.edit', $role->id) }}"class="btn btn-sm btn-primary rounded-circle mx-2">
+                                    <a
+                                        href="{{ route('admin.role.edit', $role->id) }}"class="btn btn-sm btn-primary rounded-circle mx-2">
                                         <i class="fa fa-edit"></i>
                                     </a>
-                                    <a href="javascript:void(0)" class="btn btn-sm btn-danger delete-btn rounded-circle" id="{{ $role->id }}">
+                                    <a href="javascript:void(0)"
+                                        {{-- class="btn btn-sm btn-danger delete-btn rounded-circle @if (array_search(strtolower($role->name), ['admin', 'hr', 'employee'])) disabled @endif" --}}
+                                        class="btn btn-sm btn-danger delete-btn rounded-circle @if (array_search($role->name, ['admin', 'hr', 'employee', ]) !== false) disabled @endif"
+                                        id="{{ $role->id }}">
                                         <i class="fa fa-trash"></i>
                                     </a>
                                 </div>
