@@ -58,7 +58,7 @@
                             <td>
                                 <div class="d-flex align-items-center action-btns">
                                     <a
-                                        href="{{ route('admin.employee.show', $employee->id) }}"class="btn btn-sm btn-info rounded-circle disabled">
+                                        href="{{ route('admin.employee.show', $employee->id) }}"class="btn btn-sm btn-info rounded-circle">
                                         <i class="fa fa-eye"></i>
                                     </a>
                                     <a

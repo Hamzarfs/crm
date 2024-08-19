@@ -28,6 +28,22 @@ class EmployeeController extends Controller
         ]);
     }
 
+    public function show(User $employee)
+    {
+        $employee->append('employee_details');
+
+        return view('admin.employee.show', [
+            'employee' => (object)$employee->only([
+                'id',
+                'name',
+                'email',
+                'phonenumber',
+                'avatar',
+                'employee_details'
+            ]),
+        ]);
+    }
+
     public function create()
     {
         return view('admin.employee.create');
