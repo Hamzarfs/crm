@@ -1,5 +1,18 @@
 <x-admin>
-    @section('title','Roles')
+    @section('title', 'Roles')
+
+    @section('css')
+        <style>
+            .action-btns a {
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        </style>
+    @endsection
+
     <div class="card">
         <div class="card-header">
             <h3 class="card-title">Roles</h3>
@@ -14,27 +27,22 @@
                         <th>Name</th>
                         <th>Created</th>
                         <th>Action</th>
-                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($data as $role)
                         <tr>
                             <td>{{ $role->name }}</td>
-                            <td>{{ $role->created_at }}</td>
+                            <td>{{ $role->created_at->format('h:i A d-m-Y') }}</td>
                             <td>
-                                <a href="{{ route('admin.role.edit',encrypt($role->id)) }}" class="btn btn-sm btn-secondary">
-                                    <i class="far fa-edit"></i>
-                                </a>
-                            </td>
-                            <td>
-                                <form action="{{ route('admin.role.destroy',encrypt($role->id)) }}" method="POST" onclick="confirm('Are you sure')">
-                                    @method('DELETE')
-                                    @csrf
-                                    <button type="submit" class="btn btn-danger">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                            </form>
+                                <div class="d-flex align-items-center action-btns">
+                                    <a href="{{ route('admin.role.edit', $role->id) }}"class="btn btn-sm btn-primary rounded-circle mx-2">
+                                        <i class="fa fa-edit"></i>
+                                    </a>
+                                    <a href="javascript:void(0)" class="btn btn-sm btn-danger delete-btn rounded-circle" id="{{ $role->id }}">
+                                        <i class="fa fa-trash"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     @endforeach
@@ -42,6 +50,13 @@
             </table>
         </div>
     </div>
+
+    {{-- Delete Form --}}
+    <form action="{{ route('admin.role.destroy', 11111) }}" method="post" id="delete-form">
+        @csrf
+        @method('DELETE')
+    </form>
+
     @section('js')
         <script>
             $(function() {
@@ -52,6 +67,14 @@
                     "responsive": true,
                 });
             });
+
+            $('.delete-btn').click(function() {
+                if (confirm('Are you sure you want to delete?')) {
+                    const form = $('#delete-form')
+                    form.attr('action', form.attr('action').replace('11111', this.id))
+                    form.submit()
+                }
+            })
         </script>
     @endsection
 </x-admin>

@@ -9,8 +9,10 @@ class RoleController extends Controller
 {
     public function index()
     {
-        $data = Role::orderBy('id','DESC')->get();
-        return view('admin.role.index', compact('data'));
+        $data = Role::orderBy('id', 'DESC')->get();
+        return view('admin.role.index', [
+            'data' => $data
+        ]);
     }
 
     public function create()
@@ -23,30 +25,34 @@ class RoleController extends Controller
         $request->validate([
             'name' => 'required|unique:roles|max:255',
         ]);
-        Role::updateOrCreate(
-            [
-                'id'=>$request->id
-            ],[
-                'name'=>$request->name,
-            ]
-        );
-        if($request->id){
-            $msg = 'Role updated successfully.';
-        }else{
-            $msg = 'Role created successfully.';
-        }
-        return redirect()->route('admin.role.index')->with('success',$msg);
+        Role::create([
+            'name' => $request->name,
+        ]);
+
+        return redirect()->route('admin.role.index')->with('success', "Role created successfully.");
     }
 
-    public function edit($id)
+    public function update(Role $role, Request $request)
     {
-        $data = Role::where('id',decrypt($id))->first();
-        return view('admin.role.edit',compact('data'));
+        $data = $request->validate([
+            'name' => "required|max:255|unique:roles,name,{$role->id}",
+        ]);
+
+        $role->update([ 'name' => $data['name'] ]);
+
+        return redirect()->route('admin.role.index')->with('success', "Role updated successfully.");
     }
 
-    public function destroy($id)
+    public function edit(Role $role)
     {
-        Role::where('id',decrypt($id))->delete();
-        return redirect()->route('admin.role.index')->with('error','Role deleted successfully.');
+        return view('admin.role.edit', [
+            'role' => $role
+        ]);
+    }
+
+    public function destroy(Role $role)
+    {
+        $role->delete();
+        return redirect()->route('admin.role.index')->with('error', 'Role deleted successfully.');
     }
 }
