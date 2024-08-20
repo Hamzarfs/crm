@@ -280,7 +280,7 @@
                                 <div class="col-xl-4 col-md-6">
                                     <div class="form-group">
                                         <label for="workEmail" class="form-label">Work email</label>
-                                        <input type="email" name="details[workEmail]" id="workEmail"
+                                        <input type="text" name="details[workEmail]" id="workEmail"
                                             value="{{ old('details.workEmail', $employee->employee_details->workEmail ?? '') }}"
                                             class="form-control @error('details.workEmail') is-invalid @enderror">
                                         <small class="text-muted">(Gmail & Webmail that is logged in your PC)</small>
@@ -310,7 +310,7 @@
                                 <div class="col-xl-4 col-md-6">
                                     <div class="form-group">
                                         <label for="companyEmail" class="form-label">Company Domain Email</label>
-                                        <input type="email" name="details[companyEmail]" id="companyEmail"
+                                        <input type="text" name="details[companyEmail]" id="companyEmail"
                                             value="{{ old('details.companyEmail', $employee->employee_details->companyEmail ?? '') }}"
                                             class="form-control @error('details.companyEmail') is-invalid @enderror">
                                         @error('details.companyEmail')

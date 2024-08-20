@@ -3,20 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Employee\Document\Store as EmployeeDocumentStoreRequest;
+use App\Http\Requests\Employee\Import as EmployeeImportRequest;
 use App\Http\Requests\Employee\Store as EmployeeStoreRequest;
 use App\Http\Requests\Employee\Update as EmployeeUpdateRequest;
+use App\Imports\EmployeeImport;
 use App\Models\Employee\Document;
 use App\Models\User;
 use App\Services\Employee\DocumentService;
 use App\Services\ImageService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Facades\Excel;
 
 class EmployeeController extends Controller
 {
     public function __construct(
-        public ImageService $imageService,
-        public DocumentService $documentService,
+        private ImageService $imageService,
+        private DocumentService $documentService,
     ) {}
 
     public function index()
@@ -170,5 +174,27 @@ class EmployeeController extends Controller
     {
         $document->delete();
         return back()->with('success', 'Document deleted');
+    }
+
+    public function importView()
+    {
+        return view('admin.employee.import');
+    }
+
+    public function downloadSampleFile()
+    {
+        return response()->download(public_path("storage/employees/import_sample.xlsx"), 'import_sample.xlsx');
+    }
+
+    public function import(EmployeeImportRequest $request)
+    {
+        $file = $request->validated('file');
+        try {
+            Excel::import(new EmployeeImport, $file);
+        } catch (ValidationException $e) {
+            $errors = transformErrorMessagesToIncludeRowNumber($e->errors());
+            return back()->with('customErrors', $errors);
+        }
+        return redirect()->route('admin.employee.index')->with('success', 'Employees imported successfully!!');
     }
 }

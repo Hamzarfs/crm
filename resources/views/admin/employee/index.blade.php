@@ -26,6 +26,7 @@
         <div class="card-header">
             <div class="card-tools">
                 <a href="{{ route('admin.employee.create') }}" class="btn btn-sm btn-info">New</a>
+                <a href="{{ route('admin.employee.importView') }}" class="btn btn-sm btn-info">Import</a>
             </div>
         </div>
         <div class="card-body">

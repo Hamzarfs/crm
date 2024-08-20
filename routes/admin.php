@@ -28,10 +28,18 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'role:ad
         Route::resource('employee', EmployeeController::class);
         Route::group([
             'as' => 'employee.',
-            'prefix' => 'employee/{user}/upload-documents',
+            'prefix' => 'employee',
+            'controller' => EmployeeController::class,
         ], function () {
-            Route::get('', [EmployeeController::class, 'uploadDocumentsView'])->name('uploadDocumentsView');
-            Route::post('', [EmployeeController::class, 'uploadDocuments'])->name('uploadDocuments');
+            Route::prefix('import')->group(function () {
+                Route::get('view', 'importView')->name('importView');
+                Route::post('', 'import')->name('import');
+                Route::get('sample', 'downloadSampleFile')->name('sample');
+            });
+            Route::prefix('{employee}/upload-documents')->group(function () {
+                Route::get('', 'uploadDocumentsView')->name('uploadDocumentsView');
+                Route::post('', 'uploadDocuments')->name('uploadDocuments');
+            });
         });
         Route::delete('employee/document/{document}', [EmployeeController::class, 'deleteDocument'])->name('employee.document.delete');
         Route::get('/get/subcategory', [ProductController::class, 'getsubcategory'])->name('getsubcategory');
