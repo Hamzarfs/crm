@@ -167,7 +167,7 @@ class EmployeeController extends Controller
 
         $this->documentService->uploadDocuments($user, $files);
 
-        return redirect()->route('admin.employee.index')->with('success', 'Documents uploaded successfully!!');
+        return back()->with('success', 'Documents uploaded successfully!!');
     }
 
     public function deleteDocument(Document $document)
