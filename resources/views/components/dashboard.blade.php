@@ -1,5 +1,5 @@
 <div class="row">
-    @role('admin')
+    {{-- @role('admin')
         <div class="col-lg-3 col-6">
             <div class="small-box bg-info">
                 <div class="inner">
@@ -39,7 +39,7 @@
                         class="fas fa-arrow-circle-right"></i></a>
             </div>
         </div>
-        {{-- <div class="col-lg-3 col-6">
+        <div class="col-lg-3 col-6">
             <div class="small-box bg-secondary">
                 <div class="inner">
                     <h3>{{ $collection }}</h3>
@@ -51,6 +51,6 @@
                 <a href="{{ route('admin.collection.index') }}" class="small-box-footer">View <i
                         class="fas fa-arrow-circle-right"></i></a>
             </div>
-        </div> --}}
-    @endrole
+        </div>
+    @endrole --}}
 </div>
