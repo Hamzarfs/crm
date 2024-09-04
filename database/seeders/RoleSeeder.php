@@ -4,7 +4,9 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
+use App\Enums\RolesEnum;
 
 class RoleSeeder extends Seeder
 {
@@ -13,8 +15,13 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        Role::create(['name' => 'admin']);
-        Role::create(['name' => 'vendor']);
-        Role::create(['name' => 'user']);
+        DB::transaction(function () {
+            foreach (RolesEnum::cases() as $role) {
+                Role::create([
+                    'name' => $role->value,
+                    'guard_name' => 'api'
+                ]);
+            }
+        });
     }
 }

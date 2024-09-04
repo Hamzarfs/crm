@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Pagination\Paginator;
-use App\Models\Category;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -14,19 +14,16 @@ class AppServiceProvider extends ServiceProvider
     {
         //
     }
-   
 
-    
     /**
      * Bootstrap any application services.
      */
     public function boot(): void
     {
-        view()->composer('site.layouts.footer', function ($view) {
-            $categories = Category::where('is_top', true)->get();
-            
-            $view->with('categories', $categories);
+        // Implicitly grant "Super Admin" role all permissions
+        // This works in the app by using gate-related functions like auth()->user->can() and @can()
+        Gate::before(function ($user) {
+            return $user->hasRole('Admin') ? true : null;
         });
-        Paginator::useBootstrap();
     }
 }

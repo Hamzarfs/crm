@@ -2,21 +2,17 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-use App\Models\Employee\Document;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes;
+    use HasFactory, HasApiTokens, SoftDeletes, HasRoles;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -26,9 +22,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'phonenumber',
-        'provider_id',
-        'avatar'
     ];
 
     /**
@@ -38,43 +31,22 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
-        'remember_token',
     ];
 
     /**
-     * The attributes that should be cast.
+     * Get the attributes that should be cast.
      *
-     * @var array<string, string>
+     * @return array<string, string>
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
-
-    function documents()
+    protected function casts(): array
     {
-        return $this->hasMany(Document::class, 'employee_id');
+        return [
+            'password' => 'hashed',
+        ];
     }
 
-    function document(string $type): Collection
+    public function department()
     {
-        return $this->documents()->where('type', $type)->get();
-    }
-
-    function countDocument(string $type)
-    {
-        return $this->document($type)->count();
-    }
-
-    function details()
-    {
-        return $this->hasMany(UserDetail::class);
-    }
-
-    protected function employeeDetails(): Attribute
-    {
-        return new Attribute(
-            get: fn() => (object)transformEmployeeDetailsToArray($this->details->toArray())
-        );
+        return $this->hasOne(Department::class);
     }
 }
