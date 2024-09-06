@@ -40,7 +40,6 @@ const statistic = {
     subtitle: 'Yearly Project',
 }
 
-console.log(useRoute().meta);
 
 
 </script>

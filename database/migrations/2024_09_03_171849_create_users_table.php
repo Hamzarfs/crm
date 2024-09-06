@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\EmployeeStatusesEnum;
 use App\Models\Department;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;

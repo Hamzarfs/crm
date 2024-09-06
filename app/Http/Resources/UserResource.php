@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\EmployeeStatusesEnum;
 use App\Enums\RolesEnum;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -23,11 +24,15 @@ class UserResource extends JsonResource
                 return $this->roles->map(function ($role) {
                     $roleEnum = RolesEnum::from($role->name);
                     return [
-                        'name' => $roleEnum->value,
                         'label' => $roleEnum->label(),
+                        'value' => $roleEnum->value,
                     ];
                 });
             }),
+            'status' => [
+                'label' => $this->status->label(),
+                'value' => $this->status->value,
+            ],
             'created_at' => $this->created_at->format('d-m-Y H:i:s A'),
             'updated_at' => $this->updated_at->format('d-m-Y H:i:s A'),
         ];

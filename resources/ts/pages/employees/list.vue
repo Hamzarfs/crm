@@ -1,18 +1,17 @@
 <script setup lang="ts">
-import AddNewUserDrawer from '@/views/apps/user/list/AddNewUserDrawer.vue';
 
 // 👉 Store
 const searchQuery = ref('')
 const selectedRole = ref()
-const selectedPlan = ref()
 const selectedStatus = ref()
 
 // Data table options
-const itemsPerPage = ref(10)
+const itemsPerPage = ref(20)
 const page = ref(1)
 const sortBy = ref()
 const orderBy = ref()
 const selectedRows = ref([])
+const tableLoading = ref(false)
 
 // Update data table options
 const updateOptions = (options: any) => {
@@ -22,20 +21,20 @@ const updateOptions = (options: any) => {
 
 // Headers
 const headers = [
-    { title: 'User', key: 'user' },
+    { title: 'ID', key: 'id' },
+    { title: 'Name', key: 'name' },
     { title: 'Email', key: 'email' },
-    { title: 'Role', key: 'role' },
-    { title: 'Plan', key: 'plan' },
+    { title: 'Phone', key: 'phone' },
+    { title: 'Role', key: 'role', sortable: false },
     { title: 'Status', key: 'status' },
     { title: 'Actions', key: 'actions', sortable: false },
 ]
 
 // 👉 Fetching users
-const { data: usersData, execute: fetchUsers } = await useApi<any>(createUrl('/apps/users', {
+const { data: usersData, execute: fetchUsers, isFetching } = await useApi<any>(createUrl('/users', {
     query: {
         q: searchQuery,
         status: selectedStatus,
-        plan: selectedPlan,
         role: selectedRole,
         itemsPerPage,
         page,
@@ -44,56 +43,44 @@ const { data: usersData, execute: fetchUsers } = await useApi<any>(createUrl('/a
     },
 }))
 
+// Watch isFetching from the useApi to toggle tableLoading
+watch(isFetching, (newValue) => {
+    tableLoading.value = newValue
+}, { immediate: true })
+
 const users = computed(() => usersData.value.users)
 const totalUsers = computed(() => usersData.value.totalUsers)
 
-// 👉 search filters
-const roles = [
-    { title: 'Admin', value: 'admin' },
-    { title: 'Author', value: 'author' },
-    { title: 'Editor', value: 'editor' },
-    { title: 'Maintainer', value: 'maintainer' },
-    { title: 'Subscriber', value: 'subscriber' },
-]
+const { roles } = await $api('roles')
+const { status } = await $api('users/statuses')
 
-const plans = [
-    { title: 'Basic', value: 'basic' },
-    { title: 'Company', value: 'company' },
-    { title: 'Enterprise', value: 'enterprise' },
-    { title: 'Team', value: 'team' },
-]
-
-const status = [
-    { title: 'Pending', value: 'pending' },
-    { title: 'Active', value: 'active' },
-    { title: 'Inactive', value: 'inactive' },
-]
-
-const resolveUserRoleVariant = (role: string) => {
-    const roleLowerCase = role.toLowerCase()
-
-    if (roleLowerCase === 'subscriber')
-        return { color: 'success', icon: 'ri-user-line' }
-    if (roleLowerCase === 'author')
-        return { color: 'error', icon: 'ri-computer-line' }
-    if (roleLowerCase === 'maintainer')
-        return { color: 'info', icon: 'ri-pie-chart-line' }
-    if (roleLowerCase === 'editor')
-        return { color: 'warning', icon: 'ri-edit-box-line' }
-    if (roleLowerCase === 'admin')
-        return { color: 'primary', icon: 'ri-vip-crown-line' }
-
-    return { color: 'success', icon: 'ri-user-line' }
+const resolveUserRoleVariant = (role: string): string => {
+    switch (role.toLowerCase()) {
+        case 'admin':
+            return 'success'
+        case 'employee':
+            return 'primary'
+        case 'hr':
+            return 'red'
+        case 'team_lead':
+            return 'blue-grey'
+        case 'account_manager':
+            return 'deep-orange'
+        case 'accountant':
+            return 'amber'
+        case 'sales_agent':
+            return 'teal'
+        default:
+            return ''
+    }
 }
 
 const resolveUserStatusVariant = (stat: string) => {
     const statLowerCase = stat.toLowerCase()
-    if (statLowerCase === 'pending')
-        return 'warning'
     if (statLowerCase === 'active')
         return 'success'
     if (statLowerCase === 'inactive')
-        return 'secondary'
+        return 'warning'
 
     return 'primary'
 }
@@ -103,6 +90,10 @@ const isAddNewUserDrawerVisible = ref(false)
 // 👉 Add new user
 const addNewUser = async (userData: any) => {
     // userListStore.addUser(userData)
+    // await $api('/apps/users', {
+    //     method: 'POST',
+    //     body: userData,
+    // })
     await $api('/apps/users', {
         method: 'POST',
         body: userData,
@@ -128,35 +119,36 @@ const deleteUser = async (id: number) => {
     fetchUsers()
 }
 
-const widgetData = ref([
-    { title: 'Session', value: '21,459', change: 29, desc: 'Total Users', icon: 'ri-group-line', iconColor: 'primary' },
-    { title: 'Paid Users', value: '4,567', change: 18, desc: 'Last Week Analytics', icon: 'ri-user-add-line', iconColor: 'error' },
-    { title: 'Active Users', value: '19,860', change: -14, desc: 'Last Week Analytics', icon: 'ri-user-follow-line', iconColor: 'success' },
-    { title: 'Pending Users', value: '237', change: 42, desc: 'Last Week Analytics', icon: 'ri-user-search-line', iconColor: 'warning' },
+// 👉 Get employee count for top cards
+const { total: totalEmployees, new: newEmployees, active: activeEmployees, inactive: inactiveEmployees } = await $api('users/count')
 
+const widgetData = ref([
+    { title: 'Total Employees', value: totalEmployees, icon: 'ri-group-line', iconColor: 'primary' },
+    { title: 'Active Employees', value: activeEmployees, icon: 'ri-user-follow-line', iconColor: 'success' },
+    { title: 'Inactive Employees', value: inactiveEmployees, icon: 'ri-user-add-line', iconColor: 'error' },
+    { title: 'New Employees', value: newEmployees, icon: 'ri-user-search-line', iconColor: 'warning', desc: 'Joined last month' },
 ])
+
 </script>
 
 <template>
+
     <section>
         <!-- 👉 Widgets -->
         <div class="d-flex mb-6">
             <VRow>
                 <template v-for="(data, id) in widgetData" :key="id">
                     <VCol cols="12" md="3" sm="6">
-                        <VCard>
+                        <VCard class="d-flex align-center" height="100%">
                             <VCardText>
-                                <div class="d-flex justify-space-between">
+                                <div class="d-flex justify-space-between align-center">
                                     <div class="d-flex flex-column gap-y-1">
                                         <span class="text-base text-high-emphasis">{{ data.title }}</span>
-                                        <h4 class="text-h4 d-flex align-center gap-2">
+                                        <h4 class="text-h4 d-flex align-center gap-2 font-weight-bold">
                                             {{ data.value }}
-                                            <span class="text-base font-weight-regular"
-                                                :class="data.change > 0 ? 'text-success' : 'text-error'">({{
-                                                    prefixWithPlus(data.change) }}%)</span>
                                         </h4>
 
-                                        <p class="text-sm mb-0">
+                                        <p v-if="data.desc" class="text-sm mb-0">
                                             {{ data.desc }}
                                         </p>
                                     </div>
@@ -173,21 +165,23 @@ const widgetData = ref([
 
         <VCard title="Filters" class="mb-6">
             <VCardText>
-                <VRow>
+                <VRow align="center">
                     <!-- 👉 Select Role -->
                     <VCol cols="12" sm="4">
                         <VSelect v-model="selectedRole" label="Select Role" placeholder="Select Role" :items="roles"
                             clearable clear-icon="ri-close-line" />
                     </VCol>
-                    <!-- 👉 Select Plan -->
-                    <VCol cols="12" sm="4">
-                        <VSelect v-model="selectedPlan" label="Select Plan" placeholder="Select Plan" :items="plans"
-                            clearable clear-icon="ri-close-line" />
-                    </VCol>
+
                     <!-- 👉 Select Status -->
                     <VCol cols="12" sm="4">
                         <VSelect v-model="selectedStatus" label="Select Status" placeholder="Select Status"
                             :items="status" clearable clear-icon="ri-close-line" />
+                    </VCol>
+
+                    <VCol cols="12" sm="4">
+                        <!-- 👉 Search  -->
+                        <VTextField v-model="searchQuery" placeholder="Search User" density="comfortable"
+                            class="me-4" />
                     </VCol>
                 </VRow>
             </VCardText>
@@ -195,85 +189,82 @@ const widgetData = ref([
             <VDivider />
 
             <VCardText class="d-flex flex-wrap gap-4">
-                <!-- 👉 Export button -->
-                <VBtn variant="outlined" color="secondary" prepend-icon="ri-upload-2-line">
+                <!-- 👉 Export & import buttons -->
+                <VBtn color="success" prepend-icon="ri-upload-2-line">
+                    Import
+                </VBtn>
+                <VBtn color="secondary" prepend-icon="ri-download-2-line">
                     Export
                 </VBtn>
                 <VSpacer />
-                <div class="app-user-search-filter d-flex align-center">
-                    <!-- 👉 Search  -->
-                    <VTextField v-model="searchQuery" placeholder="Search User" density="compact" class="me-4" />
-                    <!-- 👉 Add user button -->
-                    <VBtn @click="isAddNewUserDrawerVisible = true">
-                        Add New User
-                    </VBtn>
-                </div>
+                <VBtn @click="isAddNewUserDrawerVisible = true" prepend-icon="ri-user-add-fill">
+                    Add New Employee
+                </VBtn>
             </VCardText>
 
             <!-- SECTION datatable -->
-            <VDataTableServer v-model:items-per-page="itemsPerPage" v-model:model-value="selectedRows"
-                v-model:page="page" :items="users" item-value="id" :items-length="totalUsers" :headers="headers"
-                show-select class="text-no-wrap rounded-0" @update:options="updateOptions">
-                <!-- User -->
-                <template #item.user="{ item }">
-                    <div class="d-flex align-centeraa">
+
+            <VDataTableServer v-model:items-per-page="itemsPerPage" v-model:model-value="selectedRows" hover
+                :loading="tableLoading" :disable-sort="tableLoading" fixed-header height="500px" v-model:page="page"
+                :items="users" item-value="id" :items-length="totalUsers" :headers="headers"
+                class="text-no-wrap rounded-0" @update:options="updateOptions" density="default">
+
+
+                <!-- Name -->
+                <template #item.name="{ item }">
+                    <div class="d-flex align-center">
                         <VAvatar size="34" :variant="!item.avatar ? 'tonal' : undefined"
-                            :color="!item.avatar ? resolveUserRoleVariant(item.role).color : undefined" class="me-3">
+                            :color="!(item.avatar) ? 'primary' : undefined" class="me-3">
                             <VImg v-if="item.avatar" :src="item.avatar" />
-                            <span v-else>{{ avatarText(item.fullName) }}</span>
+                            <VIcon v-else icon="ri-user-line" />
                         </VAvatar>
 
-                        <div class="d-flex flex-column">
-                            <RouterLink :to="{ name: 'apps-user-view-id', params: { id: item.id } }"
-                                class="text-h6 font-weight-medium user-list-name">
-                                {{ item.fullName }}
-                            </RouterLink>
-
-                            <span class="text-sm text-medium-emphasis">@{{ item.username }}</span>
-                        </div>
+                        <span class="text-medium-emphasis">{{ item.name }}</span>
                     </div>
                 </template>
+
                 <!-- Role -->
                 <template #item.role="{ item }">
                     <div class="d-flex gap-4">
-                        <VIcon :icon="resolveUserRoleVariant(item.role).icon"
-                            :color="resolveUserRoleVariant(item.role).color" />
-                        <span class="text-capitalize text-high-emphasis">{{ item.role }}</span>
+                        <span class="text-capitalize text-high-emphasis">
+                            <VChip v-for="({ label }, id) in item.roles" :key="id"
+                                :color="resolveUserRoleVariant(label)" size="small" class="text-capitalize me-2">
+                                {{ label }}
+                            </VChip>
+                        </span>
                     </div>
                 </template>
-                <!-- Plan -->
-                <template #item.plan="{ item }">
-                    <span class="text-capitalize text-high-emphasis">{{ item.currentPlan }}</span>
-                </template>
+
                 <!-- Status -->
                 <template #item.status="{ item }">
-                    <VChip :color="resolveUserStatusVariant(item.status)" size="small" class="text-capitalize">
-                        {{ item.status }}
+                    <VChip :color="resolveUserStatusVariant(item.status.value)" size="small" class="text-capitalize">
+                        {{ item.status.label }}
                     </VChip>
                 </template>
 
                 <!-- Actions -->
                 <template #item.actions="{ item }">
-                    <IconBtn size="small" @click="deleteUser(item.id)">
+                    <IconBtn size="small" @click="deleteUser(item.id)" :disabled="tableLoading">
                         <VIcon icon="ri-delete-bin-7-line" />
                     </IconBtn>
 
-                    <IconBtn size="small" :to="{ name: 'apps-user-view-id', params: { id: item.id } }">
+                    <IconBtn size="small" :to="{ name: 'apps-user-view-id', params: { id: item.id } }"
+                        :disabled="tableLoading">
                         <VIcon icon="ri-eye-line" />
                     </IconBtn>
 
-                    <IconBtn size="small" color="medium-emphasis">
+                    <IconBtn size="small" color="medium-emphasis" :disabled="tableLoading">
                         <VIcon size="24" icon="ri-more-2-line" />
 
                         <VMenu activator="parent">
                             <VList>
-                                <VListItem link>
+                                <VListItem link :disabled="tableLoading">
                                     <template #prepend>
                                         <VIcon icon="ri-download-line" />
                                     </template>
                                     <VListItemTitle>Download</VListItemTitle>
                                 </VListItem>
-                                <VListItem link>
+                                <VListItem link :disabled="tableLoading">
                                     <template #prepend>
                                         <VIcon icon="ri-edit-box-line" />
                                     </template>
@@ -310,11 +301,14 @@ const widgetData = ref([
                     </div>
                 </template>
             </VDataTableServer>
+
             <!-- SECTION -->
         </VCard>
         <!-- 👉 Add New User -->
-        <AddNewUserDrawer v-model:isDrawerOpen="isAddNewUserDrawerVisible" @user-data="addNewUser" />
+        <AddNewUserDrawer v-model:isDrawerOpen="isAddNewUserDrawerVisible" @user-data="addNewUser" :status="status"
+            :roles="roles" />
     </section>
+
 </template>
 
 <style lang="scss">

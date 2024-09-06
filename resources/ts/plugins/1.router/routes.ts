@@ -1,6 +1,7 @@
 import type { RouteRecordRaw } from 'vue-router/auto'
 
 const DashboardComponent = () => import('@/pages/dashboard.vue')
+const EmployeesComponent = () => import('@/pages/employees/list.vue')
 
 // 👉 Redirects
 export const redirects: RouteRecordRaw[] = [
@@ -11,8 +12,9 @@ export const redirects: RouteRecordRaw[] = [
         name: 'index',
         redirect: to => {
             const userData = useCookie<Record<string, unknown> | null | undefined>('userData').value
+            const token = useCookie('accessToken').value
 
-            if (userData)
+            if (userData && token)
                 return { name: 'dashboard' }
             else
                 return { name: 'login', query: to.query }
@@ -28,6 +30,36 @@ export const routes: RouteRecordRaw[] = [
         component: DashboardComponent,
         meta: {
             navActiveLink: 'dashboard',
+            authenticatedOnly: true,
+        },
+    },
+    // Users
+    {
+        path: '/employees',
+        name: 'employees',
+        component: EmployeesComponent,
+        meta: {
+            navActiveLink: 'employees',
+            authenticatedOnly: true,
+        },
+    },
+    // Roles
+    {
+        path: '/roles',
+        name: 'roles',
+        component: DashboardComponent,
+        meta: {
+            navActiveLink: 'roles',
+            authenticatedOnly: true,
+        },
+    },
+    // Departments
+    {
+        path: '/departments',
+        name: 'departments',
+        component: DashboardComponent,
+        meta: {
+            navActiveLink: 'departments',
             authenticatedOnly: true,
         },
     },

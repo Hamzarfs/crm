@@ -12,6 +12,7 @@ import NavBarI18n from '@core/components/I18n.vue'
 
 // @layouts plugin
 import { VerticalNavLayout } from '@layouts'
+import Footer from './Footer.vue'
 </script>
 
 <template>
@@ -41,9 +42,9 @@ import { VerticalNavLayout } from '@layouts'
         <slot />
 
         <!-- 👉 Footer -->
-        <!-- <template #footer>
+        <template #footer>
             <Footer />
-        </template> -->
+        </template>
 
         <!-- 👉 Customizer -->
         <TheCustomizer />

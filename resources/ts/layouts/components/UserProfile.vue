@@ -2,7 +2,6 @@
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
 
 const router = useRouter()
-// const ability = useAbility()
 
 // TODO: Get type from backend
 const userData = useCookie<any>('userData')
@@ -12,8 +11,6 @@ const logout = async () => {
         const res = await $api('/auth/logout', {
             method: 'POST'
         })
-
-        const { message } = res
 
         // Remove "accessToken" from cookie
         useCookie('accessToken').value = null
@@ -95,7 +92,7 @@ const userProfileList = [
                                     {{ userData.name }}
                                 </h6>
                                 <VListItemSubtitle class="text-capitalize text-disabled">
-                                    {{ userData.roles.join(", ") }}
+                                    {{ userData.roles.map((role: any) => role.label).join(", ") }}
                                 </VListItemSubtitle>
                             </div>
                         </div>

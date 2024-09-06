@@ -7,7 +7,7 @@ enum DepartmentsEnum: string
     case SALES = 'sales';
     case DEVELOPMENT = 'development';
     case DESIGNING = 'designing';
-    case MARKETING = 'Marketing';
+    case MARKETING = 'marketing';
 
     public function label(): string
     {
