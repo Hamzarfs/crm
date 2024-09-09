@@ -38,7 +38,7 @@ watch(() => props.user, newVal => {
     email.value = newVal.email
     department.value = newVal.department?.id
     phone.value = newVal.phone
-    role.value = newVal.roles?.id
+    role.value = newVal.role?.id
     status.value = newVal.status?.value
 }, {
     immediate: true,
