@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Enums\EmployeeStatusesEnum;
+use App\Http\Requests\User\Store;
+use App\Http\Requests\User\Update;
 use App\Http\Resources\UserResourceCollection;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,17 +14,16 @@ class UserController extends Controller
 {
     public function list(Request $request)
     {
-        sleep(5);
-
         $page = (int) $request->input('page', 1);
         $itemsPerPage = (int) $request->input('itemsPerPage', 10);
         $query = $request->input('q');
         $status = $request->input('status');
         $role = $request->input('role');
+        $department = $request->input('department');
         $orderByColumn = $request->input('sortBy');
         $orderByDir = $request->input('orderBy');
 
-        $users = User::with('roles');
+        $users = User::with(['roles', 'department']);
 
         // Apply query filters
         $users = $users->when(
@@ -40,20 +41,13 @@ class UserController extends Controller
         )->when(        // Apply role filter
             value: $role,
             callback: fn(Builder $userQuery, string $role) => $userQuery->whereRelation('roles', 'name', '=', $role)
+        )->when(        // Apply department filter
+            value: $department,
+            callback: fn(Builder $userQuery, string $department) => $userQuery->whereRelation('department', 'name', '=', $department)
         )->when(        // Apply ordering
             value: fn() => (!is_null($orderByColumn) && !is_null($orderByDir)) ? ['column' => $orderByColumn, 'dir' => $orderByDir] : null,
             callback: fn(Builder $userQuery, array $orderBy) => $userQuery->orderBy($orderBy['column'], $orderBy['dir'])
         );
-
-        // Apply status filter
-        // $users = $users->when(
-        //     value: $status,
-        //     callback: fn(Builder $userQuery, string $status) => $userQuery->where('status', $status)
-        // );
-
-        // $totalUsers = $users->count();
-
-        // $users = $users->skip($page * $itemsPerPage)->take($itemsPerPage)->get();
 
         // Apply pagination
         $paginatedUsers = $users->paginate($itemsPerPage, page: $page);
@@ -83,7 +77,47 @@ class UserController extends Controller
         ]);
     }
 
-    public function store() {}
+    public function store(Store $request)
+    {
+        $data = $request->validated();
+
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => bcrypt('crm123'),
+            'phone' => $data['phone'],
+            'status' => $data['status'],
+            'department_id' => $data['department']
+        ]);
+
+
+        $user->assignRole($data['role']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Employee created successfully!'
+        ]);
+    }
+
+    public function update(Update $request, User $user)
+    {
+        $data = $request->validated();
+
+        $user->update([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'],
+            'status' => $data['status'],
+            'department_id' => $data['department']
+        ]);
+
+        $user->syncRoles($data['role']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Employee updated successfully!'
+        ]);
+    }
 
     public function employeeCount()
     {
@@ -102,6 +136,15 @@ class UserController extends Controller
             'active' => $activeUsers,
             'inactive' => $inactiveUsers,
             'new' => $newUsers,
+        ]);
+    }
+
+    public function delete(User $user)
+    {
+        $user->delete();
+        return response()->json([
+            'success' => true,
+            'message' => 'Employee deleted successfully!'
         ]);
     }
 }

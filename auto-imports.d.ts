@@ -82,6 +82,7 @@ declare global {
   const mapWritableState: typeof import('pinia')['mapWritableState']
   const markRaw: typeof import('vue')['markRaw']
   const nextTick: typeof import('vue')['nextTick']
+  const numberValidator: typeof import('./resources/ts/@core/utils/validators')['numberValidator']
   const onActivated: typeof import('vue')['onActivated']
   const onBeforeMount: typeof import('vue')['onBeforeMount']
   const onBeforeRouteLeave: typeof import('vue-router/auto')['onBeforeRouteLeave']
@@ -436,6 +437,7 @@ declare module 'vue' {
     readonly mapWritableState: UnwrapRef<typeof import('pinia')['mapWritableState']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
     readonly nextTick: UnwrapRef<typeof import('vue')['nextTick']>
+    readonly numberValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['numberValidator']>
     readonly onActivated: UnwrapRef<typeof import('vue')['onActivated']>
     readonly onBeforeMount: UnwrapRef<typeof import('vue')['onBeforeMount']>
     readonly onBeforeRouteLeave: UnwrapRef<typeof import('vue-router/auto')['onBeforeRouteLeave']>

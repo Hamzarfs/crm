@@ -8,6 +8,14 @@ export const requiredValidator = (value: unknown) => {
     return !!String(value).trim().length || 'This field is required'
 }
 
+// 👉 Number Validator
+export const numberValidator = (value: unknown) => {
+    if (typeof value === 'number')
+        return 'This field must be a number'
+
+    return !!String(value).trim().length || 'This field must be a number'
+}
+
 // 👉 Email Validator
 export const emailValidator = (value: unknown) => {
     if (isEmpty(value))

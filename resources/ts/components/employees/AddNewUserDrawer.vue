@@ -31,8 +31,6 @@ const status = ref()
 const userRoles = props.roles.map((r: any) => ({ title: r.title, value: r.id }))
 const departments = props.departments.map((d: any) => ({ title: d.title, value: d.id }))
 
-// Add a new ref for API success
-// const apiSuccess = ref(false)
 
 // 👉 drawer close
 const closeNavigationDrawer = () => {
@@ -46,7 +44,6 @@ const closeNavigationDrawer = () => {
 const onSubmit = () => {
     refForm.value?.validate().then(({ valid }) => {
         if (valid) {
-            // apiSuccess.value = false // Reset API success status
             emit('userData', {
                 name: name.value,
                 email: email.value,
@@ -58,14 +55,6 @@ const onSubmit = () => {
         }
     })
 }
-
-// Add a new method to handle API response
-// const handleApiResponse = (success: boolean) => {
-//     apiSuccess.value = success
-//     if (success) {
-//         closeNavigationDrawer()
-//     }
-// }
 
 defineExpose({
     closeNavigationDrawer

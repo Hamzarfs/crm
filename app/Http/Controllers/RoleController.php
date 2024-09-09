@@ -2,21 +2,63 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\RolesEnum;
+use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Str;
 
 class RoleController extends Controller
 {
     public function all()
     {
         return response()->json([
-            'roles' => Role::orderBy('id', 'asc')->pluck('name')->map(function ($role) {
-                $roleEnum = RolesEnum::from($role);
+            'roles' => Role::orderBy('id', 'asc')->get(['name', 'id'])->map(function ($role) {
+                // $roleEnum = RolesEnum::from($role->name);
                 return [
-                    'title' => $roleEnum->label(),
-                    'value' => $roleEnum->value,
+                    'id' => $role->id,
+                    'title' => Str::title(str_replace('_', ' ', $role->name)),
+                    'value' => $role->name,
                 ];
             })
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $role = Role::create([
+            'name' => Str::slug($request->name, '_'),
+            'guard_name' => 'api'
+        ]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Role created successfully!',
+            'role' => [
+                'id' => $role->id,
+                'title' => Str::title(str_replace('_', ' ', $role->name)),
+                'value' => $role->name,
+            ]
+        ]);
+    }
+
+    public function update(Request $request, Role $role)
+    {
+        $role->update(['name' => Str::slug($request->name, '_')]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Role updated successfully!',
+            'role' => [
+                'id' => $role->id,
+                'title' => Str::title(str_replace('_', ' ', $role->name)),
+                'value' => $role->name,
+            ]
+        ]);
+    }
+
+    public function delete(Role $role)
+    {
+        $role->delete();
+        return response()->json([
+            'success' => true,
+            'message' => 'Role deleted successfully!'
         ]);
     }
 }

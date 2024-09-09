@@ -7,7 +7,7 @@ use App\Enums\RolesEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class Store extends FormRequest
+class Update extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,7 +26,7 @@ class Store extends FormRequest
     {
         return [
             'name' => 'required|string',
-            'email' => 'required|email|unique:users',
+            'email' => "required|email|unique:users,email,{$this->route('user')->id},id",
             'department' => 'required|exists:departments,id',
             'phone' => 'required|numeric',
             'role' => 'required|exists:roles,id',

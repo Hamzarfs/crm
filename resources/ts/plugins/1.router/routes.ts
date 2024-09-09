@@ -2,6 +2,7 @@ import type { RouteRecordRaw } from 'vue-router/auto'
 
 const DashboardComponent = () => import('@/pages/dashboard.vue')
 const EmployeesComponent = () => import('@/pages/employees/list.vue')
+const RolesComponent = () => import('@/pages/roles/list.vue')
 
 // 👉 Redirects
 export const redirects: RouteRecordRaw[] = [
@@ -47,7 +48,7 @@ export const routes: RouteRecordRaw[] = [
     {
         path: '/roles',
         name: 'roles',
-        component: DashboardComponent,
+        component: RolesComponent,
         meta: {
             navActiveLink: 'roles',
             authenticatedOnly: true,

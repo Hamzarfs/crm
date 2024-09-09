@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -27,8 +28,18 @@ Route::group([
         Route::get('', 'list');
         Route::get('statuses', 'getStatuses');
         Route::post('', 'store');
+        Route::put('{user}', 'update');
+        Route::delete('{user}', 'delete');
         Route::get('count', 'employeeCount');
     });
 
-    Route::get('roles', [RoleController::class, 'all']);
+    Route::prefix('roles')->controller(RoleController::class)->group(function () {
+        Route::get('', 'all');
+        Route::post('', 'store');
+        Route::put('{role}', 'update');
+        Route::delete('{role}', 'delete');
+    });
+
+    // Route::get('roles', [RoleController::class, 'all']);
+    Route::get('departments', [DepartmentController::class, 'all']);
 });

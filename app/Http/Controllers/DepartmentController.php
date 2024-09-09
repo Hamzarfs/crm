@@ -2,11 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\DepartmentsEnum;
 use App\Models\Department;
 use Illuminate\Http\Request;
 
 class DepartmentController extends Controller
 {
+    public function all()
+    {
+        return response()->json([
+            'departments' => Department::orderBy('id', 'asc')->get(['name', 'id'])->map(function ($department) {
+                $departmentEnum = DepartmentsEnum::from($department->name);
+                return [
+                    'id' => $department->id,
+                    'title' => $departmentEnum->label(),
+                    'value' => $departmentEnum->value,
+                ];
+            })
+        ]);
+    }
+
+
+
     /**
      * Display a listing of the resource.
      */

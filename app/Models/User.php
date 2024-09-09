@@ -18,11 +18,13 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    // protected $fillable = [
+    //     'name',
+    //     'email',
+    //     'password',
+    // ];
+
+    protected $guarded = [];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -32,6 +34,11 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
     ];
+
+    public function guardName()
+    {
+        return 'api';
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -48,6 +55,6 @@ class User extends Authenticatable
 
     public function department()
     {
-        return $this->hasOne(Department::class);
+        return $this->belongsTo(Department::class);
     }
 }

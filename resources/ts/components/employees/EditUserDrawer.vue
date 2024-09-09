@@ -13,7 +13,9 @@ interface Props {
     roles: []
     departments: []
     errors: Record<string, string | undefined>
+    user: Record<string, any>
 }
+
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
@@ -21,18 +23,28 @@ const emit = defineEmits<Emit>()
 
 const isFormValid = ref(false)
 const refForm = ref<VForm>()
-const name = ref('')
-const email = ref('')
-const department = ref()
-const phone = ref('')
-const role = ref()
-const status = ref()
+const name = ref(props.user.name)
+const email = ref(props.user.email)
+const department = ref(props.user.department?.id)
+const phone = ref(props.user.phone)
+const role = ref(props.user.roles?.id)
+const status = ref(props.user.status?.value)
 
 const userRoles = props.roles.map((r: any) => ({ title: r.title, value: r.id }))
 const departments = props.departments.map((d: any) => ({ title: d.title, value: d.id }))
 
-// Add a new ref for API success
-// const apiSuccess = ref(false)
+watch(() => props.user, newVal => {
+    name.value = newVal.name
+    email.value = newVal.email
+    department.value = newVal.department?.id
+    phone.value = newVal.phone
+    role.value = newVal.roles?.id
+    status.value = newVal.status?.value
+}, {
+    immediate: true,
+    deep: true
+})
+
 
 // 👉 drawer close
 const closeNavigationDrawer = () => {
@@ -46,8 +58,8 @@ const closeNavigationDrawer = () => {
 const onSubmit = () => {
     refForm.value?.validate().then(({ valid }) => {
         if (valid) {
-            // apiSuccess.value = false // Reset API success status
             emit('userData', {
+                id: props.user.id,
                 name: name.value,
                 email: email.value,
                 phone: phone.value,
@@ -58,14 +70,6 @@ const onSubmit = () => {
         }
     })
 }
-
-// Add a new method to handle API response
-// const handleApiResponse = (success: boolean) => {
-//     apiSuccess.value = success
-//     if (success) {
-//         closeNavigationDrawer()
-//     }
-// }
 
 defineExpose({
     closeNavigationDrawer
@@ -81,7 +85,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
         :model-value="props.isDrawerOpen" @update:model-value="handleDrawerModelValueUpdate">
 
         <!-- 👉 Title -->
-        <AppDrawerHeaderSection title="Add Employee" @cancel="closeNavigationDrawer" />
+        <AppDrawerHeaderSection title="Edit Employee" @cancel="closeNavigationDrawer" />
 
         <VDivider />
 
@@ -105,7 +109,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
 
                             <!-- 👉 Contact -->
                             <VCol cols="12">
-                                <VTextField v-model="phone" type="number" :rules="[numberValidator]"
+                                <VTextField v-model="phone" type="number" :rules="[requiredValidator, numberValidator]"
                                     label="Phone Number" placeholder="03001234567" />
                             </VCol>
 

@@ -2,10 +2,12 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\DepartmentsEnum;
 use App\Enums\EmployeeStatusesEnum;
 use App\Enums\RolesEnum;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Str;
 
 class UserResource extends JsonResource
 {
@@ -20,14 +22,29 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
-            'roles' => $this->whenLoaded('roles', function () {
+            'phone' => $this->phone,
+            'role' => $this->whenLoaded('roles', function () {
                 return $this->roles->map(function ($role) {
-                    $roleEnum = RolesEnum::from($role->name);
+                    // $roleEnum = RolesEnum::from($role->name);
+                    // return [
+                    //     'id' => $role->id,
+                    //     'label' => $roleEnum->label(),
+                    //     'value' => $roleEnum->value,
+                    // ];
                     return [
-                        'label' => $roleEnum->label(),
-                        'value' => $roleEnum->value,
+                        'id' => $role->id,
+                        'title' => Str::title(str_replace('_', ' ', $role->name)),
+                        'value' => $role->name,
                     ];
-                });
+                })->first();
+            }),
+            'department' => $this->whenLoaded('department', function () {
+                $departmentEnum = DepartmentsEnum::from($this->department->name);
+                return [
+                    'id' => $this->department->id,
+                    'label' => $departmentEnum->label(),
+                    'value' => $departmentEnum->value,
+                ];
             }),
             'status' => [
                 'label' => $this->status->label(),
