@@ -92,7 +92,7 @@ const userProfileList = [
                                     {{ userData.name }}
                                 </h6>
                                 <VListItemSubtitle class="text-capitalize text-disabled">
-                                    {{ userData.roles.map((role: any) => role.label).join(", ") }}
+                                    {{ userData.role.title.toUpperCase() }}
                                 </VListItemSubtitle>
                             </div>
                         </div>

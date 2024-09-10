@@ -2,42 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\DepartmentsEnum;
 use App\Models\Department;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class DepartmentController extends Controller
 {
     public function all()
     {
         return response()->json([
-            'departments' => Department::orderBy('id', 'asc')->get(['name', 'id'])->map(function ($department) {
-                $departmentEnum = DepartmentsEnum::from($department->name);
+            'departments' => Department::with('leader')->orderBy('id', 'asc')->get()->map(function ($department) {
                 return [
                     'id' => $department->id,
-                    'title' => $departmentEnum->label(),
-                    'value' => $departmentEnum->value,
+                    'title' => Str::title(str_replace('_', ' ', $department->name)),
+                    'leader' => $department->leader?->name,
+                    'leader_id' => $department->leader_id,
+                    'value' => $department->name,
                 ];
             })
         ]);
-    }
-
-
-
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -45,23 +28,22 @@ class DepartmentController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Department $department)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Department $department)
-    {
-        //
+        $department = Department::create([
+            'name' => Str::slug($request->name, '_', dictionary: ['&' => 'and']),
+            'leader_id' => $request->leader_id,
+        ]);
+        $department->load('leader');
+        return response()->json([
+            'message' => 'Department created successfully',
+            'success' => true,
+            'department' => [
+                'id' => $department->id,
+                'title' => Str::title(str_replace('_', ' ', $department->name)),
+                'leader' => $department->leader?->name,
+                'leader_id' => $department->leader_id,
+                'value' => $department->name,
+            ]
+        ]);
     }
 
     /**
@@ -69,14 +51,30 @@ class DepartmentController extends Controller
      */
     public function update(Request $request, Department $department)
     {
-        //
+        $department->update([
+            'name' => Str::slug($request->name, '_', dictionary: ['&' => 'and']),
+            'leader_id' => $request->leader_id,
+        ]);
+        $department->load('leader');
+        return response()->json([
+            'message' => 'Department updated successfully',
+            'success' => true,
+            'department' => [
+                'id' => $department->id,
+                'title' => Str::title(str_replace('_', ' ', $department->name)),
+                'leader' => $department->leader?->name,
+                'leader_id' => $department->leader_id,
+                'value' => $department->name,
+            ]
+        ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Department $department)
+    public function delete(Department $department)
     {
-        //
+        $department->delete();
+        return response()->json([
+            'success' => true,
+            'message' => 'Department deleted successfully!'
+        ]);
     }
 }

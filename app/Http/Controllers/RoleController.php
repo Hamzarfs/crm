@@ -12,7 +12,6 @@ class RoleController extends Controller
     {
         return response()->json([
             'roles' => Role::orderBy('id', 'asc')->get(['name', 'id'])->map(function ($role) {
-                // $roleEnum = RolesEnum::from($role->name);
                 return [
                     'id' => $role->id,
                     'title' => Str::title(str_replace('_', ' ', $role->name)),

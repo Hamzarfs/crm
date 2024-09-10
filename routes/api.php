@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,29 +18,40 @@ Route::group(['prefix' => 'auth'], function () {
     });
 });
 
-Route::group([
-    'middleware' => ['auth:sanctum'],
-], function () {
-
-    Route::group([
-        'prefix' => 'users',
-        'controller' => UserController::class
-    ], function () {
-        Route::get('', 'list');
-        Route::get('statuses', 'getStatuses');
-        Route::post('', 'store');
-        Route::put('{user}', 'update');
-        Route::delete('{user}', 'delete');
-        Route::get('count', 'employeeCount');
+Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware('role:admin|hr')->group(function () {
+        Route::prefix('users')->controller(UserController::class)->group(function () {
+            Route::get('', 'list');
+            Route::get('statuses', 'getStatuses');
+            Route::post('', 'store');
+            Route::put('{user}', 'update');
+            Route::delete('{user}', 'delete');
+            Route::get('count', 'employeeCount');
+        });
     });
 
-    Route::prefix('roles')->controller(RoleController::class)->group(function () {
-        Route::get('', 'all');
-        Route::post('', 'store');
-        Route::put('{role}', 'update');
-        Route::delete('{role}', 'delete');
+    Route::middleware('role:admin')->group(function () {
+        Route::prefix('roles')->controller(RoleController::class)->group(function () {
+            Route::get('', 'all')->withoutMiddleware('role:admin')->middleware('role:admin|hr');
+            Route::post('', 'store');
+            Route::put('{role}', 'update');
+            Route::delete('{role}', 'delete');
+        });
+
+        Route::prefix('departments')->controller(DepartmentController::class)->group(function () {
+            Route::get('', 'all')->withoutMiddleware('role:admin')->middleware('role:admin|hr');
+            Route::post('', 'store');
+            Route::put('{department}', 'update');
+            Route::delete('{department}', 'delete');
+        });
     });
 
-    // Route::get('roles', [RoleController::class, 'all']);
-    Route::get('departments', [DepartmentController::class, 'all']);
+    Route::middleware('role:admin|team_lead')->group(function () {
+        Route::prefix('tasks')->controller(TaskController::class)->group(function () {
+            Route::get('', 'list');
+            Route::post('', 'store');
+            Route::put('{task}', 'update');
+            Route::delete('{task}', 'delete');
+        });
+    });
 });

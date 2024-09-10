@@ -308,7 +308,7 @@ const widgetData = ref([
 
                 <!-- Department -->
                 <template #item.department="{ item }: { item: any }">
-                    {{ item.department?.label }}
+                    {{ item.department?.title }}
                 </template>
 
                 <!-- Actions -->

@@ -25,12 +25,6 @@ class UserResource extends JsonResource
             'phone' => $this->phone,
             'role' => $this->whenLoaded('roles', function () {
                 return $this->roles->map(function ($role) {
-                    // $roleEnum = RolesEnum::from($role->name);
-                    // return [
-                    //     'id' => $role->id,
-                    //     'label' => $roleEnum->label(),
-                    //     'value' => $roleEnum->value,
-                    // ];
                     return [
                         'id' => $role->id,
                         'title' => Str::title(str_replace('_', ' ', $role->name)),
@@ -39,11 +33,12 @@ class UserResource extends JsonResource
                 })->first();
             }),
             'department' => $this->whenLoaded('department', function () {
-                $departmentEnum = DepartmentsEnum::from($this->department->name);
                 return [
                     'id' => $this->department->id,
-                    'label' => $departmentEnum->label(),
-                    'value' => $departmentEnum->value,
+                    'title' => Str::title(str_replace('_', ' ', $this->department->name)),
+                    'leader' => $this->department->leader?->name,
+                    'leader_id' => $this->department->leader_id,
+                    'value' => $this->department->name,
                 ];
             }),
             'status' => [

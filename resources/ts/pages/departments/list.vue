@@ -1,42 +1,46 @@
 <script setup lang="ts">
 
-import AddNewRoleDrawer from '@/components/roles/AddNewRoleDrawer.vue';
-import EditRoleDrawer from '@/components/roles/EditRoleDrawer.vue';
+import AddNewDepartmentDrawer from '@/components/departments/AddNewDepartmentDrawer.vue';
+import EditDepartmentDrawer from '@/components/departments/EditDepartmentDrawer.vue';
 
-const selectedRole = ref({
+
+const selectedDepartment = ref({
     name: '',
 })
-let roleToDelete: number
-let roleToUpdateIndex: number
+let departmentToDelete: number
+let departmentToUpdateIndex: number
 
 
 // Add a ref for the AddNewUserDrawer & editUserDrawerRef component
-const addNewRoleDrawerRef = ref()
-const editRoleDrawerRef = ref()
+const addNewDepartmentDrawerRef = ref()
+const editDepartmentDrawerRef = ref()
+
 const dataTableRef = ref()
+
 // Headers
 const headers = [
     { title: 'ID', key: 'id' },
     { title: 'Name', key: 'title' },
+    { title: 'Leader', key: 'leader' },
     { title: 'Actions', key: 'actions', sortable: false },
 ]
 
 // 👉 Fetching roles
-const { roles } = await $api('roles')
-const rolesData = ref(roles)
+const { departments } = await $api('departments')
+const { users } = await $api('users')
+const departmentsData = ref(departments)
 
-
-const isAddNewRoleDrawerVisible = ref(false)
-const isEditRoleDrawerVisible = ref(false)
+const isAddNewDepartmentDrawerVisible = ref(false)
+const isEditDepartmentDrawerVisible = ref(false)
 const isSnackBarVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
-let roleResponsemessage: string
+let departmentResponsemessage: string
 
-// 👉 Add new role
-const addNewRole = async (roleData: any) => {
-    const { success, message, role } = await $api('/roles', {
+// 👉 Add new department
+const addNewDepartment = async (departmentData: any) => {
+    const { success, message, department } = await $api('/departments', {
         method: 'POST',
-        body: roleData,
+        body: departmentData,
         onResponseError({ response }) {
             errors.value = response._data.errors
         },
@@ -44,42 +48,42 @@ const addNewRole = async (roleData: any) => {
 
     if (success) {
         isSnackBarVisible.value = true
-        rolesData.value = [...rolesData.value, role]
-        roleResponsemessage = message
-        addNewRoleDrawerRef.value.closeNavigationDrawer()
+        departmentsData.value = [...departmentsData.value, department]
+        departmentResponsemessage = message
+        addNewDepartmentDrawerRef.value.closeNavigationDrawer()
         nextTick(() => {
             dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollTop = dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollHeight
         })
     }
 }
 
-// 👉 Edit role
-const editRole = async (roleData: any) => {
-    const { success, message, role } = await $api(`roles/${roleData.id}`, {
+// 👉 Edit department
+const editDepartment = async (departmentData: any) => {
+    const { success, message, department } = await $api(`departments/${departmentData.id}`, {
         method: 'PUT',
-        body: roleData,
+        body: departmentData,
         onResponseError({ response }) {
             errors.value = response._data.errors
         },
     })
     if (success) {
         isSnackBarVisible.value = true
-        rolesData.value[roleToUpdateIndex] = role
-        roleResponsemessage = message
-        editRoleDrawerRef.value.closeNavigationDrawer()
+        departmentsData.value[departmentToUpdateIndex] = department
+        departmentResponsemessage = message
+        editDepartmentDrawerRef.value.closeNavigationDrawer()
     }
 }
 
-const openEditRoleForm = (role: any) => {
-    selectedRole.value = role
-    roleToUpdateIndex = rolesData.value.indexOf(role)
-    isEditRoleDrawerVisible.value = true
+const openEditDepartmentForm = (department: any) => {
+    selectedDepartment.value = department
+    departmentToUpdateIndex = departmentsData.value.indexOf(department)
+    isEditDepartmentDrawerVisible.value = true
 }
 
 
 // 👉 Delete role
-const deleteRole = async () => {
-    const { success, message } = await $api(`roles/${roleToDelete}`, {
+const deleteDepartment = async () => {
+    const { success, message } = await $api(`departments/${departmentToDelete}`, {
         method: 'DELETE',
     })
 
@@ -87,8 +91,8 @@ const deleteRole = async () => {
 
     if (success) {
         isSnackBarVisible.value = true
-        roleResponsemessage = message
-        rolesData.value = rolesData.value.filter((role: any) => role.id !== roleToDelete)
+        departmentResponsemessage = message
+        departmentsData.value = departmentsData.value.filter((department: any) => department.id !== departmentToDelete)
     }
 }
 
@@ -102,30 +106,30 @@ const errors = ref({
     <section>
         <VCard class="mb-6">
             <VCardTitle class="d-flex align-center my-2">
-                <span>Roles</span>
+                <span>Departments</span>
                 <VSpacer />
-                <VBtn @click="isAddNewRoleDrawerVisible = true" prepend-icon="ri-user-add-fill">
-                    Add New Role
+                <VBtn @click="isAddNewDepartmentDrawerVisible = true" prepend-icon="ri-user-add-fill">
+                    Add New Department
                 </VBtn>
             </VCardTitle>
 
             <VDivider />
 
             <!-- SECTION datatable -->
-            <VDataTable hover fixed-header style="max-height: 600px;" :items="rolesData" item-value="id"
+            <VDataTable hover fixed-header style="max-height: 600px;" :items="departmentsData" item-value="id"
                 ref="dataTableRef" :headers="headers" class="text-no-wrap rounded-0" density="default">
 
                 <!-- Actions -->
                 <template #item.actions="{ item }: { item: any }">
-                    <IconBtn size="small" @click="openEditRoleForm(item)" color="primary">
+                    <IconBtn size="small" @click="openEditDepartmentForm(item)" color="primary">
                         <VIcon icon="ri-edit-box-line" />
                         <VTooltip activator="parent" location="top">
                             Edit
                         </VTooltip>
                     </IconBtn>
 
-                    <IconBtn size="small" @click="isDeleteDialogVisible = true; roleToDelete = item.id" color="error"
-                        :disabled="item.id >= 1 && item.id <= 7">
+                    <IconBtn size="small" @click="isDeleteDialogVisible = true; departmentToDelete = item.id"
+                        color="error" :disabled="item.id >= 1 && item.id <= 4">
                         <VIcon icon="ri-delete-bin-7-line" />
                         <VTooltip activator="parent" location="top">
                             Delete
@@ -138,15 +142,15 @@ const errors = ref({
         </VCard>
 
         <!-- 👉 Add New Role -->
-        <AddNewRoleDrawer v-model:isDrawerOpen="isAddNewRoleDrawerVisible" @role-data="addNewRole"
-            ref="addNewRoleDrawerRef" :errors="errors" />
+        <AddNewDepartmentDrawer v-model:isDrawerOpen="isAddNewDepartmentDrawerVisible"
+            @department-data="addNewDepartment" ref="addNewDepartmentDrawerRef" :errors="errors" :users="users" />
 
         <!-- 👉 Edit User -->
-        <EditRoleDrawer v-model:isDrawerOpen="isEditRoleDrawerVisible" @role-data="editRole" :role="selectedRole"
-            ref="editRoleDrawerRef" :errors="errors" />
+        <EditDepartmentDrawer v-model:isDrawerOpen="isEditDepartmentDrawerVisible" @department-data="editDepartment"
+            :department="selectedDepartment" ref="editDepartmentDrawerRef" :errors="errors" :users="users" />
 
         <VSnackbar v-model="isSnackBarVisible">
-            {{ roleResponsemessage }}
+            {{ departmentResponsemessage }}
             <template #actions>
                 <VBtn color="error" @click="isSnackBarVisible = false">
                     Close
@@ -160,11 +164,11 @@ const errors = ref({
                 <DialogCloseBtn variant="text" size="default" @click="isDeleteDialogVisible = false" />
 
                 <VCardText>
-                    Are you sure you want to delete this role?
+                    Are you sure you want to delete this department?
                 </VCardText>
 
                 <VCardText class="d-flex align-center justify-center gap-4">
-                    <VBtn variant="elevated" @click="deleteRole()" color="error">
+                    <VBtn variant="elevated" @click="deleteDepartment()" color="error">
                         Confirm
                     </VBtn>
 

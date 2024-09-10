@@ -28,12 +28,27 @@ provide(injectionKeyIsVerticalNavHovered, isHovered)
 const configStore = useLayoutConfigStore()
 
 const resolveNavItemComponent = (item: NavLink | NavSectionTitle | NavGroup): unknown => {
-    if ('heading' in item)
-        return VerticalNavSectionTitle
-    if ('children' in item)
-        return VerticalNavGroup
+    const role = useCookie('userData').value?.role?.value
 
-    return VerticalNavLink
+    if (item.role) {
+        if (item.role.includes(role)) {
+            if ('heading' in item)
+                return VerticalNavSectionTitle
+            if ('children' in item)
+                return VerticalNavGroup
+
+            return VerticalNavLink
+        } else {
+            return
+        }
+    } else {
+        if ('heading' in item)
+            return VerticalNavSectionTitle
+        if ('children' in item)
+            return VerticalNavGroup
+
+        return VerticalNavLink
+    }
 }
 
 /*

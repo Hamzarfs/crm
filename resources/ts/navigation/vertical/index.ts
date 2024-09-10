@@ -38,15 +38,23 @@ export default [
         title: 'Employees',
         icon: { icon: 'ri-user-line' },
         to: { name: 'employees' },
+        role: ['admin', 'hr'],
     },
     {
         title: 'Roles',
         icon: { icon: 'ri-lock-2-line' },
         to: { name: 'roles' },
+        role: ['admin'],
     },
     {
         title: 'Departments',
         icon: { icon: 'ri-building-line' },
         to: { name: 'departments' },
+        role: ['admin'],
+    },
+    {
+        title: 'Tasks',
+        icon: { icon: 'ri-task-line' },
+        to: { name: 'tasks' },
     },
 ] as VerticalNavItems

@@ -22,7 +22,7 @@ const CookieDefaults: CookieOptions<any> = {
     encode: val => encodeURIComponent(typeof val === 'string' ? val : JSON.stringify(val)),
 }
 
-export const useCookie = <T = string | null | undefined>(name: string, _opts?: CookieOptions<T>): CookieRef<T> => {
+export const useCookie = <T = string | null | undefined | any>(name: string, _opts?: CookieOptions<T>): CookieRef<T> => {
     const opts = { ...CookieDefaults, ..._opts || {} }
     const cookies = parse(document.cookie, opts)
 
