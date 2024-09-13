@@ -19,9 +19,9 @@ Route::group(['prefix' => 'auth'], function () {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::middleware('role:admin|hr')->group(function () {
-        Route::prefix('users')->controller(UserController::class)->group(function () {
-            Route::get('', 'list');
+    Route::prefix('users')->controller(UserController::class)->group(function () {
+        Route::get('', 'list')->middleware('role:admin|hr|team_lead');
+        Route::middleware('role:admin|hr')->group(function () {
             Route::get('statuses', 'getStatuses');
             Route::post('', 'store');
             Route::put('{user}', 'update');
@@ -46,9 +46,9 @@ Route::middleware('auth:sanctum')->group(function () {
         });
     });
 
-    Route::middleware('role:admin|team_lead')->group(function () {
-        Route::prefix('tasks')->controller(TaskController::class)->group(function () {
-            Route::get('', 'list');
+    Route::prefix('tasks')->controller(TaskController::class)->group(function () {
+        Route::get('', 'list');
+        Route::middleware('role:admin|team_lead')->group(function () {
             Route::post('', 'store');
             Route::put('{task}', 'update');
             Route::delete('{task}', 'delete');

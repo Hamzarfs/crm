@@ -86,7 +86,7 @@ const users = props.users.map((u: any) => ({ title: u.name, value: u.id }))
 
                         <!-- 👉 Leader -->
                         <VCol cols="12">
-                            <VSelect v-model="leader" :items="users" :rules="[requiredValidator]" label="Leader"
+                            <VAutocomplete v-model="leader" :items="users" :rules="[requiredValidator]" label="Leader"
                                 :error-messages="props.errors.leader_id" placeholder="Select Leader" />
                         </VCol>
 

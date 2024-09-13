@@ -2,5 +2,399 @@
 
 
 
+// Get currently logged in user data
+const userData = useCookie('userData').value
+
+// Filter values
+const searchQuery = ref('')
+const selectedUser = ref()
+const selectedDepartment = ref()
+const selectedDate = ref()
+const selectedStatus = ref()
+
+// Selected task to edit
+const selectedTask = ref({})
+let taskToDelete: number
+
+// Data table options
+const itemsPerPage = ref(20)
+const page = ref(1)
+const sortBy = ref()
+const orderBy = ref()
+const selectedRows = ref([])
+const tableLoading = ref(false)
+
+// Add a ref for the AddNewTaskDrawer & editTaskDrawerRef component
+const addNewTaskDrawerRef = ref()
+const editTaskDrawerRef = ref()
+
+// Update data table options
+const updateOptions = (options: any) => {
+    sortBy.value = options.sortBy[0]?.key
+    orderBy.value = options.sortBy[0]?.order
+}
+
+// Headers
+const headers = [
+    { title: 'ID', key: 'id' },
+    { title: 'Title', key: 'title' },
+    { title: 'Status', key: 'status' },
+    { title: 'Department', key: 'department', sortable: false, showToOnly: ['admin'] },
+    { title: 'Assigned To', key: 'assigned_to', sortable: false },
+    { title: 'Deadline', key: 'deadline' },
+    { title: 'Created By', key: 'created_by', sortable: false, showToOnly: ['admin'] },
+    { title: 'Creation Date', key: 'created_at' },
+    { title: 'Last Updated', key: 'updated_at' },
+    { title: 'Actions', key: 'actions', sortable: false },
+]
+
+const _headers = computed(() => headers.filter(h => h.showToOnly ? (h.showToOnly.includes(userData.role.value)) : h))
+
+// 👉 Fetching tasks
+const { data: tasksData, execute: fetchTasks, isFetching } = await useApi<any>(createUrl('tasks', {
+    query: {
+        q: searchQuery,
+        user: selectedUser,
+        department: selectedDepartment,
+        date: selectedDate,
+        status: selectedStatus,
+        itemsPerPage,
+        page,
+        sortBy,
+        orderBy,
+    },
+}))
+
+// Watch isFetching from the useApi to toggle tableLoading
+watch(() => isFetching.value, (newValue) => {
+    tableLoading.value = newValue
+}, { immediate: true })
+
+const tasks = computed(() => tasksData.value.tasks)
+const totalTasks = computed(() => tasksData.value.totalTasks)
+
+// const { roles } = await $api('roles')
+// const { status } = await $api('users/statuses')
+
+const statuses = [
+    {
+        title: 'Pending',
+        value: 'pending'
+    },
+    {
+        title: 'In Progress',
+        value: 'in_progress'
+    },
+    {
+        title: 'Completed',
+        value: 'completed'
+    },
+]
+
+const users = ref([])
+const departments = ref([])
+if (['admin', 'team_lead'].includes(userData.role.value)) {
+    const { users: fetchedUsers } = await $api('users')
+    users.value = fetchedUsers.map((u: any) => ({
+        value: u.id,
+        title: u.name,
+    }))
+
+    if (userData.role.value === 'admin') {
+        const { departments: fetchedDepartments } = await $api('departments')
+        departments.value = fetchedDepartments.map((d: any) => ({
+            title: d.title,
+            value: d.id,
+        }))
+    }
+}
+
+const resolveTaskStatusColor = (status: string): string => {
+    switch (status) {
+        case 'completed':
+            return 'success'
+        case 'in_progress':
+            return 'info'
+        default:
+            return 'error'
+    }
+}
+
+const isAddNewTaskDrawerVisible = ref(false)
+const isEditTaskDrawerVisible = ref(false)
+const isSnackBarVisible = ref(false)
+const isDeleteDialogVisible = ref(false)
+let taskResponsemessage: string
+
+// 👉 Add new task
+const addNewTask = async (taskData: any) => {
+    const { success, message } = await $api('tasks', {
+        method: 'POST',
+        body: taskData,
+        onResponseError({ response }) {
+            errors.value = response._data.errors
+        },
+    })
+
+    if (success) {
+        isSnackBarVisible.value = true
+        taskResponsemessage = message
+        addNewTaskDrawerRef.value.closeNavigationDrawer()
+        fetchTasks()
+    }
+}
+
+// 👉 Edit task
+const editTask = async (taskData: any) => {
+    const { success, message } = await $api(`tasks/${taskData.id}`, {
+        method: 'PUT',
+        body: taskData,
+        onResponseError({ response }) {
+            errors.value = response._data.errors
+        },
+    })
+
+    if (success) {
+        isSnackBarVisible.value = true
+        taskResponsemessage = message
+        editTaskDrawerRef.value.closeNavigationDrawer()
+        fetchTasks()
+    }
+}
+
+const openEditTaskForm = (task: any) => {
+    selectedTask.value = task
+    isEditTaskDrawerVisible.value = true
+}
+
+// 👉 Delete task
+const deleteTask = async () => {
+    const { success, message } = await $api(`tasks/${taskToDelete}`, {
+        method: 'DELETE',
+    })
+
+    isDeleteDialogVisible.value = false
+
+    if (success) {
+        isSnackBarVisible.value = true
+        taskResponsemessage = message
+        fetchTasks()
+    }
+}
+
+const errors = ref({
+    title: undefined,
+    description: undefined,
+    deadline: undefined,
+    assigned_to: undefined,
+    files: undefined,
+    status: undefined,
+})
 
 </script>
+
+<template>
+    <section>
+        <VCard :title="['admin', 'team_lead'].includes(userData.role.value) ? 'Filters' : 'Tasks'" class="mb-6">
+            <VCardText v-if="['admin', 'team_lead'].includes(userData.role.value)">
+                <VRow align="center">
+                    <!-- 👉 Select Department -->
+                    <VCol v-if="userData.role.value === 'admin'">
+                        <VSelect v-model="selectedDepartment" label="Filter by Department"
+                            placeholder="Filter by  Department" :items="departments" clearable
+                            clear-icon="ri-close-line" chips />
+                    </VCol>
+
+                    <!-- 👉 Select User -->
+                    <VCol v-if="['admin', 'team_lead'].includes(userData.role.value)">
+                        <VAutocomplete v-model="selectedUser" label="Filter by  User" placeholder="Filter by  User"
+                            :items="users" auto-select-first clearable clear-icon="ri-close-line" chips />
+                    </VCol>
+
+                    <!-- 👉 Select Date -->
+                    <VCol>
+                        <AppDateTimePicker v-model="selectedDate" label="Filter by  Date" placeholder="Filter by  Date"
+                            date-format="d-m-Y" clearable clear-icon="ri-close-line" />
+                    </VCol>
+
+                    <!-- 👉 Select Status -->
+                    <VCol v-if="['admin', 'team_lead'].includes(userData.role.value)">
+                        <VSelect v-model="selectedStatus" label="Filter by  Status" placeholder="Filter by  Status"
+                            :items="statuses" clearable clear-icon="ri-close-line" chips />
+                    </VCol>
+
+                    <VCol>
+                        <!-- 👉 Search  -->
+                        <VTextField v-model="searchQuery" placeholder="Filter by Query" density="comfortable" clearable
+                            label="Filter by Query" class="me-4" />
+                    </VCol>
+                </VRow>
+            </VCardText>
+
+            <VDivider />
+
+            <VCardText class="d-flex flex-wrap gap-4">
+                <!-- 👉 Export & import buttons -->
+                <VBtn color="success" prepend-icon="ri-upload-2-line">
+                    Import
+                </VBtn>
+                <VBtn color="secondary" prepend-icon="ri-download-2-line">
+                    Export
+                </VBtn>
+                <VSpacer />
+                <VBtn @click="isAddNewTaskDrawerVisible = true" prepend-icon="ri-task-fill">
+                    Add New Task
+                </VBtn>
+            </VCardText>
+
+            <!-- SECTION datatable -->
+            <VDataTableServer v-model:items-per-page="itemsPerPage" v-model:model-value="selectedRows" hover show-select
+                :loading="tableLoading" :disable-sort="tableLoading" fixed-header style="max-height: 500px;"
+                v-model:page="page" :items="tasks" item-value="id" :items-length="totalTasks" :headers="headers"
+                class="text-no-wrap rounded-0" @update:options="updateOptions" density="default">
+
+                <!-- Status -->
+                <template #item.status="{ item }: { item: any }">
+                    <VChip :color="resolveTaskStatusColor(item.status)" size="small" class="text-uppercase">
+                        {{ slugToTitleCase(item.status) }}
+                    </VChip>
+                </template>
+
+                <!-- Department -->
+                <template #item.department="{ item }: { item: any }">
+                    {{ item.created_by.department?.title ?? 'Not assigned' }}
+                </template>
+
+                <!-- Assigned To -->
+                <template #item.assigned_to="{ item }: { item: any }">
+                    {{ item.assigned_to.name }}
+                </template>
+
+                <!-- Deadline -->
+                <template #item.deadline="{ item }: { item: any }">
+                    <VChip :color="parseDate(item.deadline) < new Date() ? 'error' :
+                        isToday(parseDate(item.deadline)) ? 'warning' : 'info'" size="small">
+                        {{ item.deadline }}
+                    </VChip>
+                </template>
+
+
+                <!-- <template #item.deadline="{ item }: { item: any }">
+
+                    {{ console.log(new Date(item.deadline), item.deadline) }}
+
+                    <VChip :color="new Date(item.deadline) < new Date() ? 'error' :
+                        isToday(new Date(item.deadline)) ? 'warning' : 'info'" size="small">
+                        {{ item.deadline }}
+                    </VChip>
+                </template> -->
+
+                <!-- Created By -->
+                <template #item.created_by="{ item }: { item: any }">
+                    {{ item.created_by.name }}
+                </template>
+
+                <!-- Created at -->
+                <template #item.created_at="{ item }: { item: any }">
+                    {{ item.created_at }}
+                </template>
+
+                <!-- Updated at -->
+                <template #item.updated_at="{ item }: { item: any }">
+                    {{ item.updated_at }}
+                </template>
+
+                <!-- Actions -->
+                <template #item.actions="{ item }: { item: any }">
+                    <IconBtn size="small" :disabled="tableLoading" color="info">
+                        <VIcon icon="ri-eye-line" />
+                        <VTooltip activator="parent" location="top">
+                            View
+                        </VTooltip>
+                    </IconBtn>
+
+                    <IconBtn size="small" @click="openEditTaskForm(item)" color="primary"
+                        v-if="['admin', 'team_lead'].includes(userData.role.value)" :disabled="tableLoading">
+                        <VIcon icon="ri-edit-box-line" />
+                        <VTooltip activator="parent" location="top">
+                            Edit
+                        </VTooltip>
+                    </IconBtn>
+
+                    <IconBtn size="small" @click="isDeleteDialogVisible = true; taskToDelete = item.id" color="error"
+                        v-if="['admin', 'team_lead'].includes(userData.role.value)" :disabled="tableLoading">
+                        <VIcon icon="ri-delete-bin-7-line" />
+                        <VTooltip activator="parent" location="top">
+                            Delete
+                        </VTooltip>
+                    </IconBtn>
+                </template>
+
+                <!-- Pagination -->
+                <template #bottom>
+                    <VDivider />
+                    <div class="d-flex justify-end flex-wrap gap-x-6 px-2 py-1">
+                        <div class="d-flex align-center gap-x-2 text-medium-emphasis text-base">
+                            Rows Per Page:
+                            <VSelect v-model="itemsPerPage" class="per-page-select" variant="plain"
+                                :items="[10, 20, 25, 50, 100]" />
+                        </div>
+
+                        <p class="d-flex align-center text-base text-high-emphasis me-2 mb-0">
+                            {{ paginationMeta({ page, itemsPerPage }, totalTasks) }}
+                        </p>
+
+                        <div class="d-flex gap-x-2 align-center me-2">
+                            <VBtn class="flip-in-rtl" icon="ri-arrow-left-s-line" variant="text" density="comfortable"
+                                color="high-emphasis" :disabled="page <= 1" @click="page <= 1 ? page = 1 : page--" />
+
+                            <VBtn class="flip-in-rtl" icon="ri-arrow-right-s-line" density="comfortable" variant="text"
+                                color="high-emphasis" :disabled="page >= Math.ceil(totalTasks / itemsPerPage)"
+                                @click="page >= Math.ceil(totalTasks / itemsPerPage) ? page = Math.ceil(totalTasks / itemsPerPage) : page++" />
+                        </div>
+                    </div>
+                </template>
+
+            </VDataTableServer>
+            <!-- SECTION -->
+        </VCard>
+        <!-- 👉 Add New User -->
+        <!-- <AddNewUserDrawer v-model:isDrawerOpen="isAddNewUserDrawerVisible" @user-data="addNewUser" :status="status"
+            ref="addNewUserDrawerRef" :roles="roles" :departments="departments" :errors="errors" /> -->
+
+        <!-- 👉 Edit User -->
+        <!-- <EditUserDrawer v-model:isDrawerOpen="isEditUserDrawerVisible" @user-data="editUser" :status="status"
+            :user="selectedUser" ref="editUserDrawerRef" :roles="roles" :departments="departments" :errors="errors" /> -->
+
+        <VSnackbar v-model="isSnackBarVisible">
+            {{ taskResponsemessage }}
+            <template #actions>
+                <VBtn color="error" @click="isSnackBarVisible = false">
+                    Close
+                </VBtn>
+            </template>
+        </VSnackbar>
+
+        <VDialog v-model="isDeleteDialogVisible" width="400">
+            <!-- Dialog Content -->
+            <VCard title="Confirmation" class="pb-5">
+                <DialogCloseBtn variant="text" size="default" @click="isDeleteDialogVisible = false" />
+
+                <VCardText>
+                    Are you sure you want to delete this task?
+                </VCardText>
+
+                <VCardText class="d-flex align-center justify-center gap-4">
+                    <VBtn variant="elevated" @click="deleteTask()" color="error">
+                        Confirm
+                    </VBtn>
+
+                    <VBtn color="secondary" variant="outlined" @click="isDeleteDialogVisible = false">
+                        Cancel
+                    </VBtn>
+                </VCardText>
+            </VCard>
+        </VDialog>
+    </section>
+
+</template>

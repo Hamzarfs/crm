@@ -15,7 +15,7 @@ const selectedUser = ref({
     department: undefined,
     status: undefined,
 })
-let userToDelete: Number
+let userToDelete: number
 
 // Data table options
 const itemsPerPage = ref(20)
@@ -41,15 +41,15 @@ const headers = [
     { title: 'ID', key: 'id' },
     { title: 'Name', key: 'name' },
     { title: 'Department', key: 'department', sortable: false },
-    { title: 'Email', key: 'email' },
-    { title: 'Phone', key: 'phone' },
     { title: 'Role', key: 'role', sortable: false },
     { title: 'Status', key: 'status' },
+    { title: 'Email', key: 'email' },
+    { title: 'Phone', key: 'phone' },
     { title: 'Actions', key: 'actions', sortable: false },
 ]
 
 // 👉 Fetching users
-const { data: usersData, execute: fetchUsers, isFetching } = await useApi<any>(createUrl('/users', {
+const { data: usersData, execute: fetchUsers, isFetching } = await useApi<any>(createUrl('users', {
     query: {
         q: searchQuery,
         status: selectedStatus,
@@ -152,7 +152,6 @@ const openEditUserForm = (user: any) => {
     isEditUserDrawerVisible.value = true
 }
 
-
 // 👉 Delete user
 const deleteUser = async () => {
     const { success, message } = await $api(`users/${userToDelete}`, {
@@ -226,26 +225,27 @@ const widgetData = ref([
                 <VRow align="center">
                     <!-- 👉 Select Role -->
                     <VCol cols="12" sm="3">
-                        <VSelect v-model="selectedRole" label="Select Role" placeholder="Select Role" :items="roles"
-                            clearable clear-icon="ri-close-line" chips />
+                        <VSelect v-model="selectedRole" label="Filter by Role" placeholder="Filter by Role"
+                            :items="roles" clearable clear-icon="ri-close-line" chips />
                     </VCol>
 
                     <!-- 👉 Select Department -->
                     <VCol cols="12" sm="3">
-                        <VSelect v-model="selectedDepartment" label="Select Department" placeholder="Select Department"
-                            :items="departments" clearable clear-icon="ri-close-line" chips />
+                        <VSelect v-model="selectedDepartment" label="Filter by Department"
+                            placeholder="Filter by Department" :items="departments" clearable clear-icon="ri-close-line"
+                            chips />
                     </VCol>
 
                     <!-- 👉 Select Status -->
                     <VCol cols="12" sm="3">
-                        <VSelect v-model="selectedStatus" label="Select Status" placeholder="Select Status"
+                        <VSelect v-model="selectedStatus" label="Filter by Status" placeholder="Filter by Status"
                             :items="status" clearable clear-icon="ri-close-line" chips />
                     </VCol>
 
                     <VCol cols="12" sm="3">
                         <!-- 👉 Search  -->
-                        <VTextField v-model="searchQuery" placeholder="Search User" density="comfortable" clearable
-                            class="me-4" />
+                        <VTextField v-model="searchQuery" placeholder="Filter by User" label="Filter by User"
+                            density="comfortable" clearable class="me-4" />
                     </VCol>
                 </VRow>
             </VCardText>
@@ -267,8 +267,7 @@ const widgetData = ref([
             </VCardText>
 
             <!-- SECTION datatable -->
-
-            <VDataTableServer v-model:items-per-page="itemsPerPage" v-model:model-value="selectedRows" hover
+            <VDataTableServer v-model:items-per-page="itemsPerPage" v-model:model-value="selectedRows" hover show-select
                 :loading="tableLoading" :disable-sort="tableLoading" fixed-header style="max-height: 500px;"
                 v-model:page="page" :items="users" item-value="id" :items-length="totalUsers" :headers="headers"
                 class="text-no-wrap rounded-0" @update:options="updateOptions" density="default">
@@ -288,22 +287,16 @@ const widgetData = ref([
 
                 <!-- Role -->
                 <template #item.role="{ item }: { item: any }">
-                    <span class="text-capitalize text-high-emphasis">
-                        <VChip :color="resolveUserRoleVariant(item.role?.value)" size="small"
-                            class="text-capitalize me-2">
-                            {{ item.role?.title }}
-                        </VChip>
-                    </span>
+                    <VChip :color="resolveUserRoleVariant(item.role?.value)" size="small" class="text-uppercase">
+                        {{ item.role?.title }}
+                    </VChip>
                 </template>
 
                 <!-- Status -->
                 <template #item.status="{ item }: { item: any }">
-                    <span class="text-capitalize text-high-emphasis">
-                        <VChip :color="resolveUserStatusVariant(item.status.value)" size="small"
-                            class="text-capitalize">
-                            {{ item.status.label }}
-                        </VChip>
-                    </span>
+                    <VChip :color="resolveUserStatusVariant(item.status.value)" size="small" class="text-uppercase">
+                        {{ item.status.label }}
+                    </VChip>
                 </template>
 
                 <!-- Department -->
@@ -313,23 +306,22 @@ const widgetData = ref([
 
                 <!-- Actions -->
                 <template #item.actions="{ item }: { item: any }">
-
-                    <IconBtn size="small" :disabled="tableLoading">
+                    <IconBtn size="small" :disabled="tableLoading" color="info">
                         <VIcon icon="ri-eye-line" />
                         <VTooltip activator="parent" location="top">
                             View
                         </VTooltip>
                     </IconBtn>
 
-                    <IconBtn size="small" @click="openEditUserForm(item)" :disabled="tableLoading">
+                    <IconBtn size="small" @click="openEditUserForm(item)" :disabled="tableLoading" color="primary">
                         <VIcon icon="ri-edit-box-line" />
                         <VTooltip activator="parent" location="top">
                             Edit
                         </VTooltip>
                     </IconBtn>
 
-                    <IconBtn size="small" @click="isDeleteDialogVisible = true; userToDelete = item.id"
-                        :disabled="tableLoading">
+                    <IconBtn size="small" @click="isDeleteDialogVisible = true; userToDelete = item.id" color="error"
+                        :disabled="tableLoading || item.role.value === 'admin'">
                         <VIcon icon="ri-delete-bin-7-line" />
                         <VTooltip activator="parent" location="top">
                             Delete
@@ -340,7 +332,6 @@ const widgetData = ref([
                 <!-- Pagination -->
                 <template #bottom>
                     <VDivider />
-
                     <div class="d-flex justify-end flex-wrap gap-x-6 px-2 py-1">
                         <div class="d-flex align-center gap-x-2 text-medium-emphasis text-base">
                             Rows Per Page:
@@ -364,9 +355,9 @@ const widgetData = ref([
                 </template>
 
             </VDataTableServer>
-
             <!-- SECTION -->
         </VCard>
+
         <!-- 👉 Add New User -->
         <AddNewUserDrawer v-model:isDrawerOpen="isAddNewUserDrawerVisible" @user-data="addNewUser" :status="status"
             ref="addNewUserDrawerRef" :roles="roles" :departments="departments" :errors="errors" />
@@ -407,17 +398,3 @@ const widgetData = ref([
     </section>
 
 </template>
-
-<style lang="scss">
-.app-user-search-filter {
-    inline-size: 24.0625rem;
-}
-
-.text-capitalize {
-    text-transform: capitalize;
-}
-
-.user-list-name:not(:hover) {
-    color: rgba(var(--v-theme-on-background), var(--v-high-emphasis-opacity));
-}
-</style>

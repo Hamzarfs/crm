@@ -9,4 +9,9 @@ class TaskFile extends Model
 {
     use HasFactory;
     protected $guarded = [];
+
+    public function uploadedBy()
+    {
+        return $this->belongsTo(User::class, 'uploaded_by');
+    }
 }

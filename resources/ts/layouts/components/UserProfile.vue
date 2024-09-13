@@ -73,7 +73,7 @@ const userProfileList = [
             <VIcon v-else icon="ri-user-line" />
 
             <!-- SECTION Menu -->
-            <VMenu activator="parent" width="230" location="bottom end" offset="15px">
+            <VMenu activator="parent" min-width="230" max-width="265" location="bottom end" offset="15px">
                 <VList>
                     <VListItem>
                         <div class="d-flex gap-2 align-center">
@@ -91,8 +91,8 @@ const userProfileList = [
                                 <h6 class="text-h6 font-weight-medium">
                                     {{ userData.name }}
                                 </h6>
-                                <VListItemSubtitle class="text-capitalize text-disabled">
-                                    {{ userData.role.title.toUpperCase() }}
+                                <VListItemSubtitle class="text-uppercase text-disabled font-weight-bold">
+                                    {{ userData.role.title }}
                                 </VListItemSubtitle>
                             </div>
                         </div>

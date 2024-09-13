@@ -117,7 +117,8 @@ const errors = ref({
 
                 <!-- Actions -->
                 <template #item.actions="{ item }: { item: any }">
-                    <IconBtn size="small" @click="openEditRoleForm(item)" color="primary">
+                    <IconBtn size="small" @click="openEditRoleForm(item)" color="primary"
+                        :disabled="item.id >= 1 && item.id <= 7">
                         <VIcon icon="ri-edit-box-line" />
                         <VTooltip activator="parent" location="top">
                             Edit
@@ -132,6 +133,7 @@ const errors = ref({
                         </VTooltip>
                     </IconBtn>
                 </template>
+
             </VDataTable>
 
             <!-- SECTION -->

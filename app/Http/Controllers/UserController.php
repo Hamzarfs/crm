@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\EmployeeStatusesEnum;
 use App\Http\Requests\User\Store;
 use App\Http\Requests\User\Update;
-use App\Http\Resources\UserResourceCollection;
+use App\Http\Resources\Collections\UserResourceCollection;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -13,6 +13,23 @@ use Illuminate\Http\Request;
 class UserController extends Controller
 {
     public function list(Request $request)
+    {
+        if ($request->hasAny(['q', 'itemsPerPage', 'page'])) {
+            return $this->getUserDT($request);
+        } else {
+            return $this->getUserAll();
+        }
+    }
+
+    private function getUserAll()
+    {
+        $users = User::where('status', EmployeeStatusesEnum::ACTIVE)->get();
+        return response()->json([
+            'users' => $users,
+        ]);
+    }
+
+    private function getUserDT(Request $request)
     {
         $page = (int) $request->input('page', 1);
         $itemsPerPage = (int) $request->input('itemsPerPage', 10);

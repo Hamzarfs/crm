@@ -20,12 +20,12 @@ class Task extends Model
         return $this->hasMany(TaskFile::class);
     }
 
-    public function assignedTo()
+    public function assignee()
     {
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
-    public function createdBy()
+    public function creater()
     {
         return $this->belongsTo(User::class, 'created_by');
     }

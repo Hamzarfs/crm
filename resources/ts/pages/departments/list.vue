@@ -121,7 +121,8 @@ const errors = ref({
 
                 <!-- Actions -->
                 <template #item.actions="{ item }: { item: any }">
-                    <IconBtn size="small" @click="openEditDepartmentForm(item)" color="primary">
+                    <IconBtn size="small" @click="openEditDepartmentForm(item)" color="primary"
+                        :disabled="item.id >= 1 && item.id <= 4">
                         <VIcon icon="ri-edit-box-line" />
                         <VTooltip activator="parent" location="top">
                             Edit

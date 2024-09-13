@@ -26,7 +26,6 @@ class Store extends FormRequest
             'title' => 'required|string',
             'description' => 'required|string',
             'deadline' => 'date',
-            'started_at' => 'date',
             'status' => 'required|in:pending,in_progress,completed',
             'assigned_to' => 'integer|exists:users,id',
             'files' => 'array',
