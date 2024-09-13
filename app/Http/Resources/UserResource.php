@@ -42,8 +42,8 @@ class UserResource extends JsonResource
                 ];
             }),
             'status' => [
-                'label' => $this->status->label(),
-                'value' => $this->status->value,
+                'label' => $this->status?->label(),
+                'value' => $this->status?->value,
             ],
             'created_at' => $this->created_at->format('d-m-Y H:i:s A'),
             'updated_at' => $this->updated_at->format('d-m-Y H:i:s A'),

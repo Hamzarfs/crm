@@ -4,3 +4,5 @@
 
 
 </script>
+
+<template>Tasks</template>

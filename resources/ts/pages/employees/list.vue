@@ -1,191 +1,199 @@
 <script setup lang="ts">
-import AddNewUserDrawer from '@/components/employees/AddNewUserDrawer.vue';
-import EditUserDrawer from '@/components/employees/EditUserDrawer.vue';
+    import AddNewUserDrawer from '@/components/employees/AddNewUserDrawer.vue';
+    import EditUserDrawer from '@/components/employees/EditUserDrawer.vue';
 
-// 👉 Store
-const searchQuery = ref('')
-const selectedRole = ref()
-const selectedStatus = ref()
-const selectedDepartment = ref()
-const selectedUser = ref({
-    name: '',
-    email: '',
-    phone: '',
-    role: undefined,
-    department: undefined,
-    status: undefined,
-})
-let userToDelete: Number
+    // 👉 Store
+    const searchQuery = ref('')
+    const selectedRole = ref()
+    const selectedStatus = ref()
+    const selectedDepartment = ref()
+    const selectedUser = ref({
+        name: '',
+        email: '',
+        phone: '',
+        role: undefined,
+        department: undefined,
+        status: undefined,
+    })
+    let userToDelete: Number
 
-// Data table options
-const itemsPerPage = ref(20)
-const page = ref(1)
-const sortBy = ref()
-const orderBy = ref()
-const selectedRows = ref([])
-const tableLoading = ref(false)
+    // Data table options
+    const itemsPerPage = ref(20)
+    const page = ref(1)
+    const sortBy = ref()
+    const orderBy = ref()
+    const selectedRows = ref([])
+    const tableLoading = ref(false)
 
 
-// Add a ref for the AddNewUserDrawer & editUserDrawerRef component
-const addNewUserDrawerRef = ref()
-const editUserDrawerRef = ref()
+    // Add a ref for the AddNewUserDrawer & editUserDrawerRef component
+    const addNewUserDrawerRef = ref()
+    const editUserDrawerRef = ref()
 
-// Update data table options
-const updateOptions = (options: any) => {
-    sortBy.value = options.sortBy[0]?.key
-    orderBy.value = options.sortBy[0]?.order
-}
+    // Update data table options
+    const updateOptions = (options: any) => {
+        sortBy.value = options.sortBy[0]?.key
+        orderBy.value = options.sortBy[0]?.order
+    }
 
-// Headers
-const headers = [
-    { title: 'ID', key: 'id' },
-    { title: 'Name', key: 'name' },
-    { title: 'Department', key: 'department', sortable: false },
-    { title: 'Email', key: 'email' },
-    { title: 'Phone', key: 'phone' },
-    { title: 'Role', key: 'role', sortable: false },
-    { title: 'Status', key: 'status' },
-    { title: 'Actions', key: 'actions', sortable: false },
-]
+    // Headers
+    const headers = [
+        { title: 'ID', key: 'id' },
+        { title: 'Name', key: 'name' },
+        { title: 'Department', key: 'department', sortable: false },
+        { title: 'Email', key: 'email' },
+        { title: 'Phone', key: 'phone' },
+        { title: 'Role', key: 'role', sortable: false },
+        { title: 'Status', key: 'status' },
+        { title: 'Actions', key: 'actions', sortable: false },
+    ]
 
-// 👉 Fetching users
-const { data: usersData, execute: fetchUsers, isFetching } = await useApi<any>(createUrl('/users', {
-    query: {
-        q: searchQuery,
-        status: selectedStatus,
-        role: selectedRole,
-        department: selectedDepartment,
-        itemsPerPage,
-        page,
-        sortBy,
-        orderBy,
-    },
-}))
+    // 👉 Fetching users
+    const { data: usersData, execute: fetchUsers, isFetching } = await useApi<any>(createUrl('/users', {
+        query: {
+            q: searchQuery,
+            status: selectedStatus,
+            role: selectedRole,
+            department: selectedDepartment,
+            itemsPerPage,
+            page,
+            sortBy,
+            orderBy,
+        },
+    }))
 
-// Watch isFetching from the useApi to toggle tableLoading
-watch(() => isFetching.value, (newValue) => {
-    tableLoading.value = newValue
-}, { immediate: true })
+    // Watch isFetching from the useApi to toggle tableLoading
+    watch(() => isFetching.value, (newValue) => {
+        tableLoading.value = newValue
+    }, { immediate: true })
 
-const users = computed(() => usersData.value.users)
-const totalUsers = computed(() => usersData.value.totalUsers)
+    const users = computed(() => usersData.value.users)
+    const totalUsers = computed(() => usersData.value.totalUsers)
 
-const { roles } = await $api('roles')
-const { status } = await $api('users/statuses')
-const { departments } = await $api('departments')
+    const { roles } = await $api('roles')
+    const { status } = await $api('users/statuses')
+    const { departments } = await $api('departments')
 
-const resolveUserRoleVariant = (role: string): string => {
-    switch (role) {
-        case 'admin':
+    const resolveUserRoleVariant = (role: string): string => {
+        switch (role) {
+            case 'admin':
+                return 'success'
+            case 'employee':
+                return 'primary'
+            case 'hr':
+                return 'red'
+            case 'team_lead':
+                return 'blue-grey'
+            case 'account_manager':
+                return 'deep-orange'
+            case 'accountant':
+                return 'amber'
+            case 'sales_agent':
+                return 'teal'
+            default:
+                return 'info'
+        }
+    }
+
+    const resolveUserStatusVariant = (stat: string) => {
+        const statLowerCase = stat.toLowerCase()
+        if (statLowerCase === 'active')
             return 'success'
-        case 'employee':
-            return 'primary'
-        case 'hr':
-            return 'red'
-        case 'team_lead':
-            return 'blue-grey'
-        case 'account_manager':
-            return 'deep-orange'
-        case 'accountant':
-            return 'amber'
-        case 'sales_agent':
-            return 'teal'
-        default:
-            return 'info'
+        if (statLowerCase === 'inactive')
+            return 'warning'
+
+        return 'primary'
     }
-}
 
-const resolveUserStatusVariant = (stat: string) => {
-    const statLowerCase = stat.toLowerCase()
-    if (statLowerCase === 'active')
-        return 'success'
-    if (statLowerCase === 'inactive')
-        return 'warning'
+    const isAddNewUserDrawerVisible = ref(false)
+    const isEditUserDrawerVisible = ref(false)
+    const isSnackBarVisible = ref(false)
+    const isDeleteDialogVisible = ref(false)
+    let userResponsemessage: string
 
-    return 'primary'
-}
+    // 👉 Add new user
+    const addNewUser = async (userData: any) => {
+        const { success, message } = await $api('/users', {
+            method: 'POST',
+            body: userData,
+            onResponseError({ response }) {
+                errors.value = response._data.errors
+            },
+        })
 
-const isAddNewUserDrawerVisible = ref(false)
-const isEditUserDrawerVisible = ref(false)
-const isSnackBarVisible = ref(false)
-const isDeleteDialogVisible = ref(false)
-let userResponsemessage: string
+        if (success) {
+            isSnackBarVisible.value = true
+            userResponsemessage = message
+            addNewUserDrawerRef.value.closeNavigationDrawer()
+            fetchUsers()
+        }
+    }
 
-// 👉 Add new user
-const addNewUser = async (userData: any) => {
-    const { success, message } = await $api('/users', {
-        method: 'POST',
-        body: userData,
-        onResponseError({ response }) {
-            errors.value = response._data.errors
-        },
+    // 👉 Edit user
+    const editUser = async (userData: any) => {
+        const { success, message } = await $api(`users/${userData.id}`, {
+            method: 'PUT',
+            body: userData,
+            onResponseError({ response }) {
+                errors.value = response._data.errors
+            },
+        })
+
+        if (success) {
+            isSnackBarVisible.value = true
+            userResponsemessage = message
+            editUserDrawerRef.value.closeNavigationDrawer()
+            fetchUsers()
+        }
+    }
+
+    const openEditUserForm = (user: any) => {
+        selectedUser.value = user
+        isEditUserDrawerVisible.value = true
+    }
+
+
+    // 👉 Delete user
+    const deleteUser = async () => {
+        const { success, message } = await $api(`users/${userToDelete}`, {
+            method: 'DELETE',
+        })
+
+        isDeleteDialogVisible.value = false
+
+        if (success) {
+            isSnackBarVisible.value = true
+            userResponsemessage = message
+            fetchUsers()
+        }
+    }
+
+    const errors = ref({
+        name: undefined,
+        email: undefined,
+        phone: undefined,
+        role: undefined,
+        department: undefined,
+        status: undefined,
     })
 
-    if (success) {
-        isSnackBarVisible.value = true
-        userResponsemessage = message
-        addNewUserDrawerRef.value.closeNavigationDrawer()
-        fetchUsers()
+    // 👉 Get employee count for top cards
+    const { total: totalEmployees, new: newEmployees, active: activeEmployees, inactive: inactiveEmployees } = await $api('users/count')
+
+    const widgetData = ref([
+        { title: 'Total Employees', value: totalEmployees, icon: 'ri-group-line', iconColor: 'primary' },
+        { title: 'Active Employees', value: activeEmployees, icon: 'ri-user-follow-line', iconColor: 'success' },
+        { title: 'Inactive Employees', value: inactiveEmployees, icon: 'ri-user-add-line', iconColor: 'error' },
+        { title: 'New Employees', value: newEmployees, icon: 'ri-user-search-line', iconColor: 'warning', desc: 'Joined last month' },
+    ])
+
+    const clearFilterFields = () => {
+        selectedRole.value = null
+        selectedDepartment.value = null
+        selectedStatus.value = null
+        searchQuery.value = ''
+
     }
-}
-
-// 👉 Edit user
-const editUser = async (userData: any) => {
-    const { success, message } = await $api(`users/${userData.id}`, {
-        method: 'PUT',
-        body: userData,
-        onResponseError({ response }) {
-            errors.value = response._data.errors
-        },
-    })
-
-    if (success) {
-        isSnackBarVisible.value = true
-        userResponsemessage = message
-        editUserDrawerRef.value.closeNavigationDrawer()
-        fetchUsers()
-    }
-}
-
-const openEditUserForm = (user: any) => {
-    selectedUser.value = user
-    isEditUserDrawerVisible.value = true
-}
-
-
-// 👉 Delete user
-const deleteUser = async () => {
-    const { success, message } = await $api(`users/${userToDelete}`, {
-        method: 'DELETE',
-    })
-
-    isDeleteDialogVisible.value = false
-
-    if (success) {
-        isSnackBarVisible.value = true
-        userResponsemessage = message
-        fetchUsers()
-    }
-}
-
-const errors = ref({
-    name: undefined,
-    email: undefined,
-    phone: undefined,
-    role: undefined,
-    department: undefined,
-    status: undefined,
-})
-
-// 👉 Get employee count for top cards
-const { total: totalEmployees, new: newEmployees, active: activeEmployees, inactive: inactiveEmployees } = await $api('users/count')
-
-const widgetData = ref([
-    { title: 'Total Employees', value: totalEmployees, icon: 'ri-group-line', iconColor: 'primary' },
-    { title: 'Active Employees', value: activeEmployees, icon: 'ri-user-follow-line', iconColor: 'success' },
-    { title: 'Inactive Employees', value: inactiveEmployees, icon: 'ri-user-add-line', iconColor: 'error' },
-    { title: 'New Employees', value: newEmployees, icon: 'ri-user-search-line', iconColor: 'warning', desc: 'Joined last month' },
-])
 
 </script>
 
@@ -221,7 +229,21 @@ const widgetData = ref([
             </VRow>
         </div>
 
-        <VCard title="Filters" class="mb-6">
+        <VCard class="mb-6">
+
+            <div class="d-flex align-center pl-0 pt-2" style="padding: .75rem 1.25rem !important;">
+                <VCardTitle class="font-weight-bold" :style="{ fontSize: '25px' }">Filters</VCardTitle>
+                <VSpacer />
+                <!-- <VBtn roun /> -->
+                <IconBtn :disabled="tableLoading" rounded="lg" elevation="3" ripple class="bg-error" size="small"
+                    @click="clearFilterFields" :style="{ width: '35px', height: '35px' }">
+                    <VIcon icon="ri-delete-bin-7-fill" />
+                    <VTooltip activator="parent" location="top">
+                        Clear All
+                    </VTooltip>
+                </IconBtn>
+            </div>
+
             <VCardText>
                 <VRow align="center">
                     <!-- 👉 Select Role -->
@@ -409,15 +431,15 @@ const widgetData = ref([
 </template>
 
 <style lang="scss">
-.app-user-search-filter {
-    inline-size: 24.0625rem;
-}
+    .app-user-search-filter {
+        inline-size: 24.0625rem;
+    }
 
-.text-capitalize {
-    text-transform: capitalize;
-}
+    .text-capitalize {
+        text-transform: capitalize;
+    }
 
-.user-list-name:not(:hover) {
-    color: rgba(var(--v-theme-on-background), var(--v-high-emphasis-opacity));
-}
+    .user-list-name:not(:hover) {
+        color: rgba(var(--v-theme-on-background), var(--v-high-emphasis-opacity));
+    }
 </style>
