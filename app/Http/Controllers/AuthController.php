@@ -62,7 +62,7 @@ class AuthController extends Controller
          * @var User
          */
         $user = Auth::user();
-        $user->load('roles');
+        $user->load(['roles', 'department']);
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->plainTextToken;
 

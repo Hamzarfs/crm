@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import flatpickr from 'flatpickr';
 import FlatPickr from 'vue-flatpickr-component';
 import { useTheme } from 'vuetify';
 
@@ -41,7 +40,6 @@ const props = defineProps({
         variant: 'outlined',
         color: 'primary',
     }),
-    dateFormat: String,
 })
 
 
@@ -105,12 +103,7 @@ watch(() => configStore.theme, updateThemeClassInCalendar)
 
 onMounted(() => {
     updateThemeClassInCalendar()
-    setFlatPickrDateFormat(props.dateFormat)
 })
-
-const setFlatPickrDateFormat = (format: string) => {
-    flatpickr(refFlatPicker.value.$el).set('dateFormat', format)
-}
 
 const emitModelValue = (val: string) => {
     emit('update:modelValue', val)

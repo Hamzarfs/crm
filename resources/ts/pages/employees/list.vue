@@ -268,9 +268,9 @@ const widgetData = ref([
 
             <!-- SECTION datatable -->
             <VDataTableServer v-model:items-per-page="itemsPerPage" v-model:model-value="selectedRows" hover show-select
-                :loading="tableLoading" :disable-sort="tableLoading" fixed-header style="max-height: 500px;"
-                v-model:page="page" :items="users" item-value="id" :items-length="totalUsers" :headers="headers"
-                class="text-no-wrap rounded-0" @update:options="updateOptions" density="default">
+                :loading="tableLoading" loading-text="Loading Employees..." :disable-sort="tableLoading" fixed-header
+                style="max-height: 500px;" v-model:page="page" :items="users" item-value="id" :items-length="totalUsers"
+                :headers="headers" class="text-no-wrap rounded-0" @update:options="updateOptions" density="default">
 
                 <!-- Name -->
                 <template #item.name="{ item }: { item: any }">
@@ -321,7 +321,7 @@ const widgetData = ref([
                     </IconBtn>
 
                     <IconBtn size="small" @click="isDeleteDialogVisible = true; userToDelete = item.id" color="error"
-                        :disabled="tableLoading || item.role.value === 'admin'">
+                        :disabled="tableLoading || item.role?.value === 'admin'">
                         <VIcon icon="ri-delete-bin-7-line" />
                         <VTooltip activator="parent" location="top">
                             Delete

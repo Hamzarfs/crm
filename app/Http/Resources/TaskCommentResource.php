@@ -18,10 +18,8 @@ class TaskCommentResource extends JsonResource
             'id' => $this->id,
             'comment' => $this->comment,
             'created_by' => $this->whenLoaded('createdBy', new UserResource($this->createdBy)),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-            // 'created_at' => $this->created_at->format('d M Y, g:i A'),
-            // 'updated_at' => $this->updated_at->format('d M Y, g:i A'),
+            'created_at' => $this->created_at->format('d M Y, g:i A'),
+            'updated_at' => $this->updated_at->format('d M Y, g:i A'),
         ];
     }
 }

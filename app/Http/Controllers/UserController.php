@@ -17,13 +17,21 @@ class UserController extends Controller
         if ($request->hasAny(['q', 'itemsPerPage', 'page'])) {
             return $this->getUserDT($request);
         } else {
-            return $this->getUserAll();
+            return $this->getUserAll($request);
         }
     }
 
-    private function getUserAll()
+    private function getUserAll(Request $request)
     {
-        $users = User::where('status', EmployeeStatusesEnum::ACTIVE)->get();
+        $department = $request->input('department');
+        $users = User::where([
+            ['status', EmployeeStatusesEnum::ACTIVE],
+            ['id', '!=', $request->user()->id]
+        ])->when(
+            value: $department,
+            callback: fn(Builder $userQuery, string $department) => $userQuery->where('department_id', $department)
+        )->get();
+
         return response()->json([
             'users' => $users,
         ]);

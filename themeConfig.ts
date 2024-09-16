@@ -17,7 +17,7 @@ export const { themeConfig, layoutConfig } = defineThemeConfig({
         logo: h('div', { innerHTML: logo, style: 'line-height:0; color: rgb(var(--v-global-theme-primary))' }),
         // logoLight: h('img', { src: logoLight, alt: 'logo_light' }),
         // logoDark: h('img', { src: logoDark, alt: 'logo_dark' }),
-        contentWidth: ContentWidth.Boxed,
+        contentWidth: ContentWidth.Fluid,
         contentLayoutNav: AppContentLayoutNav.Vertical,
         overlayNavFromBreakpoint: breakpointsVuetifyV3.lg - 1, // 1 for matching with vuetify breakpoint. Docs: https://next.vuetifyjs.com/en/features/display-and-platform/
         i18n: {

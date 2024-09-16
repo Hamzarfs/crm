@@ -5,7 +5,7 @@ namespace App\Http\Requests\Task;
 use App\Enums\RolesEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
-class Store extends FormRequest
+class Update extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -28,8 +28,6 @@ class Store extends FormRequest
             'deadline' => 'required|date|after_or_equal:today',
             'status' => 'required|in:pending,in_progress,completed',
             'assigned_to' => 'required|integer|exists:users,id',
-            'files' => 'array',
-            'files.*' => 'file'
         ];
     }
 }

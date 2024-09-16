@@ -56,7 +56,7 @@ export const slugToTitleCase = (slug: string) => {
 }
 
 export const parseDate = (date: string, format: string = 'DD-MM-YYYY') => {
-    return moment(date, format, true).format()
+    return moment(date, 'YYYY-MM-DD').format(format)
 }
 
 /**

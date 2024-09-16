@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Task\Store;
-use App\Http\Resources\TaskResource;
+use App\Http\Requests\Task\{Store, Update};
 use App\Http\Resources\Collections\TaskResourceCollection;
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -25,6 +23,7 @@ class TaskController extends Controller
         $department = $request->input('department');
         $user = $request->input('user');
         $date = $request->input('date');
+        $assignedToMe = $request->input('assignedToMe');
         $status = $request->input('status');
         $query = $request->input('q');
 
@@ -35,7 +34,10 @@ class TaskController extends Controller
 
         if (!$request->user()->hasRole('admin')) {
             if ($request->user()->hasRole('team_lead'))
-                $tasks = $tasks->where('created_by', Auth::id());
+                $tasks = $tasks->where([
+                    ['created_by', '=', Auth::id(), 'OR'],
+                    ['assigned_to', '=', Auth::id(), 'OR'],
+                ]);
             else
                 $tasks = $tasks->where('assigned_to', Auth::id());
         }
@@ -43,29 +45,31 @@ class TaskController extends Controller
         // Applying DT filters
         $tasks = $tasks->when(
             value: $department,
-            callback: fn(Builder $tasksQuery, $department) => $tasksQuery->whereRelation('createdBy', 'department_id', '=', $department)
+            callback: fn(Builder $tasksQuery, $department) => $tasksQuery->whereRelation('creater', 'department_id', '=', $department)
         )->when(
             value: $user,
             callback: fn(Builder $tasksQuery, $user) => $tasksQuery->where(
                 column: [
-                    ['created_by' => $user],
-                    ['assigned_to' => $user],
+                    ['created_by', '=', $user, 'OR'],
+                    ['assigned_to', '=', $user, 'OR'],
                 ],
-                boolean: 'OR',
             )
         )->when(
             value: $date,
-            callback: function (QueryBuilder $tasksQuery, $date) {
+            callback: function (Builder $tasksQuery, $date) {
                 $formattedDate = Carbon::createFromFormat('d-m-Y', $date);
-                return $tasksQuery->whereDate('deadline', '=', $formattedDate, 'OR')
-                    ->whereDate('completed_at', '=', $formattedDate, 'OR')
-                    ->whereDate('started_at', '=', $formattedDate, 'OR')
-                    ->whereDate('created_at', '=', $formattedDate, 'OR')
-                    ->whereDate('updated_at', '=', $formattedDate, 'OR');
+                return $tasksQuery->where(fn($q) => $q->whereDate('deadline', '=', $formattedDate)
+                    ->orWhereDate('completed_at', '=', $formattedDate)
+                    ->orWhereDate('started_at', '=', $formattedDate)
+                    ->orWhereDate('created_at', '=', $formattedDate)
+                    ->orWhereDate('updated_at', '=', $formattedDate));
             }
         )->when(
             value: $status,
             callback: fn(Builder $tasksQuery, $status) => $tasksQuery->where('status', $status)
+        )->when(
+            value: $assignedToMe,
+            callback: fn(Builder $tasksQuery, $assignedToMe) => $assignedToMe === 'yes' ? $tasksQuery->where('assigned_to', Auth::id()) : $tasksQuery->where('created_by', Auth::id()),
         )->when(
             value: $query,
             callback: fn(Builder $tasksQuery, $query) => $tasksQuery->where(
@@ -86,7 +90,6 @@ class TaskController extends Controller
         $total = $paginatedTasks->total();
 
         $tasks = new TaskResourceCollection($paginatedTasks);
-        // dd($tasks);
 
         return response()->json([
             'tasks' => $tasks,
@@ -94,83 +97,6 @@ class TaskController extends Controller
             'page' => ($currentPage <= $lastPage) ? $currentPage : $lastPage,
             'totalPages' => $lastPage,
         ]);
-
-
-
-
-
-
-
-
-
-
-        // $tasks = $tasks->when(
-        //     value: $department,
-        //     callback: fn(Builder $query, $department) => $query->whereHas('createdBy', function($q) use ($department) {
-        //         $q->where('department_id', $department);
-        //     })
-        // );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        // dd($tasks->all(), $tasks->all()->count());
-
-        // if ($request->user()->hasRole('admin')) {
-        //     $tasks = $tasks
-        // }else if ($request->user()->hasRole('team_lead')) {
-        // }else if ($request->user()->hasRole('team_lead')) {
-        // }
-        // if ($request->user()->hasRole('admin')) {
-        //     $tasks = $tasks
-        // }
-
-
-
-
-
-
-        // $tasks = $tasks->when(
-        //     value: $department,
-        //     callback: function ($query, $department) {
-        //         return $query->where('department_id', $department);
-        //     }
-        // );
-
-
-
-
-
-
-
-        // $tasks = Task::with(['files', 'createdBy.department', 'assignedTo', 'comments']);
-        // // dd($tasks->get()->toArray());
-        // if (request()->user()->hasRole('admin')) {
-        //     $tasks = $tasks->get();
-        // } else if (request()->user()->hasRole('team_lead')) {
-        //     $tasks = $tasks->where('created_by', Auth::id())->get();
-        // } else {
-        //     $tasks = $tasks->where('assigned_to', Auth::id())->get();
-        // }
-
-
-
-
-
-        // return response()->json([
-        //     'tasks' => new TaskResourceCollection($tasks),
-        // ]);
     }
 
 
@@ -184,7 +110,7 @@ class TaskController extends Controller
         $task = Task::create([
             'title' => $data->title,
             'description' => $data->description,
-            'deadline' => Carbon::createFromFormat('d/m/Y', $data->deadline)->format('Y-m-d'),
+            'deadline' => Carbon::createFromFormat('d-m-Y', $data->deadline)->format('Y-m-d'),
             'status' => $data->status,
             'assigned_to' => $data->assigned_to,
             'created_by' => $request->user()->id,
@@ -198,42 +124,45 @@ class TaskController extends Controller
                 'uploaded_by' => $request->user()->id,
             ]);
         }
+
         return response()->json([
             'success' => true,
             'message' => 'Task created successfully',
-            'task' => new TaskResource($task->load(['files', 'createdBy', 'assignedTo'])),
         ]);
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Task $task)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Task $task)
-    {
-        //
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Task $task)
+    public function update(Update $request, Task $task)
     {
-        //
+        $data = (object) $request->validated();
+
+        $task->update([
+            'title' => $data->title,
+            'description' => $data->description,
+            'deadline' => Carbon::createFromFormat('d-m-Y', $data->deadline)->format('Y-m-d'),
+            'status' => $data->status,
+            'assigned_to' => $data->assigned_to,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Task updated successfully',
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Task $task)
+    public function delete(Task $task)
     {
-        //
+        $task->comments()->delete();
+        $task->files()->delete();
+        $task->delete();
+        return response()->json([
+            'success' => true,
+            'message' => 'Task deleted successfully!'
+        ]);
     }
 }

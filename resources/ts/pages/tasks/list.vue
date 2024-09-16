@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
-
+import AddNewTaskDrawer from '@/components/tasks/AddNewTaskDrawer.vue';
+import EditTaskDrawer from '@/components/tasks/EditTaskDrawer.vue';
 
 // Get currently logged in user data
 const userData = useCookie('userData').value
@@ -11,6 +12,12 @@ const selectedUser = ref()
 const selectedDepartment = ref()
 const selectedDate = ref()
 const selectedStatus = ref()
+const toggleAssignedToMe = ref(false)
+const assignedToMe = ref('no')
+
+watch(toggleAssignedToMe, newValue => {
+    assignedToMe.value = newValue ? 'yes' : 'no'
+})
 
 // Selected task to edit
 const selectedTask = ref({})
@@ -19,8 +26,8 @@ let taskToDelete: number
 // Data table options
 const itemsPerPage = ref(20)
 const page = ref(1)
-const sortBy = ref()
-const orderBy = ref()
+const sortBy = ref('id')
+const orderBy = ref<boolean | 'asc' | 'desc'>('desc')
 const selectedRows = ref([])
 const tableLoading = ref(false)
 
@@ -40,7 +47,7 @@ const headers = [
     { title: 'Title', key: 'title' },
     { title: 'Status', key: 'status' },
     { title: 'Department', key: 'department', sortable: false, showToOnly: ['admin'] },
-    { title: 'Assigned To', key: 'assigned_to', sortable: false },
+    { title: 'Assigned To', key: 'assigned_to', sortable: false, showToOnly: ['admin', 'team_lead'] },
     { title: 'Deadline', key: 'deadline' },
     { title: 'Created By', key: 'created_by', sortable: false, showToOnly: ['admin'] },
     { title: 'Creation Date', key: 'created_at' },
@@ -50,9 +57,8 @@ const headers = [
 
 const _headers = computed(() => headers.filter(h => h.showToOnly ? (h.showToOnly.includes(userData.role.value)) : h))
 
-// 👉 Fetching tasks
-const { data: tasksData, execute: fetchTasks, isFetching } = await useApi<any>(createUrl('tasks', {
-    query: {
+const query = computed(() => {
+    const query: any = {
         q: searchQuery,
         user: selectedUser,
         department: selectedDepartment,
@@ -62,8 +68,15 @@ const { data: tasksData, execute: fetchTasks, isFetching } = await useApi<any>(c
         page,
         sortBy,
         orderBy,
-    },
-}))
+    }
+    if (userData.role.value === 'team_lead')
+        query.assignedToMe = assignedToMe
+
+    return query
+})
+
+// 👉 Fetching tasks
+const { data: tasksData, execute: fetchTasks, isFetching } = await useApi<any>(createUrl('tasks', { query }))
 
 // Watch isFetching from the useApi to toggle tableLoading
 watch(() => isFetching.value, (newValue) => {
@@ -72,9 +85,6 @@ watch(() => isFetching.value, (newValue) => {
 
 const tasks = computed(() => tasksData.value.tasks)
 const totalTasks = computed(() => tasksData.value.totalTasks)
-
-// const { roles } = await $api('roles')
-// const { status } = await $api('users/statuses')
 
 const statuses = [
     {
@@ -94,7 +104,11 @@ const statuses = [
 const users = ref([])
 const departments = ref([])
 if (['admin', 'team_lead'].includes(userData.role.value)) {
-    const { users: fetchedUsers } = await $api('users')
+    const { users: fetchedUsers } = await $api('users', {
+        query: {
+            department: userData?.department?.id,
+        },
+    })
     users.value = fetchedUsers.map((u: any) => ({
         value: u.id,
         title: u.name,
@@ -127,7 +141,7 @@ const isDeleteDialogVisible = ref(false)
 let taskResponsemessage: string
 
 // 👉 Add new task
-const addNewTask = async (taskData: any) => {
+const addNewTask = async (taskData: FormData) => {
     const { success, message } = await $api('tasks', {
         method: 'POST',
         body: taskData,
@@ -187,7 +201,7 @@ const errors = ref({
     description: undefined,
     deadline: undefined,
     assigned_to: undefined,
-    files: undefined,
+    files: [],
     status: undefined,
 })
 
@@ -195,36 +209,45 @@ const errors = ref({
 
 <template>
     <section>
-        <VCard :title="['admin', 'team_lead'].includes(userData.role.value) ? 'Filters' : 'Tasks'" class="mb-6">
+        <VCard class="mb-6">
+            <VCardTitle class="text-h4 py-5">
+                {{ ['admin', 'team_lead'].includes(userData.role.value) ? 'Filters' : 'Tasks' }}
+            </VCardTitle>
+
             <VCardText v-if="['admin', 'team_lead'].includes(userData.role.value)">
                 <VRow align="center">
+                    <!-- 👉 Toggle Assigned to me or assigned by me (only for team_lead role) -->
+                    <VCol cols="2" v-if="userData.role.value === 'team_lead'">
+                        <VSwitch v-model="toggleAssignedToMe" :inset="false"
+                            :label="toggleAssignedToMe ? 'Assigned to me' : 'Assigned by me'" />
+                    </VCol>
+
                     <!-- 👉 Select Department -->
                     <VCol v-if="userData.role.value === 'admin'">
                         <VSelect v-model="selectedDepartment" label="Filter by Department"
-                            placeholder="Filter by  Department" :items="departments" clearable
-                            clear-icon="ri-close-line" chips />
+                            placeholder="Filter by Department" :items="departments" clearable chips />
                     </VCol>
 
                     <!-- 👉 Select User -->
                     <VCol v-if="['admin', 'team_lead'].includes(userData.role.value)">
-                        <VAutocomplete v-model="selectedUser" label="Filter by  User" placeholder="Filter by  User"
-                            :items="users" auto-select-first clearable clear-icon="ri-close-line" chips />
+                        <VAutocomplete v-model="selectedUser" label="Filter by User" placeholder="Filter by User"
+                            :items="users" auto-select-first clearable chips />
                     </VCol>
 
                     <!-- 👉 Select Date -->
                     <VCol>
-                        <AppDateTimePicker v-model="selectedDate" label="Filter by  Date" placeholder="Filter by  Date"
-                            date-format="d-m-Y" clearable clear-icon="ri-close-line" />
+                        <AppDateTimePicker v-model="selectedDate" label="Filter by Date" placeholder="Filter by Date"
+                            clearable :config="{ dateFormat: 'd-m-Y' }" clear-icon="ri-close-line" />
                     </VCol>
 
                     <!-- 👉 Select Status -->
                     <VCol v-if="['admin', 'team_lead'].includes(userData.role.value)">
-                        <VSelect v-model="selectedStatus" label="Filter by  Status" placeholder="Filter by  Status"
-                            :items="statuses" clearable clear-icon="ri-close-line" chips />
+                        <VSelect v-model="selectedStatus" label="Filter by Status" placeholder="Filter by Status"
+                            :items="statuses" clearable chips />
                     </VCol>
 
+                    <!-- 👉 Search  -->
                     <VCol>
-                        <!-- 👉 Search  -->
                         <VTextField v-model="searchQuery" placeholder="Filter by Query" density="comfortable" clearable
                             label="Filter by Query" class="me-4" />
                     </VCol>
@@ -233,7 +256,7 @@ const errors = ref({
 
             <VDivider />
 
-            <VCardText class="d-flex flex-wrap gap-4">
+            <VCardText v-if="['admin', 'team_lead'].includes(userData.role.value)" class="d-flex flex-wrap gap-4">
                 <!-- 👉 Export & import buttons -->
                 <VBtn color="success" prepend-icon="ri-upload-2-line">
                     Import
@@ -249,9 +272,10 @@ const errors = ref({
 
             <!-- SECTION datatable -->
             <VDataTableServer v-model:items-per-page="itemsPerPage" v-model:model-value="selectedRows" hover show-select
-                :loading="tableLoading" :disable-sort="tableLoading" fixed-header style="max-height: 500px;"
-                v-model:page="page" :items="tasks" item-value="id" :items-length="totalTasks" :headers="headers"
-                class="text-no-wrap rounded-0" @update:options="updateOptions" density="default">
+                :sort-by="[{ key: sortBy, order: orderBy }]" :loading="tableLoading" loading-text="Loading Tasks..."
+                :disable-sort="tableLoading" fixed-header style="max-height: 500px;" v-model:page="page" :items="tasks"
+                item-value="id" :items-length="totalTasks" :headers="_headers" class="text-no-wrap rounded-0"
+                @update:options="updateOptions" density="default">
 
                 <!-- Status -->
                 <template #item.status="{ item }: { item: any }">
@@ -272,22 +296,11 @@ const errors = ref({
 
                 <!-- Deadline -->
                 <template #item.deadline="{ item }: { item: any }">
-                    <!-- <VChip :color="parseDate(item.deadline) < new Date() ? 'error' :
-                        isToday(parseDate(item.deadline)) ? 'warning' : 'info'" size="small">
-                        {{ item.deadline }}
-                    </VChip> -->
-                </template>
-
-
-                <!-- <template #item.deadline="{ item }: { item: any }">
-
-                    {{ console.log(new Date(item.deadline), item.deadline) }}
-
-                    <VChip :color="new Date(item.deadline) < new Date() ? 'error' :
-                        isToday(new Date(item.deadline)) ? 'warning' : 'info'" size="small">
-                        {{ item.deadline }}
+                    <VChip :color="checkDeadlineStatus(item.deadline) === 'exceeded' ? 'error' :
+                        checkDeadlineStatus(item.deadline) === 'approaching' ? 'success' : 'warning'" size="small">
+                        {{ parseDate(item.deadline) }}
                     </VChip>
-                </template> -->
+                </template>
 
                 <!-- Created By -->
                 <template #item.created_by="{ item }: { item: any }">
@@ -314,15 +327,15 @@ const errors = ref({
                     </IconBtn>
 
                     <IconBtn size="small" @click="openEditTaskForm(item)" color="primary"
-                        v-if="['admin', 'team_lead'].includes(userData.role.value)" :disabled="tableLoading">
+                        :disabled="tableLoading || !(userData.role.value === 'admin' || item.created_by.id === userData.id)">
                         <VIcon icon="ri-edit-box-line" />
                         <VTooltip activator="parent" location="top">
                             Edit
                         </VTooltip>
                     </IconBtn>
 
-                    <IconBtn size="small" @click="isDeleteDialogVisible = true; taskToDelete = item.id" color="error"
-                        v-if="['admin', 'team_lead'].includes(userData.role.value)" :disabled="tableLoading">
+                    <IconBtn @click="isDeleteDialogVisible = true; taskToDelete = item.id" color="error" size="small"
+                        :disabled="tableLoading || !(userData.role.value === 'admin' || item.created_by.id === userData.id)">
                         <VIcon icon="ri-delete-bin-7-line" />
                         <VTooltip activator="parent" location="top">
                             Delete
@@ -358,13 +371,16 @@ const errors = ref({
             </VDataTableServer>
             <!-- SECTION -->
         </VCard>
-        <!-- 👉 Add New User -->
-        <!-- <AddNewUserDrawer v-model:isDrawerOpen="isAddNewUserDrawerVisible" @user-data="addNewUser" :status="status"
-            ref="addNewUserDrawerRef" :roles="roles" :departments="departments" :errors="errors" /> -->
 
-        <!-- 👉 Edit User -->
-        <!-- <EditUserDrawer v-model:isDrawerOpen="isEditUserDrawerVisible" @user-data="editUser" :status="status"
-            :user="selectedUser" ref="editUserDrawerRef" :roles="roles" :departments="departments" :errors="errors" /> -->
+        <!-- 👉 Add New Task  v-if="userData.role.value === 'team_lead'" -->
+        <AddNewTaskDrawer v-if="['admin', 'team_lead'].includes(userData.role.value)"
+            v-model:isDrawerOpen="isAddNewTaskDrawerVisible" @task-data="addNewTask" :users="users" :statuses="statuses"
+            ref="addNewTaskDrawerRef" :errors="errors" />
+
+        <!-- 👉 Edit Task -->
+        <EditTaskDrawer v-if="['admin', 'team_lead'].includes(userData.role.value)"
+            v-model:isDrawerOpen="isEditTaskDrawerVisible" @task-data="editTask" :users="users" :statuses="statuses"
+            :task="selectedTask" ref="editTaskDrawerRef" :errors="errors" />
 
         <VSnackbar v-model="isSnackBarVisible">
             {{ taskResponsemessage }}
