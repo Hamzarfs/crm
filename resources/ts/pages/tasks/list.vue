@@ -272,10 +272,10 @@ const errors = ref({
 
                 <!-- Deadline -->
                 <template #item.deadline="{ item }: { item: any }">
-                    <VChip :color="parseDate(item.deadline) < new Date() ? 'error' :
+                    <!-- <VChip :color="parseDate(item.deadline) < new Date() ? 'error' :
                         isToday(parseDate(item.deadline)) ? 'warning' : 'info'" size="small">
                         {{ item.deadline }}
-                    </VChip>
+                    </VChip> -->
                 </template>
 
 
