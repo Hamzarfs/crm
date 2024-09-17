@@ -20,7 +20,7 @@ watch(toggleAssignedToMe, newValue => {
 })
 
 // Selected task to edit
-const selectedTask = ref({})
+const selectedTask = ref<Record<string, any>>({})
 let taskToDelete: number
 
 // Data table options
@@ -31,9 +31,10 @@ const orderBy = ref<boolean | 'asc' | 'desc'>('desc')
 const selectedRows = ref([])
 const tableLoading = ref(false)
 
-// Add a ref for the AddNewTaskDrawer & editTaskDrawerRef component
+// Add a ref for the AddNewTaskDrawer, editTaskDrawerRef & viewTaskDrawerRef component
 const addNewTaskDrawerRef = ref()
 const editTaskDrawerRef = ref()
+const viewTaskDrawerRef = ref()
 
 // Update data table options
 const updateOptions = (options: any) => {
@@ -136,6 +137,7 @@ const resolveTaskStatusColor = (status: string): string => {
 
 const isAddNewTaskDrawerVisible = ref(false)
 const isEditTaskDrawerVisible = ref(false)
+const isViewTaskDrawerVisible = ref(false)
 const isSnackBarVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
 let taskResponsemessage: string
@@ -176,9 +178,10 @@ const editTask = async (taskData: any) => {
     }
 }
 
-const openEditTaskForm = (task: any) => {
+// 👉 View task
+const viewTask = (task: any) => {
     selectedTask.value = task
-    isEditTaskDrawerVisible.value = true
+    isViewTaskDrawerVisible.value = true
 }
 
 // 👉 Delete task
@@ -196,6 +199,27 @@ const deleteTask = async () => {
     }
 }
 
+// 👉 Add comment
+const addComment = async (commentData: FormData) => {
+    const { success, message, comment } = await $api(`tasks/${selectedTask.value.id}/comments`, {
+        method: 'POST',
+        body: commentData,
+    })
+
+    if (success) {
+        isSnackBarVisible.value = true
+        taskResponsemessage = message
+        selectedTask.value.comments.push(comment)
+        viewTaskDrawerRef.value.commentForm.reset()
+    }
+}
+
+
+const openEditTaskForm = (task: any) => {
+    selectedTask.value = task
+    isEditTaskDrawerVisible.value = true
+}
+
 const errors = ref({
     title: undefined,
     description: undefined,
@@ -203,6 +227,7 @@ const errors = ref({
     assigned_to: undefined,
     files: [],
     status: undefined,
+    comment: undefined,
 })
 
 </script>
@@ -280,7 +305,8 @@ const errors = ref({
                 <!-- Status -->
                 <template #item.status="{ item }: { item: any }">
                     <VChip :color="resolveTaskStatusColor(item.status)" size="small" class="text-uppercase">
-                        {{ slugToTitleCase(item.status) }}
+                        {{ statuses.find((status: any) => status.value === item.status)?.title }}
+                        <!-- {{ slugToTitleCase(item.status) }} -->
                     </VChip>
                 </template>
 
@@ -319,7 +345,7 @@ const errors = ref({
 
                 <!-- Actions -->
                 <template #item.actions="{ item }: { item: any }">
-                    <IconBtn size="small" :disabled="tableLoading" color="info">
+                    <IconBtn size="small" :disabled="tableLoading" color="info" @click="viewTask(item)">
                         <VIcon icon="ri-eye-line" />
                         <VTooltip activator="parent" location="top">
                             View
@@ -372,7 +398,7 @@ const errors = ref({
             <!-- SECTION -->
         </VCard>
 
-        <!-- 👉 Add New Task  v-if="userData.role.value === 'team_lead'" -->
+        <!-- 👉 Add New Task -->
         <AddNewTaskDrawer v-if="['admin', 'team_lead'].includes(userData.role.value)"
             v-model:isDrawerOpen="isAddNewTaskDrawerVisible" @task-data="addNewTask" :users="users" :statuses="statuses"
             ref="addNewTaskDrawerRef" :errors="errors" />
@@ -381,6 +407,11 @@ const errors = ref({
         <EditTaskDrawer v-if="['admin', 'team_lead'].includes(userData.role.value)"
             v-model:isDrawerOpen="isEditTaskDrawerVisible" @task-data="editTask" :users="users" :statuses="statuses"
             :task="selectedTask" ref="editTaskDrawerRef" :errors="errors" />
+
+        <!-- 👉 View Task -->
+        <ViewTaskDrawer v-model:isDrawerOpen="isViewTaskDrawerVisible" :task="selectedTask" :statuses="statuses"
+            :resolveTaskStatusColor="resolveTaskStatusColor" :errors="errors" ref="viewTaskDrawerRef"
+            @comment-data="addComment" />
 
         <VSnackbar v-model="isSnackBarVisible">
             {{ taskResponsemessage }}

@@ -389,6 +389,7 @@ declare module 'vue' {
     TwoFactorAuthDialog: typeof import('./resources/ts/components/dialogs/TwoFactorAuthDialog.vue')['default']
     UserInfoEditDialog: typeof import('./resources/ts/components/dialogs/UserInfoEditDialog.vue')['default']
     UserUpgradePlanDialog: typeof import('./resources/ts/components/dialogs/UserUpgradePlanDialog.vue')['default']
+    ViewTaskDrawer: typeof import('./resources/ts/components/tasks/ViewTaskDrawer.vue')['default']
     VueApexCharts: typeof import('vue3-apexcharts')['default']
   }
 }

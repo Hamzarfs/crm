@@ -67,10 +67,8 @@ const userProfileList = [
 
 <template>
     <VBadge v-if="userData" dot bordered location="bottom right" offset-x="3" offset-y="3" color="success">
-        <VAvatar class="cursor-pointer" size="38" :color="!(userData && userData.avatar) ? 'primary' : undefined"
-            :variant="!(userData && userData.avatar) ? 'tonal' : undefined">
-            <VImg v-if="userData && userData.avatar" :src="userData.avatar" />
-            <VIcon v-else icon="ri-user-line" />
+        <VAvatar class="cursor-pointer" size="38" :color="!(userData && userData.avatar) ? 'primary' : undefined">
+            {{ getInitials(userData.name) }}
 
             <!-- SECTION Menu -->
             <VMenu activator="parent" min-width="230" max-width="265" location="bottom end" offset="15px">
@@ -79,10 +77,8 @@ const userProfileList = [
                         <div class="d-flex gap-2 align-center">
                             <VListItemAction>
                                 <VBadge dot location="bottom right" offset-x="3" offset-y="3" color="success">
-                                    <VAvatar :color="!(userData && userData.avatar) ? 'primary' : undefined"
-                                        :variant="!(userData && userData.avatar) ? 'tonal' : undefined">
-                                        <VImg v-if="userData && userData.avatar" :src="userData.avatar" />
-                                        <VIcon v-else icon="ri-user-line" />
+                                    <VAvatar :color="!(userData && userData.avatar) ? 'primary' : undefined">
+                                        {{ getInitials(userData.name) }}
                                     </VAvatar>
                                 </VBadge>
                             </VListItemAction>

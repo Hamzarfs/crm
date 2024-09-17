@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Requests\Task;
+namespace App\Http\Requests\Task\Comment;
 
-use App\Enums\RolesEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class Store extends FormRequest
@@ -12,7 +11,7 @@ class Store extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->hasRole([RolesEnum::ADMIN, RolesEnum::TEAM_LEAD]);
+        return true;
     }
 
     /**
@@ -23,12 +22,8 @@ class Store extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required|string',
-            'description' => 'required|string',
-            'deadline' => 'required|date|after_or_equal:today',
-            'status' => 'required|in:pending,in_progress,completed',
-            'assigned_to' => 'required|integer|exists:users,id',
-            'files' => 'array',
+            'comment' => 'required|string',
+            'files' => 'nullable|array',
             'files.*' => 'file|mimes:jpeg,png,gif,bmp,svg,webp,pdf,doc,docx,xls,xlsx,ppt,pptx,txt'
         ];
     }

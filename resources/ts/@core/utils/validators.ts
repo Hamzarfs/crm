@@ -111,3 +111,23 @@ export const alphaDashValidator = (value: unknown) => {
 
     return /^[\w-]*$/.test(valueAsString) || 'All Character are not valid'
 }
+
+// 👉 File Validator For Tasks & Task Comments
+export const fileValidator = (files: File[]) => {
+    const allowedExtensions = ['image/*', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt']
+    if (isEmpty(files))
+        return true
+
+    for (const file of files) {
+        const fileExtensionInfo = file.type.split('/')
+        const fileType = fileExtensionInfo[0]
+        const fileExtension = fileExtensionInfo[1]
+
+        if (!(
+            (fileType === 'image' && allowedExtensions.includes('image/*')) ||
+            allowedExtensions.includes(fileType) ||
+            allowedExtensions.includes(fileExtension)
+        )) return `File type ${file.type} is not allowed`
+    }
+    return true
+}

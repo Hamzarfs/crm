@@ -10,8 +10,8 @@ interface Emit {
 interface Props {
     isDrawerOpen: boolean
     users: Record<number, any>[]
-    statuses: Record<string, string>[]
-    errors: any | any[]
+    statuses: Record<number, any>[]
+    errors: any
 }
 
 const props = defineProps<Props>()
@@ -118,9 +118,10 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                             <!-- 👉 Files -->
                             <VCol cols="12">
                                 <VFileInput v-model="files" label="Select files" placeholder="Select files" multiple
-                                    prepend-icon="" append-icon="$file" chips show-size
-                                    :error-messages="props.errors.files"
-                                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" />
+                                    prepend-icon="" append-icon="$file" chips show-size clearable
+                                    :error-messages="props.errors.files" :rules="[fileValidator]"
+                                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt" counter
+                                    :counter-size-string="String(files.length)" />
                             </VCol>
 
                             <!-- 👉 Submit and Cancel -->

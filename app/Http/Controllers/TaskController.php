@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Task\{Store, Update};
-use App\Http\Resources\Collections\TaskResourceCollection;
-use App\Models\Task;
+use App\Http\Requests\Task\{Store, Update, Comment\Store as CommentStore};
+use App\Http\Resources\{TaskCommentResource, Collections\TaskResourceCollection};
+use App\Models\{Task, TaskFile};
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class TaskController extends Controller
 {
@@ -30,7 +31,7 @@ class TaskController extends Controller
         $orderByColumn = $request->input('sortBy');
         $orderByDir = $request->input('orderBy');
 
-        $tasks = Task::with(['files', 'creater.department', 'assignee', 'comments']);
+        $tasks = Task::with(['files', 'creater.department', 'assignee', 'comments.files']);
 
         if (!$request->user()->hasRole('admin')) {
             if ($request->user()->hasRole('team_lead'))
@@ -163,6 +164,42 @@ class TaskController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Task deleted successfully!'
+        ]);
+    }
+
+    /**
+     * Download the specified file.
+     */
+    public function downloadFile(TaskFile $taskFile)
+    {
+        return Storage::download($taskFile->file);
+    }
+
+    /**
+     * Add a comment to the specified task.
+     */
+    public function addComment(CommentStore $request, Task $task)
+    {
+        $data = (object) $request->validated();
+
+        $comment = $task->comments()->create([
+            'comment' => $data->comment,
+            'created_by' => Auth::id(),
+        ]);
+
+        foreach ($data->files as $file) {
+            $filePath = $file->store('tasks/comments');
+            $comment->files()->create([
+                'type' => 'comment',
+                'file' => $filePath,
+                'uploaded_by' => Auth::id(),
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Comment added successfully',
+            'comment' => new TaskCommentResource($comment),
         ]);
     }
 }
