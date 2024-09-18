@@ -2,6 +2,7 @@
 
 import AddNewTaskDrawer from '@/components/tasks/AddNewTaskDrawer.vue';
 import EditTaskDrawer from '@/components/tasks/EditTaskDrawer.vue';
+import ViewTaskDrawer from '@/components/tasks/ViewTaskDrawer.vue';
 import { mergeProps } from 'vue';
 
 // Get currently logged in user data
@@ -219,7 +220,6 @@ const addComment = async (commentData: FormData) => {
     }
 }
 
-
 const openEditTaskForm = (task: any) => {
     selectedTask.value = task
     isEditTaskDrawerVisible.value = true
@@ -257,6 +257,31 @@ const handleStatusUpdate = async ({ id, status }: { id: number, status: string }
     }
 }
 
+const isTasksActionBtnsDisable = (taskCreatorId: number): boolean => (tableLoading.value || !(userData.role.value === 'admin' || taskCreatorId === userData.id))
+
+const deleteComment = async (commentIndex: number) => {
+    const comment = selectedTask.value.comments[commentIndex]
+
+    const { success, message } = await $api(`tasks/comments/${comment.id}`, {
+        method: 'DELETE',
+        onResponseError({ response }) {
+            console.error(response._data.message)
+            isSnackBarVisible.value = true
+            taskResponsemessage = "Something went wrong! Please try again."
+        },
+    })
+
+    if (success) {
+        selectedTask.value.comments.splice(commentIndex, 1)
+        isSnackBarVisible.value = true
+        taskResponsemessage = message
+    }
+}
+
+watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDrawer]) => {
+    if (!editDrawer && !viewDrawer)
+        selectedTask.value = {}
+})
 
 </script>
 
@@ -397,24 +422,30 @@ const handleStatusUpdate = async ({ id, status }: { id: number, status: string }
 
                 <!-- Actions -->
                 <template #item.actions="{ item }: { item: any }">
-                    <IconBtn size="small" :disabled="tableLoading" color="info" @click="viewTask(item)">
-                        <VIcon icon="ri-eye-line" />
+                    <IconBtn size="small" :disabled="tableLoading" color="info" @click="viewTask(item)" variant="flat">
+                        <VIcon icon="ri-eye-fill" />
                         <VTooltip activator="parent" location="top">
                             View
                         </VTooltip>
                     </IconBtn>
 
                     <IconBtn size="small" @click="openEditTaskForm(item)" color="primary"
-                        :disabled="tableLoading || !(userData.role.value === 'admin' || item.created_by.id === userData.id)">
-                        <VIcon icon="ri-edit-box-line" />
+                        :variant="isTasksActionBtnsDisable(item.created_by.id) ? 'text' : 'flat'" class="mx-1"
+                        :disabled="isTasksActionBtnsDisable(item.created_by.id)">
+                        <VIcon :icon="isTasksActionBtnsDisable(item.created_by.id) ?
+                            'ri-edit-box-line' :
+                            'ri-edit-box-fill'" />
                         <VTooltip activator="parent" location="top">
                             Edit
                         </VTooltip>
                     </IconBtn>
 
                     <IconBtn @click="isDeleteDialogVisible = true; taskToDelete = item.id" color="error" size="small"
-                        :disabled="tableLoading || !(userData.role.value === 'admin' || item.created_by.id === userData.id)">
-                        <VIcon icon="ri-delete-bin-7-line" />
+                        :variant="isTasksActionBtnsDisable(item.created_by.id) ? 'text' : 'flat'"
+                        :disabled="isTasksActionBtnsDisable(item.created_by.id)">
+                        <VIcon :icon="isTasksActionBtnsDisable(item.created_by.id) ?
+                            'ri-delete-bin-line' :
+                            'ri-delete-bin-fill'" />
                         <VTooltip activator="parent" location="top">
                             Delete
                         </VTooltip>
@@ -463,7 +494,7 @@ const handleStatusUpdate = async ({ id, status }: { id: number, status: string }
         <!-- 👉 View Task -->
         <ViewTaskDrawer v-model:isDrawerOpen="isViewTaskDrawerVisible" :task="selectedTask" :statuses="statuses"
             :resolveTaskStatusColor="resolveTaskStatusColor" :errors="errors" ref="viewTaskDrawerRef"
-            @comment-data="addComment" @status-update="handleStatusUpdate" />
+            @comment-data="addComment" @status-update="handleStatusUpdate" @delete-comment="deleteComment" />
 
         <VSnackbar v-model="isSnackBarVisible">
             {{ taskResponsemessage }}

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Task\{Store, Update, Comment\Store as CommentStore};
 use App\Http\Resources\{TaskCommentResource, Collections\TaskResourceCollection};
-use App\Models\{Task, TaskFile};
+use App\Models\{Task, TaskComment, TaskFile};
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -216,6 +216,19 @@ class TaskController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Task status updated successfully',
+        ]);
+    }
+
+    /**
+     * Delete the comment of the specified task
+     */
+    public function deleteComment(TaskComment $taskComment)
+    {
+        $taskComment->files()->delete();
+        $taskComment->delete();
+        return response()->json([
+            'success' => true,
+            'message' => 'Task comment deleted successfully!'
         ]);
     }
 }

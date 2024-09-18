@@ -50,7 +50,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('{task}', 'delete');
         });
         Route::get('files/{taskFile}', 'downloadFile');
-        Route::post('{task}/comments', 'addComment');
         Route::patch('{task}/status', 'updateStatus');
+        Route::post('{task}/comments', 'addComment');
+        Route::delete('comments/{taskComment}', 'deleteComment');
     });
 });

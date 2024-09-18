@@ -16,8 +16,9 @@ interface Props {
 
 interface Emit {
     (e: 'update:isDrawerOpen', value: boolean): void
-    (e: 'comment-data', value: FormData): void
-    (e: 'status-update', value: { id: number, status: string }): void
+    (e: 'commentData', value: FormData): void
+    (e: 'statusUpdate', value: { id: number, status: string }): void
+    (e: 'deleteComment', value: number): void
 }
 
 const props = defineProps<Props>()
@@ -41,9 +42,7 @@ const closeNavigationDrawer = () => {
 }
 
 const downloadFile = async (file: any, index: number) => {
-    const fileBlob = await $api(`/tasks/files/${file.id}`, {
-        responseType: 'blob'
-    })
+    const fileBlob = await $api(`/tasks/files/${file.id}`, { responseType: 'blob' })
     const url = URL.createObjectURL(new Blob([fileBlob]))
     const link = document.createElement('a')
     link.href = url
@@ -56,6 +55,8 @@ const downloadFile = async (file: any, index: number) => {
 const files = ref([])
 const refForm = ref<VForm>()
 const isFormValid = ref(false)
+const isDeleteDialogVisible = ref(false)
+let commentIndexToDelete: number
 
 const onSubmit = (e: SubmitEvent) => {
     refForm.value?.validate()
@@ -63,7 +64,7 @@ const onSubmit = (e: SubmitEvent) => {
             if (isValid) {
                 const data = new FormData(e.target as HTMLFormElement)
 
-                emit('comment-data', data)
+                emit('commentData', data)
             }
         })
 }
@@ -71,6 +72,8 @@ const onSubmit = (e: SubmitEvent) => {
 defineExpose({
     commentForm: refForm
 })
+
+
 
 </script>
 
@@ -128,7 +131,7 @@ defineExpose({
 
                                     <VList>
                                         <VListItem v-for="status in statuses" :key="status.value" :value="status.value"
-                                            @click="emit('status-update', { id: props.task.id, status: status.value })">
+                                            @click="emit('statusUpdate', { id: props.task.id, status: status.value })">
                                             {{ status.title }}
                                         </VListItem>
                                     </VList>
@@ -190,15 +193,26 @@ defineExpose({
                             <template v-if="props.task.comments?.length > 0">
                                 <!-- 👉 Comments -->
                                 <div v-for="(comment, i) in props.task.comments" :key="comment.id" class="mb-5">
-                                    <div class="d-flex mb-3 gap-3">
-                                        <VAvatar color="primary" variant="tonal">
-                                            {{ getInitials(comment.created_by?.name) }}
-                                        </VAvatar>
+                                    <div class="d-flex justify-space-between align-center mb-3">
                                         <div>
-                                            <div class="text-body-1 font-weight-medium">
-                                                {{ comment.created_by?.name }}
+                                            <div class="d-flex gap-3 align-center">
+                                                <VAvatar color="primary" variant="tonal">
+                                                    {{ getInitials(comment.created_by.name) }}
+                                                </VAvatar>
+                                                <div>
+                                                    <div class="text-body-1 font-weight-medium">
+                                                        {{ comment.created_by.name }}
+                                                    </div>
+                                                    <div class="text-caption">{{ comment.created_at }}</div>
+                                                </div>
                                             </div>
-                                            <div class="text-body-1 text-caption">{{ comment.created_at }}</div>
+                                        </div>
+
+                                        <div>
+                                            <VBtn
+                                                v-if="userData.role.value === 'admin' || comment.created_by.id === userData.id"
+                                                size="small" variant="tonal" color="error" icon="ri-delete-bin-6-line"
+                                                @click="isDeleteDialogVisible = true; commentIndexToDelete = i" />
                                         </div>
                                     </div>
 
@@ -250,4 +264,26 @@ defineExpose({
             </VCard>
         </PerfectScrollbar>
     </VNavigationDrawer>
+
+    <VDialog v-model="isDeleteDialogVisible" width="400">
+        <!-- Dialog Content -->
+        <VCard title="Confirmation" class="pb-5">
+            <DialogCloseBtn variant="text" size="default" @click="isDeleteDialogVisible = false" />
+
+            <VCardText>
+                Are you sure you want to delete this comment ?
+            </VCardText>
+
+            <VCardText class="d-flex align-center justify-center gap-4">
+                <VBtn variant="elevated"
+                    @click="isDeleteDialogVisible = false; emit('deleteComment', commentIndexToDelete)" color="error">
+                    Confirm
+                </VBtn>
+
+                <VBtn color="secondary" variant="outlined" @click="isDeleteDialogVisible = false">
+                    Cancel
+                </VBtn>
+            </VCardText>
+        </VCard>
+    </VDialog>
 </template>

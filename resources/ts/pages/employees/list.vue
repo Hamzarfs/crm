@@ -287,21 +287,25 @@ const widgetData = ref([
 
                 <!-- Role -->
                 <template #item.role="{ item }: { item: any }">
-                    <VChip :color="resolveUserRoleVariant(item.role?.value)" size="small" class="text-uppercase">
-                        {{ item.role?.title }}
+                    <VChip v-if="item.role" :color="resolveUserRoleVariant(item.role?.value)" size="small"
+                        class="text-uppercase" elevation="5">
+                        {{ item.role.title }}
                     </VChip>
+                    <span v-else class="text-error font-weight-bold">Not assigned</span>
                 </template>
 
                 <!-- Status -->
                 <template #item.status="{ item }: { item: any }">
-                    <VChip :color="resolveUserStatusVariant(item.status.value)" size="small" class="text-uppercase">
+                    <VChip :color="resolveUserStatusVariant(item.status.value)" size="small" class="text-uppercase"
+                        elevation="5">
                         {{ item.status.label }}
                     </VChip>
                 </template>
 
                 <!-- Department -->
                 <template #item.department="{ item }: { item: any }">
-                    {{ item.department?.title }}
+                    <span v-if="item.department">{{ item.department.title }}</span>
+                    <span v-else class="text-error font-weight-bold">Not assigned</span>
                 </template>
 
                 <!-- Actions -->

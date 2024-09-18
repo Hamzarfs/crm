@@ -64,6 +64,9 @@ defineExpose({
 
 const handleDrawerModelValueUpdate = (val: boolean) => {
     emit('update:isDrawerOpen', val)
+    !val && nextTick(() => {
+        refForm.value?.resetValidation()
+    })
 }
 </script>
 
