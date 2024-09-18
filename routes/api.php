@@ -1,10 +1,6 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\DepartmentController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\TaskController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\{AuthController, DepartmentController, RoleController, TaskController, UserController};
 use Illuminate\Support\Facades\Route;
 
 
@@ -55,5 +51,6 @@ Route::middleware('auth:sanctum')->group(function () {
         });
         Route::get('files/{taskFile}', 'downloadFile');
         Route::post('{task}/comments', 'addComment');
+        Route::patch('{task}/status', 'updateStatus');
     });
 });

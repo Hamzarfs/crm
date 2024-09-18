@@ -49,7 +49,7 @@ const onSubmit = () => {
             formData.append('status', status.value)
 
             // Append files
-            files.value.forEach((file: File, index: number) => {
+            files.value.length && files.value.forEach((file: File, index: number) => {
                 formData.append(`files[${index}]`, file)
             })
 
@@ -121,7 +121,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                                     prepend-icon="" append-icon="$file" chips show-size clearable
                                     :error-messages="props.errors.files" :rules="[fileValidator]"
                                     accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt" counter
-                                    :counter-size-string="String(files.length)" />
+                                    :counter-size-string="String(files?.length)" />
                             </VCol>
 
                             <!-- 👉 Submit and Cancel -->

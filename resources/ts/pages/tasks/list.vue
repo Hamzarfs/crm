@@ -2,6 +2,7 @@
 
 import AddNewTaskDrawer from '@/components/tasks/AddNewTaskDrawer.vue';
 import EditTaskDrawer from '@/components/tasks/EditTaskDrawer.vue';
+import { mergeProps } from 'vue';
 
 // Get currently logged in user data
 const userData = useCookie('userData').value
@@ -84,8 +85,12 @@ watch(() => isFetching.value, (newValue) => {
     tableLoading.value = newValue
 }, { immediate: true })
 
-const tasks = computed(() => tasksData.value.tasks)
+const tasks = ref(tasksData.value.tasks)
 const totalTasks = computed(() => tasksData.value.totalTasks)
+
+watch(tasksData, (newVal) => {
+    tasks.value = newVal.tasks
+})
 
 const statuses = [
     {
@@ -230,6 +235,29 @@ const errors = ref({
     comment: undefined,
 })
 
+const handleStatusUpdate = async ({ id, status }: { id: number, status: string }) => {
+    const task = tasks.value.find((t: any) => t.id === id)
+
+    if (task.status !== status) {
+        const { success, message } = await $api(`tasks/${id}/status`, {
+            method: 'PATCH',
+            body: { status },
+            onResponseError({ response }) {
+                console.error(response._data.message)
+                isSnackBarVisible.value = true
+                taskResponsemessage = "Something went wrong! Please try again."
+            },
+        })
+
+        if (success) {
+            task.status = status
+            isSnackBarVisible.value = true
+            taskResponsemessage = message
+        }
+    }
+}
+
+
 </script>
 
 <template>
@@ -304,7 +332,30 @@ const errors = ref({
 
                 <!-- Status -->
                 <template #item.status="{ item }: { item: any }">
-                    <VChip :color="resolveTaskStatusColor(item.status)" size="small" class="text-uppercase">
+                    <VMenu v-if="userData.id === item.assigned_to.id" transition="slide-y-transition">
+                        <template #activator="{ props: menuProps }">
+                            <VTooltip location="top">
+                                <template #activator="{ props: tooltipProps }">
+                                    <VChip v-bind="mergeProps(menuProps, tooltipProps)" elevation="5"
+                                        :color="resolveTaskStatusColor(item.status)" size="small"
+                                        class="text-uppercase">
+                                        {{ statuses.find((status: any) => status.value === item.status)?.title }}
+                                    </VChip>
+                                </template>
+                                <span>Click to update status</span>
+                            </VTooltip>
+                        </template>
+
+                        <VList>
+                            <VListItem v-for="status in statuses" :key="status.value" :value="status.value"
+                                @click="handleStatusUpdate({ id: item.id, status: status.value })">
+                                {{ status.title }}
+                            </VListItem>
+                        </VList>
+                    </VMenu>
+
+                    <VChip v-else :color="resolveTaskStatusColor(item.status)" size="small" class="text-uppercase"
+                        elevation="5">
                         {{ statuses.find((status: any) => status.value === item.status)?.title }}
                         <!-- {{ slugToTitleCase(item.status) }} -->
                     </VChip>
@@ -323,7 +374,8 @@ const errors = ref({
                 <!-- Deadline -->
                 <template #item.deadline="{ item }: { item: any }">
                     <VChip :color="checkDeadlineStatus(item.deadline) === 'exceeded' ? 'error' :
-                        checkDeadlineStatus(item.deadline) === 'approaching' ? 'success' : 'warning'" size="small">
+                        checkDeadlineStatus(item.deadline) === 'approaching' ? 'success' : 'warning'" size="small"
+                        elevation="5">
                         {{ parseDate(item.deadline) }}
                     </VChip>
                 </template>
@@ -411,7 +463,7 @@ const errors = ref({
         <!-- 👉 View Task -->
         <ViewTaskDrawer v-model:isDrawerOpen="isViewTaskDrawerVisible" :task="selectedTask" :statuses="statuses"
             :resolveTaskStatusColor="resolveTaskStatusColor" :errors="errors" ref="viewTaskDrawerRef"
-            @comment-data="addComment" />
+            @comment-data="addComment" @status-update="handleStatusUpdate" />
 
         <VSnackbar v-model="isSnackBarVisible">
             {{ taskResponsemessage }}

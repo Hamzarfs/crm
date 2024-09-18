@@ -117,13 +117,15 @@ class TaskController extends Controller
             'created_by' => $request->user()->id,
         ]);
 
-        foreach ($data->files as $file) {
-            $filePath = $file->store('tasks');
-            $task->files()->create([
-                'type' => 'task',
-                'file' => $filePath,
-                'uploaded_by' => $request->user()->id,
-            ]);
+        if ($request->hasFile('files')) {
+            foreach ($data->files as $file) {
+                $filePath = $file->store('tasks');
+                $task->files()->create([
+                    'type' => 'task',
+                    'file' => $filePath,
+                    'uploaded_by' => $request->user()->id,
+                ]);
+            }
         }
 
         return response()->json([
@@ -187,19 +189,33 @@ class TaskController extends Controller
             'created_by' => Auth::id(),
         ]);
 
-        foreach ($data->files as $file) {
-            $filePath = $file->store('tasks/comments');
-            $comment->files()->create([
-                'type' => 'comment',
-                'file' => $filePath,
-                'uploaded_by' => Auth::id(),
-            ]);
+        if ($request->hasFile('files')) {
+            foreach ($data->files as $file) {
+                $filePath = $file->store('tasks/comments');
+                $comment->files()->create([
+                    'type' => 'comment',
+                    'file' => $filePath,
+                    'uploaded_by' => Auth::id(),
+                ]);
+            }
         }
 
         return response()->json([
             'success' => true,
             'message' => 'Comment added successfully',
             'comment' => new TaskCommentResource($comment),
+        ]);
+    }
+
+    /**
+     * Update the status of the specified task.
+     */
+    public function updateStatus(Request $request, Task $task)
+    {
+        $task->update(['status' => $request->input('status')]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Task status updated successfully',
         ]);
     }
 }
