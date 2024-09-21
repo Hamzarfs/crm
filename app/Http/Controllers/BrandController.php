@@ -32,7 +32,7 @@ class BrandController extends Controller
         return response()->json([
             'message' => 'Brand created successfully',
             'success' => true,
-            'Brand' => [
+            'brand' => [
                 'id' => $brand->id,
                 'name' => Str::title(str_replace('_', ' ', $brand->name)),
                 
@@ -55,7 +55,7 @@ class BrandController extends Controller
         return response()->json([
             'message' => 'Brand updated successfully',
             'success' => true,
-            'Brand' => [
+            'brand' => [
                 'id' => $brand->id,
                 'name' => Str::title(str_replace('_', ' ', $brand->name)),
                  
