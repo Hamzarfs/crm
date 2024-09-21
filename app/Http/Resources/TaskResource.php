@@ -24,7 +24,7 @@ class TaskResource extends JsonResource
             'deadline' => $this->deadline,
             'status' => $this->status,
             'assigned_to' => $this->whenLoaded('assignee', new UserResource($this->assignee)),
-            'created_by' => $this->whenLoaded('creater', new UserResource($this->creater)),
+            'created_by' => $this->whenLoaded('creator', new UserResource($this->creator)),
             'files' => $this->whenLoaded('files', new TaskFileResourceCollection($this->files)),
             'comments' => $this->whenLoaded('comments', new TaskCommentResourceCollection($this->comments)),
             'created_at' => $this->created_at->format('d M Y, g:i A'),

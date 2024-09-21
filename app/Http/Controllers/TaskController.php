@@ -31,7 +31,7 @@ class TaskController extends Controller
         $orderByColumn = $request->input('sortBy');
         $orderByDir = $request->input('orderBy');
 
-        $tasks = Task::with(['files', 'creater.department', 'assignee', 'comments.files']);
+        $tasks = Task::with(['files', 'creator', 'assignee.department', 'comments.files']);
 
         if (!$request->user()->hasRole('admin')) {
             if ($request->user()->hasRole('team_lead'))
@@ -46,7 +46,7 @@ class TaskController extends Controller
         // Applying DT filters
         $tasks = $tasks->when(
             value: $department,
-            callback: fn(Builder $tasksQuery, $department) => $tasksQuery->whereRelation('creater', 'department_id', '=', $department)
+            callback: fn(Builder $tasksQuery, $department) => $tasksQuery->whereRelation('assignee', 'department_id', '=', $department)
         )->when(
             value: $user,
             callback: fn(Builder $tasksQuery, $user) => $tasksQuery->where(

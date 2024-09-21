@@ -2,13 +2,17 @@
 
 namespace App\Models;
 
+use App\Notifications\Tasks\Created;
+use Illuminate\Database\Eloquent\BroadcastsEventsAfterCommit;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Notifications\Notifiable;
 
 class Task extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, Notifiable, BroadcastsEventsAfterCommit;
+
     protected $guarded = [];
 
     public function comments()
@@ -26,8 +30,13 @@ class Task extends Model
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
-    public function creater()
+    public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    protected static function booted()
+    {
+        static::created(fn(self $task) => $task->notifyNow(new Created($task->load(['creator']))));
     }
 }

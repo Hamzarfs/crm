@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\{AuthController, DepartmentController, RoleController, TaskController, UserController};
+use App\Http\Controllers\{AuthController, DepartmentController, NotificationController, RoleController, TaskController, UserController};
 use Illuminate\Support\Facades\Route;
 
 
@@ -54,4 +54,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('{task}/comments', 'addComment');
         Route::delete('comments/{taskComment}', 'deleteComment');
     });
+
+    Route::get('notfications/all', [NotificationController::class, 'all']);
 });

@@ -111,17 +111,8 @@ export interface I18nLanguage {
 // avatar | text | icon
 // Thanks: https://stackoverflow.com/a/60617060/10796681
 export type Notification = {
-    id: number
-    title: string
-    subtitle: string
-    time: string
-    color?: string
-    isSeen: boolean
-} & (
-        | { img: string; text?: never; icon?: never }
-        | { img?: never; text: string; icon?: never }
-        | { img?: never; text?: never; icon: string }
-    )
+    [key: string]: any
+}
 
 export interface ThemeSwitcherTheme {
     name: string

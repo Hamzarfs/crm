@@ -49,7 +49,7 @@ const onSubmit = () => {
             formData.append('status', status.value)
 
             // Append files
-            files.value.length && files.value.forEach((file: File, index: number) => {
+            files.value?.length && files.value.forEach((file: File, index: number) => {
                 formData.append(`files[${index}]`, file)
             })
 

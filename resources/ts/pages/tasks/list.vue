@@ -388,7 +388,7 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
 
                 <!-- Department -->
                 <template #item.department="{ item }: { item: any }">
-                    {{ item.created_by.department?.title ?? 'Not assigned' }}
+                    {{ item.assigned_to.department?.title ?? 'Not assigned' }}
                 </template>
 
                 <!-- Assigned To -->
@@ -430,7 +430,7 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
                     </IconBtn>
 
                     <IconBtn size="small" @click="openEditTaskForm(item)" color="primary"
-                        :variant="isTasksActionBtnsDisable(item.created_by.id) ? 'text' : 'flat'" class="mx-1"
+                        :variant="isTasksActionBtnsDisable(item.created_by.id) ? 'text' : 'flat'" class="mx-2"
                         :disabled="isTasksActionBtnsDisable(item.created_by.id)">
                         <VIcon :icon="isTasksActionBtnsDisable(item.created_by.id) ?
                             'ri-edit-box-line' :
