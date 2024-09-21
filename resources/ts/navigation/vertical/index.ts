@@ -57,4 +57,41 @@ export default [
         icon: { icon: 'ri-task-line' },
         to: { name: 'tasks' },
     },
+    {
+        heading: 'Sales Management',
+        department: ['sales', 'admin'],
+    },
+    {
+        title: 'Sales',
+        icon: { icon: 'ri-money-dollar-circle-line' },
+        department: ['sales', 'admin'],
+        children: [
+            {
+                title: 'Brands',
+                role: ['admin', 'team_lead']
+                // to: { name: '' },
+            },
+            {
+                title: 'Lead Sources',
+                role: ['admin', 'team_lead']
+                // to: { name: '' },
+            },
+            {
+                title: 'Services',
+                role: ['admin', 'team_lead']
+                // to: { name: '' },
+            },
+            {
+                title: 'Customers',
+                role: ['admin', 'team_lead']
+                // to: { name: '' },
+            },
+            {
+                title: 'Leads',
+                // to: { name: '' },
+            },
+        ],
+        // to: { name: 'tasks' },
+
+    },
 ] as VerticalNavItems

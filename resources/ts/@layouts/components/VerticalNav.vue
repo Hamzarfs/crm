@@ -29,25 +29,52 @@ const configStore = useLayoutConfigStore()
 
 const resolveNavItemComponent = (item: NavLink | NavSectionTitle | NavGroup): unknown => {
     const role = useCookie('userData').value?.role?.value
+    const department = useCookie('userData').value?.department?.value
 
-    if (item.role) {
-        if (item.role.includes(role)) {
+    if (item.department) {
+        if (item.department.includes(department)) {
+            if (item.role) {
+                if (item.role.includes(role)) {
+                    if ('heading' in item)
+                        return VerticalNavSectionTitle
+                    if ('children' in item)
+                        return VerticalNavGroup
+
+                    return VerticalNavLink
+                } else {
+                    return
+                }
+            } else {
+                if ('heading' in item)
+                    return VerticalNavSectionTitle
+                if ('children' in item)
+                    return VerticalNavGroup
+
+                return VerticalNavLink
+            }
+        } else {
+            return
+        }
+    } else {
+        if (item.role) {
+            if (item.role.includes(role)) {
+                if ('heading' in item)
+                    return VerticalNavSectionTitle
+                if ('children' in item)
+                    return VerticalNavGroup
+
+                return VerticalNavLink
+            } else {
+                return
+            }
+        } else {
             if ('heading' in item)
                 return VerticalNavSectionTitle
             if ('children' in item)
                 return VerticalNavGroup
 
             return VerticalNavLink
-        } else {
-            return
         }
-    } else {
-        if ('heading' in item)
-            return VerticalNavSectionTitle
-        if ('children' in item)
-            return VerticalNavGroup
-
-        return VerticalNavLink
     }
 }
 
@@ -69,6 +96,7 @@ const handleNavScroll = (evt: Event) => {
 }
 
 const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered)
+
 </script>
 
 <template>
@@ -115,7 +143,7 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered)
             <PerfectScrollbar key="configStore.isAppRTL" tag="ul" class="nav-items"
                 :options="{ wheelPropagation: false }" @ps-scroll-y="handleNavScroll">
                 <Component :is="resolveNavItemComponent(item)" v-for="(item, index) in navItems" :key="index"
-                    :item="item" />
+                    :item="item" :resolveNavItemComponent="resolveNavItemComponent" />
             </PerfectScrollbar>
         </slot>
 
