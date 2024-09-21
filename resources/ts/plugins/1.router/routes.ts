@@ -4,6 +4,8 @@ const DashboardComponent = () => import('@/pages/dashboard.vue')
 const EmployeesComponent = () => import('@/pages/employees/list.vue')
 const RolesComponent = () => import('@/pages/roles/list.vue')
 const DepartmentsComponent = () => import('@/pages/departments/list.vue')
+const BrandsComponent = () => import('@/pages/brands/list.vue')
+
 const TasksComponent = () => import('@/pages/tasks/list.vue')
 
 // 👉 Redirects
@@ -73,6 +75,16 @@ export const routes: RouteRecordRaw[] = [
         component: TasksComponent,
         meta: {
             navActiveLink: 'tasks',
+            authenticatedOnly: true,
+        },
+    },
+    // Brand
+    {
+        path: '/brands',
+        name: 'brands',
+        component: BrandsComponent,
+        meta: {
+            navActiveLink: 'brands',
             authenticatedOnly: true,
         },
     },

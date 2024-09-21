@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\{AuthController, DepartmentController, RoleController, TaskController, UserController};
+use App\Http\Controllers\{AuthController, DepartmentController,BrandController, RoleController, TaskController, UserController};
 use Illuminate\Support\Facades\Route;
 
 
@@ -39,6 +39,13 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('', 'store');
             Route::put('{department}', 'update');
             Route::delete('{department}', 'delete');
+        });
+
+        Route::prefix('brands')->controller(BrandController::class)->group(function () {
+            Route::get('', 'all')->withoutMiddleware('role:admin')->middleware('role:admin|hr');
+            Route::post('', 'store');
+            Route::put('{brand}', 'update');
+            Route::delete('{brand}', 'delete');
         });
     });
 
