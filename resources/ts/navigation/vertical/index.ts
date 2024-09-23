@@ -68,8 +68,8 @@ export default [
         children: [
             {
                 title: 'Brands',
-                role: ['admin', 'team_lead']
-                // to: { name: '' },
+                role: ['admin', 'team_lead'],
+                to: { name: 'brands' },
             },
             {
                 title: 'Lead Sources',
