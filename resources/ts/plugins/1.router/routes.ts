@@ -4,6 +4,8 @@ const DashboardComponent = () => import('@/pages/dashboard.vue')
 const EmployeesComponent = () => import('@/pages/employees/list.vue')
 const RolesComponent = () => import('@/pages/roles/list.vue')
 const DepartmentsComponent = () => import('@/pages/departments/list.vue')
+const BrandsComponent = () => import('@/pages/brands/list.vue')
+
 const TasksComponent = () => import('@/pages/tasks/list.vue')
 
 // 👉 Redirects
@@ -76,4 +78,61 @@ export const routes: RouteRecordRaw[] = [
             authenticatedOnly: true,
         },
     },
+    // /SAlES ROUTES
+    {
+        path: '/sales',
+        name: 'sales',
+        children: [
+            {
+                path: '/brands',
+                name: 'brands',
+                component: BrandsComponent,
+                meta: {
+                    navActiveLink: 'brands',
+                    authenticatedOnly: true,
+                },
+            },
+            {
+                path: '/lead-sources',
+                name: 'lead-sources',
+                component: TasksComponent,
+                meta: {
+                    navActiveLink: 'lead-sources',
+                    authenticatedOnly: true,
+                },
+            },
+            {
+                path: '/services',
+                name: 'services',
+                component: TasksComponent,
+                meta: {
+                    navActiveLink: 'services',
+                    authenticatedOnly: true,
+                },
+            },
+            {
+                path: '/customers',
+                name: 'customers',
+                component: TasksComponent,
+                meta: {
+                    navActiveLink: 'customers',
+                    authenticatedOnly: true,
+                },
+            },
+            {
+                path: '/leads',
+                name: 'leads',
+                component: TasksComponent,
+                meta: {
+                    navActiveLink: 'leads',
+                    authenticatedOnly: true,
+                },
+            },
+        ],
+    },
+
+
+
+
+
 ]
