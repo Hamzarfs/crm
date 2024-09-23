@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { layoutConfig } from '@layouts'
-import { TransitionExpand, VerticalNavLink } from '@layouts/components'
+import { TransitionExpand } from '@layouts/components'
 import { TransitionGroup } from 'vue'
 // import { canViewNavMenuGroup } from '@layouts/plugins/casl'
 import { useLayoutConfigStore } from '@layouts/stores/config'
 import { injectionKeyIsVerticalNavHovered } from '@layouts/symbols'
-import type { NavGroup } from '@layouts/types'
+import type { NavGroup, NavLink, NavSectionTitle } from '@layouts/types'
 import { getDynamicI18nProps, isNavGroupActive, openGroups } from '@layouts/utils'
 
 defineOptions({
@@ -14,6 +14,7 @@ defineOptions({
 
 const props = defineProps<{
     item: NavGroup
+    resolveNavItemComponent: (item: NavLink | NavSectionTitle | NavGroup) => unknown
 }>()
 
 const route = useRoute()
@@ -152,7 +153,9 @@ watch(
     ]">
         <div class="nav-group-label" @click="isGroupOpen = !isGroupOpen">
             <Component :is="layoutConfig.app.iconRenderer || 'div'"
-                v-bind="item.icon || layoutConfig.verticalNav.defaultNavItemIconProps" class="nav-item-icon" />
+                v-bind="(item.icon || layoutConfig.verticalNav.defaultNavItemIconProps) as object"
+                class="nav-item-icon" />
+
 
             <Component :is="TransitionGroup" name="transition-slide-x">
                 <!-- 👉 Title -->
@@ -174,8 +177,8 @@ watch(
         </div>
         <TransitionExpand>
             <ul v-show="isGroupOpen" class="nav-group-children">
-                <Component :is="'children' in child ? 'VerticalNavGroup' : VerticalNavLink"
-                    v-for="child in item.children" :key="child.title" :item="child" />
+                <Component :is="props.resolveNavItemComponent(child)" v-for="child in item.children" :key="child.title"
+                    :item="child" />
             </ul>
         </TransitionExpand>
     </li>

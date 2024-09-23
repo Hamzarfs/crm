@@ -68,27 +68,27 @@ export default [
         children: [
             {
                 title: 'Brands',
-                role: ['admin', 'team_lead']
-                // to: { name: '' },
+                role: ['admin', 'team_lead'],
+                to: { name: 'brands' },
             },
             {
                 title: 'Lead Sources',
-                role: ['admin', 'team_lead']
-                // to: { name: '' },
+                role: ['admin', 'team_lead'],
+                to: { name: 'lead-sources' },
             },
             {
                 title: 'Services',
-                role: ['admin', 'team_lead']
-                // to: { name: '' },
+                role: ['admin', 'team_lead'],
+                to: { name: 'services' },
             },
             {
                 title: 'Customers',
-                role: ['admin', 'team_lead']
-                // to: { name: '' },
+                role: ['admin', 'team_lead'],
+                to: { name: 'customers' },
             },
             {
                 title: 'Leads',
-                // to: { name: '' },
+                to: { name: 'leads' },
             },
         ],
         // to: { name: 'tasks' },

@@ -1,0 +1,27 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\LeadSource;
+use Illuminate\Database\Seeder;
+
+class LeadSourceSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        $lead_sources = [
+            'PPC',
+            'Organic',
+            'Bark'
+        ];
+
+        foreach ($lead_sources as $ls) {
+            LeadSource::create([
+                'name' => $ls
+            ]);
+        }
+    }
+}

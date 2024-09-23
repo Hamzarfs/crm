@@ -5,7 +5,6 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Str;
 
 class UserResource extends JsonResource
 {
@@ -25,7 +24,7 @@ class UserResource extends JsonResource
                 return $this->roles->map(function ($role) {
                     return [
                         'id' => $role->id,
-                        'title' => Str::title(str_replace('_', ' ', $role->name)),
+                        'title' => strToTitleCase($role->name),
                         'value' => $role->name,
                     ];
                 })->first();
@@ -33,7 +32,7 @@ class UserResource extends JsonResource
             'department' => $this->whenLoaded('department', function () {
                 return [
                     'id' => $this->department->id,
-                    'title' => Str::title(str_replace('_', ' ', $this->department->name)),
+                    'title' => strToTitleCase($this->department->name),
                     'leader' => $this->department->leader?->name,
                     'leader_id' => $this->department->leader_id,
                     'value' => $this->department->name,
