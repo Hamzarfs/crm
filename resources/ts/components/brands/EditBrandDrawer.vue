@@ -3,14 +3,14 @@ import type { VForm } from 'vuetify/components/VForm';
 
 interface Emit {
     (e: 'update:isDrawerOpen', value: boolean): void
-    (e: 'departmentData', value: any): void
+    (e: 'brandData', value: any): void
 }
 
 interface Props {
     isDrawerOpen: boolean
     errors: Record<string, string | undefined>
-    department: Record<string, any>
-    users: any
+    brand: Record<string, any>
+    
 }
 
 const props = defineProps<Props>()
@@ -19,12 +19,12 @@ const emit = defineEmits<Emit>()
 
 const isFormValid = ref(false)
 const refForm = ref<VForm>()
-const name = ref(props.department.name)
-const leader = ref(props.department.leader_id)
+const name = ref(props.brand.name)
+ 
 
-watch(() => props.department, newVal => {
-    name.value = newVal.title
-    leader.value = newVal.leader_id
+watch(() => props.brand, newVal => {
+    name.value = newVal.name
+   
 }, {
     immediate: true,
     deep: true
@@ -43,10 +43,10 @@ const closeNavigationDrawer = () => {
 const onSubmit = () => {
     refForm.value?.validate().then(({ valid }) => {
         if (valid) {
-            emit('departmentData', {
-                id: props.department.id,
+            emit('brandData', {
+                id: props.brand.id,
                 name: name.value,
-                leader_id: leader.value,
+                
             })
         }
     })
@@ -60,8 +60,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
     emit('update:isDrawerOpen', val)
 }
 
-const users = props.users.map((u: any) => ({ title: u.name, value: u.id }))
-
+ 
 </script>
 
 <template>
@@ -69,7 +68,7 @@ const users = props.users.map((u: any) => ({ title: u.name, value: u.id }))
         @update:model-value="handleDrawerModelValueUpdate">
 
         <!-- 👉 Title -->
-        <AppDrawerHeaderSection title="Edit Department" @cancel="closeNavigationDrawer" />
+        <AppDrawerHeaderSection title="Edit brand" @cancel="closeNavigationDrawer" />
 
         <VDivider />
 
@@ -81,14 +80,10 @@ const users = props.users.map((u: any) => ({ title: u.name, value: u.id }))
                         <!-- 👉 Name -->
                         <VCol cols="12">
                             <VTextField v-model="name" :rules="[requiredValidator]" label="Name"
-                                :error-messages="props.errors.name" placeholder="Department Name" />
+                                :error-messages="props.errors.name" placeholder="brand Name" />
                         </VCol>
 
-                        <!-- 👉 Leader -->
-                        <VCol cols="12">
-                            <VAutocomplete v-model="leader" :items="users" :rules="[requiredValidator]" label="Leader"
-                                :error-messages="props.errors.leader_id" placeholder="Select Leader" />
-                        </VCol>
+                        
 
                         <!-- 👉 Submit and Cancel -->
                         <VCol cols="12">

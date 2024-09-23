@@ -9,7 +9,7 @@ interface Emit {
 interface Props {
     isDrawerOpen: boolean
     errors: Record<string, string | undefined>
-    users: any
+   
 }
 
 const props = defineProps<Props>()
@@ -19,7 +19,7 @@ const emit = defineEmits<Emit>()
 const isFormValid = ref(false)
 const refForm = ref<VForm>()
 const name = ref('')
-const leader = ref()
+ 
 
 // 👉 drawer close
 const closeNavigationDrawer = () => {
@@ -49,8 +49,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
     emit('update:isDrawerOpen', val)
 }
 
-const users = props.users.map((u: any) => ({ title: u.name, value: u.id }))
-
+ 
 </script>
 
 <template>

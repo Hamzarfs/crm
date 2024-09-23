@@ -26,7 +26,6 @@ const headers = [
 
 // 👉 Fetching roles
 const { brands } = await $api('brands')
-const { users } = await $api('users')
 const brandsData = ref(brands)
 
 const isAddNewBrandDrawerVisible = ref(false)
@@ -143,11 +142,11 @@ const errors = ref({
 
         <!-- 👉 Add New Role -->
         <AddNewBrandDrawer v-model:isDrawerOpen="isAddNewBrandDrawerVisible"
-            @brand-data="addNewbrand" ref="addNewBrandDrawerRef" :errors="errors" :users="users" />
+            @brand-data="addNewbrand" ref="addNewBrandDrawerRef" :errors="errors"  />
 
         <!-- 👉 Edit User -->
-        <!-- <editBrandDrawer v-model:isDrawerOpen="isEditBrandDrawerVisible" @brand-data="editbrand"
-            :brand="selectedBrand" ref="editBrandDrawerRef" :errors="errors" :users="users" /> -->
+        <editBrandDrawer v-model:isDrawerOpen="isEditBrandDrawerVisible" @brand-data="editbrand"
+            :brand="selectedBrand" ref="editBrandDrawerRef" :errors="errors"  />
 
         <VSnackbar v-model="isSnackBarVisible">
             {{ brandResponsemessage }}
