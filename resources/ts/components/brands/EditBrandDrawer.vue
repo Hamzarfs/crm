@@ -10,7 +10,7 @@ interface Props {
     isDrawerOpen: boolean
     errors: Record<string, string | undefined>
     brand: Record<string, any>
-    
+
 }
 
 const props = defineProps<Props>()
@@ -20,11 +20,11 @@ const emit = defineEmits<Emit>()
 const isFormValid = ref(false)
 const refForm = ref<VForm>()
 const name = ref(props.brand.name)
- 
+
 
 watch(() => props.brand, newVal => {
     name.value = newVal.name
-   
+
 }, {
     immediate: true,
     deep: true
@@ -35,6 +35,7 @@ watch(() => props.brand, newVal => {
 const closeNavigationDrawer = () => {
     emit('update:isDrawerOpen', false)
     nextTick(() => {
+        props.errors.name = ''
         refForm.value?.reset()
         refForm.value?.resetValidation()
     })
@@ -46,7 +47,7 @@ const onSubmit = () => {
             emit('brandData', {
                 id: props.brand.id,
                 name: name.value,
-                
+
             })
         }
     })
@@ -60,7 +61,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
     emit('update:isDrawerOpen', val)
 }
 
- 
+
 </script>
 
 <template>
@@ -83,7 +84,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                                 :error-messages="props.errors.name" placeholder="brand Name" />
                         </VCol>
 
-                        
+
 
                         <!-- 👉 Submit and Cancel -->
                         <VCol cols="12">

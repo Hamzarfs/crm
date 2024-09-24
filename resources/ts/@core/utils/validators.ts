@@ -10,10 +10,17 @@ export const requiredValidator = (value: unknown) => {
 
 // 👉 Number Validator
 export const numberValidator = (value: unknown) => {
-    if (typeof value === 'number')
-        return 'This field must be a number'
+    // if (typeof value !== 'number')
+    //     return 'This field must be a number'
 
-    return !!String(value).trim().length || 'This field must be a number'
+    // return !!String(value).trim().length || 'This field must be a number'
+    if (typeof value !== 'string')
+        return 'This field must be a string';
+
+    // Regular expression to check if string contains numbers 0-9 and a + sign
+    const regex = /^[+]?[\d]+$/;
+
+    return regex.test(value.trim()) || 'This field must contain numbers and optionally a + sign in start';
 }
 
 // 👉 Email Validator

@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use App\Enums\RolesEnum;
+use App\Models\Department;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class AdminSeeder extends Seeder
@@ -18,6 +18,7 @@ class AdminSeeder extends Seeder
             'name' => 'Admin User',
             'email' => 'admin@rftech.com',
             'password' => bcrypt('abcd1234'),
+            'department_id' => Department::where('name', 'admin')->value('id'),
         ])->assignRole(RolesEnum::ADMIN);
     }
 }

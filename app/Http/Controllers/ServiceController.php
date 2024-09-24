@@ -2,64 +2,83 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Sales\Service\Store;
+use App\Http\Requests\Sales\Service\Update;
 use App\Models\Service;
 use Illuminate\Http\Request;
 
 class ServiceController extends Controller
 {
     /**
-     * Get listing of the services.
+     * Get listing of the Services.
      */
     public function list()
     {
-        dd('list');
+        return response()->json([
+            'services' => Service::orderBy('id', 'asc')->get()->map(function ($service) {
+                return [
+                    'id' => $service->id,
+                    'name' => $service->name,
+                    'created_at' => $service->created_at->format('d M Y, g:i A'),
+                    'updated_at' => $service->updated_at->format('d M Y, g:i A'),
+                ];
+            })
+        ]);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Store a newly created Service.
      */
-    public function create()
+    public function store(Store $request)
     {
-        //
+        $data = (object) $request->validated();
+
+        $service = Service::create([
+            'name' => $data->name
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Service created successfully!',
+            'service' => [
+                'id' => $service->id,
+                'name' => $service->name,
+                'created_at' => $service->created_at->format('d M Y, g:i A'),
+                'updated_at' => $service->updated_at->format('d M Y, g:i A'),
+            ]
+        ]);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Update the specified Service.
      */
-    public function store(Request $request)
+    public function update(Update $request, Service $service)
     {
-        //
+        $data = (object) $request->validated();
+
+        $service->update(['name' => $data->name]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Service updated successfully!',
+            'service' => [
+                'id' => $service->id,
+                'name' => $service->name,
+                'created_at' => $service->created_at->format('d M Y, g:i A'),
+                'updated_at' => $service->updated_at->format('d M Y, g:i A'),
+            ]
+        ]);
     }
 
     /**
-     * Display the specified resource.
+     * Remove the specified Service.
      */
-    public function show(Service $service)
+    public function delete(Service $service)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Service $service)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Service $service)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Service $service)
-    {
-        //
+        $service->delete();
+        return response()->json([
+            'success' => true,
+            'message' => 'Service deleted successfully!'
+        ]);
     }
 }

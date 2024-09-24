@@ -3,12 +3,13 @@ import type { VForm } from 'vuetify/components/VForm';
 
 interface Emit {
     (e: 'update:isDrawerOpen', value: boolean): void
-    (e: 'brandData', value: any): void
+    (e: 'serviceData', value: any): void
 }
 
 interface Props {
     isDrawerOpen: boolean
     errors: Record<string, string | undefined>
+    service: Record<string, any>
 }
 
 const props = defineProps<Props>()
@@ -17,14 +18,20 @@ const emit = defineEmits<Emit>()
 
 const isFormValid = ref(false)
 const refForm = ref<VForm>()
-const name = ref('')
+const name = ref(props.service.name)
+
+watch(() => props.service, newVal => {
+    name.value = newVal.name
+}, {
+    immediate: true,
+    deep: true
+})
 
 
 // 👉 drawer close
 const closeNavigationDrawer = () => {
     emit('update:isDrawerOpen', false)
     nextTick(() => {
-        props.errors.name = ''
         refForm.value?.reset()
         refForm.value?.resetValidation()
     })
@@ -33,7 +40,8 @@ const closeNavigationDrawer = () => {
 const onSubmit = () => {
     refForm.value?.validate().then(({ valid }) => {
         if (valid) {
-            emit('brandData', {
+            emit('serviceData', {
+                id: props.service.id,
                 name: name.value,
             })
         }
@@ -47,8 +55,6 @@ defineExpose({
 const handleDrawerModelValueUpdate = (val: boolean) => {
     emit('update:isDrawerOpen', val)
 }
-
-
 </script>
 
 <template>
@@ -56,7 +62,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
         @update:model-value="handleDrawerModelValueUpdate">
 
         <!-- 👉 Title -->
-        <AppDrawerHeaderSection title="Add Brand" @cancel="closeNavigationDrawer" />
+        <AppDrawerHeaderSection title="Edit Service" @cancel="closeNavigationDrawer" />
 
         <VDivider />
 
@@ -68,7 +74,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                         <!-- 👉 Name -->
                         <VCol cols="12">
                             <VTextField v-model="name" :rules="[requiredValidator]" label="Name"
-                                :error-messages="props.errors.name" placeholder="Brand Name" />
+                                :error-messages="props.errors.name" placeholder="Service name" />
                         </VCol>
 
                         <!-- 👉 Submit and Cancel -->
@@ -84,5 +90,6 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                 </VForm>
             </VCardText>
         </VCard>
+
     </VNavigationDrawer>
 </template>

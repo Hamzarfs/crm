@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Http\Requests\Sales\Brand;
+namespace App\Http\Requests\Sales\Service;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Enums\RolesEnum;
-
+use Illuminate\Foundation\Http\FormRequest;
 
 class Store extends FormRequest
 {
@@ -24,19 +23,7 @@ class Store extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|unique:brands',
-        ];
-    }
-
-    /**
-     * Get custom attributes for validator errors.
-     *
-     * @return array
-     */
-    public function attributes()
-    {
-        return [
-            'name' => 'Brand name',
+            'name' => 'required|string|unique:services'
         ];
     }
 }

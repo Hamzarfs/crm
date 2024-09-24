@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\{AuthController, DepartmentController, BrandController, NotificationController, RoleController, ServiceController, TaskController, UserController};
+use App\Http\Controllers\{AuthController, DepartmentController, BrandController, CustomerController, NotificationController, RoleController, ServiceController, TaskController, UserController};
 use Illuminate\Support\Facades\Route;
 
 
@@ -15,6 +15,7 @@ Route::group(['prefix' => 'auth'], function () {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
+
     Route::prefix('users')->controller(UserController::class)->group(function () {
         Route::get('', 'list')->middleware('role:admin|hr|team_lead');
         Route::middleware('role:admin|hr')->group(function () {
@@ -41,12 +42,12 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('{department}', 'delete');
         });
 
-        Route::prefix('brands')->controller(BrandController::class)->group(function () {
-            Route::get('', 'all')->withoutMiddleware('role:admin')->middleware('role:admin|hr');
-            Route::post('', 'store');
-            Route::put('{brand}', 'update');
-            Route::delete('{brand}', 'delete');
-        });
+        // Route::prefix('brands')->controller(BrandController::class)->group(function () {
+        //     Route::get('', 'all')->withoutMiddleware('role:admin')->middleware('role:admin|hr');
+        //     Route::post('', 'store');
+        //     Route::put('{brand}', 'update');
+        //     Route::delete('{brand}', 'delete');
+        // });
     });
 
     Route::prefix('tasks')
@@ -75,6 +76,30 @@ Route::middleware('auth:sanctum')->group(function () {
                 Route::post('', 'store');
                 Route::put('{service}', 'update');
                 Route::delete('{service}', 'delete');
+            });
+        });
+
+    Route::prefix('brands')
+        ->controller(BrandController::class)
+        ->middleware('department:admin,sales')
+        ->group(function () {
+            Route::get('', 'all');
+            Route::middleware('role:admin|team_lead')->group(function () {
+                Route::post('', 'store');
+                Route::put('{brand}', 'update');
+                Route::delete('{brand}', 'delete');
+            });
+        });
+
+    Route::prefix('customers')
+        ->controller(CustomerController::class)
+        ->middleware('department:admin,sales')
+        ->group(function () {
+            Route::get('', 'list');
+            Route::middleware('role:admin|team_lead')->group(function () {
+                Route::post('', 'store');
+                Route::put('{customer}', 'update');
+                Route::delete('{customer}', 'delete');
             });
         });
 });

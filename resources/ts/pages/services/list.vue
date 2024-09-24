@@ -1,22 +1,14 @@
 <script setup lang="ts">
 
-import AddNewBrandDrawer from '@/components/brands/AddNewBrandDrawer.vue';
-import EditBrandDrawer from '@/components/brands/EditBrandDrawer.vue';
+const selectedService = ref<Record<string, any>>({})
+let serviceToDelete: number
+let serviceToUpdateIndex: number
 
 
-const selectedBrand = ref({
-    name: '',
-})
-let brandToDelete: number
-let brandToUpdateIndex: number
-
-
-// Add a ref for the AddNewBrandDrawer & editBrandDrawerRef component
-const addNewBrandDrawerRef = ref()
-const editBrandDrawerRef = ref()
-
+// Add a ref for the AddNewServiceDrawer & EditServiceDrawer component
+const addNewServiceDrawerRef = ref()
+const editServiceDrawerRef = ref()
 const dataTableRef = ref()
-
 // Headers
 const headers = [
     { title: 'ID', key: 'id' },
@@ -24,21 +16,22 @@ const headers = [
     { title: 'Actions', key: 'actions', sortable: false },
 ]
 
-const isAddNewBrandDrawerVisible = ref(false)
-const isEditBrandDrawerVisible = ref(false)
+// 👉 Fetching roles
+const { services } = await $api('services')
+const servicesData = ref(services)
+
+
+const isAddNewServiceDrawerVisible = ref(false)
+const isEditServiceDrawerVisible = ref(false)
 const isSnackBarVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
-let brandResponsemessage: string
+let serviceResponsemessage: string
 
-// 👉 Fetching brands
-const { brands } = await $api('brands')
-const brandsData = ref(brands)
-
-// 👉 Add new brand
-const addNewbrand = async (brandData: any) => {
-    const { success, message, brand } = await $api('/brands', {
+// 👉 Add new service
+const addNewService = async (serviceData: any) => {
+    const { success, message, service } = await $api('/services', {
         method: 'POST',
-        body: brandData,
+        body: serviceData,
         onResponseError({ response }) {
             errors.value = response._data.errors
         },
@@ -46,42 +39,41 @@ const addNewbrand = async (brandData: any) => {
 
     if (success) {
         isSnackBarVisible.value = true
-        brandsData.value = [...brandsData.value, brand]
-        brandResponsemessage = message
-        addNewBrandDrawerRef.value.closeNavigationDrawer()
+        servicesData.value = [...servicesData.value, service]
+        serviceResponsemessage = message
+        addNewServiceDrawerRef.value.closeNavigationDrawer()
         nextTick(() => {
             dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollTop = dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollHeight
         })
     }
 }
 
-// 👉 Edit brand
-const editbrand = async (brandData: any) => {
-    const { success, message, brand } = await $api(`brands/${brandData.id}`, {
+// 👉 Edit service
+const editService = async (serviceData: any) => {
+    const { success, message, service } = await $api(`services/${selectedService.value.id}`, {
         method: 'PUT',
-        body: brandData,
+        body: serviceData,
         onResponseError({ response }) {
             errors.value = response._data.errors
         },
     })
     if (success) {
         isSnackBarVisible.value = true
-        brandsData.value[brandToUpdateIndex] = brand
-        brandResponsemessage = message
-        editBrandDrawerRef.value.closeNavigationDrawer()
+        servicesData.value[serviceToUpdateIndex] = service
+        serviceResponsemessage = message
+        editServiceDrawerRef.value.closeNavigationDrawer()
     }
 }
 
-const openeditbrandForm = (brand: any) => {
-    selectedBrand.value = brand
-    brandToUpdateIndex = brandsData.value.indexOf(brand)
-    isEditBrandDrawerVisible.value = true
+const openEditServiceForm = (service: any) => {
+    selectedService.value = service
+    serviceToUpdateIndex = servicesData.value.indexOf(service)
+    isEditServiceDrawerVisible.value = true
 }
 
-
-// 👉 Delete role
-const deleteBrand = async () => {
-    const { success, message } = await $api(`brands/${brandToDelete}`, {
+// 👉 Delete service
+const deleteService = async () => {
+    const { success, message } = await $api(`services/${serviceToDelete}`, {
         method: 'DELETE',
     })
 
@@ -89,8 +81,8 @@ const deleteBrand = async () => {
 
     if (success) {
         isSnackBarVisible.value = true
-        brandResponsemessage = message
-        brandsData.value = brandsData.value.filter((brand: any) => brand.id !== brandToDelete)
+        serviceResponsemessage = message
+        servicesData.value = servicesData.value.filter((service: any) => service.id !== serviceToDelete)
     }
 }
 
@@ -104,50 +96,52 @@ const errors = ref({
     <section>
         <VCard class="mb-6">
             <VCardTitle class="d-flex align-center my-2">
-                <span>Brands</span>
+                <span>Services</span>
                 <VSpacer />
-                <VBtn @click="isAddNewBrandDrawerVisible = true" prepend-icon="ri-user-add-fill">
-                    Add New Brand
+                <VBtn @click="isAddNewServiceDrawerVisible = true" prepend-icon="ri-user-add-fill">
+                    Add New Service
                 </VBtn>
             </VCardTitle>
 
             <VDivider />
 
             <!-- SECTION datatable -->
-            <VDataTable hover fixed-header style="max-height: 600px;" :items="brandsData" item-value="id"
+            <VDataTable hover fixed-header style="max-height: 600px;" :items="servicesData" item-value="id"
                 ref="dataTableRef" :headers="headers" class="text-no-wrap rounded-0" density="default">
 
                 <!-- Actions -->
                 <template #item.actions="{ item }: { item: any }">
-                    <IconBtn size="small" @click="openeditbrandForm(item)" color="primary">
+                    <IconBtn size="small" @click="openEditServiceForm(item)" color="primary">
                         <VIcon icon="ri-edit-box-line" />
                         <VTooltip activator="parent" location="top">
                             Edit
                         </VTooltip>
                     </IconBtn>
 
-                    <IconBtn size="small" @click="isDeleteDialogVisible = true; brandToDelete = item.id" color="error">
+                    <IconBtn size="small" @click="isDeleteDialogVisible = true; serviceToDelete = item.id"
+                        color="error">
                         <VIcon icon="ri-delete-bin-7-line" />
                         <VTooltip activator="parent" location="top">
                             Delete
                         </VTooltip>
                     </IconBtn>
                 </template>
+
             </VDataTable>
 
             <!-- SECTION -->
         </VCard>
 
-        <!-- 👉 Add New Role -->
-        <AddNewBrandDrawer v-model:isDrawerOpen="isAddNewBrandDrawerVisible" @brand-data="addNewbrand"
-            ref="addNewBrandDrawerRef" :errors="errors" />
+        <!-- 👉 Add New Service -->
+        <AddNewServiceDrawer v-model:isDrawerOpen="isAddNewServiceDrawerVisible" @service-data="addNewService"
+            ref="addNewServiceDrawerRef" :errors="errors" />
 
-        <!-- 👉 Edit User -->
-        <editBrandDrawer v-model:isDrawerOpen="isEditBrandDrawerVisible" @brand-data="editbrand" :brand="selectedBrand"
-            ref="editBrandDrawerRef" :errors="errors" />
+        <!-- 👉 Edit Service -->
+        <EditServiceDrawer v-model:isDrawerOpen="isEditServiceDrawerVisible" @service-data="editService"
+            :service="selectedService" ref="editServiceDrawerRef" :errors="errors" />
 
         <VSnackbar v-model="isSnackBarVisible">
-            {{ brandResponsemessage }}
+            {{ serviceResponsemessage }}
             <template #actions>
                 <VBtn color="error" @click="isSnackBarVisible = false">
                     Close
@@ -161,11 +155,11 @@ const errors = ref({
                 <DialogCloseBtn variant="text" size="default" @click="isDeleteDialogVisible = false" />
 
                 <VCardText>
-                    Are you sure you want to delete this brand?
+                    Are you sure you want to delete this service?
                 </VCardText>
 
                 <VCardText class="d-flex align-center justify-center gap-4">
-                    <VBtn variant="elevated" @click="deleteBrand()" color="error">
+                    <VBtn variant="elevated" @click="deleteService()" color="error">
                         Confirm
                     </VBtn>
 

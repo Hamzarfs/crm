@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Sales\Brand;
+namespace App\Http\Requests\Sales\Service;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Enums\RolesEnum;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-
-class Store extends FormRequest
+class Update extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,19 +24,11 @@ class Store extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|unique:brands',
-        ];
-    }
-
-    /**
-     * Get custom attributes for validator errors.
-     *
-     * @return array
-     */
-    public function attributes()
-    {
-        return [
-            'name' => 'Brand name',
+            'name' => [
+                'required',
+                'string',
+                Rule::unique('services')->ignoreModel($this->route('service'))
+            ],
         ];
     }
 }

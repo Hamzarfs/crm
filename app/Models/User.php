@@ -57,4 +57,10 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Department::class);
     }
+
+    public function hasDepartment(string ...$departments)
+    {
+        $this->load('department:id,name');
+        return array_search($this->department->name, $departments, true) !== false;
+    }
 }
