@@ -74,7 +74,7 @@ export default [
             {
                 title: 'Lead Sources',
                 role: ['admin', 'team_lead'],
-                to: { name: 'lead-sources' },
+                to: { name: 'leadsource' },
             },
             {
                 title: 'Services',

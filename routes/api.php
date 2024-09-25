@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\{AuthController, DepartmentController, BrandController, NotificationController, RoleController, ServiceController, TaskController, UserController};
+use App\Http\Controllers\{AuthController, DepartmentController, BrandController, LeadSourceController, NotificationController, RoleController, ServiceController, TaskController, UserController};
+use App\Models\LeadSource;
 use Illuminate\Support\Facades\Route;
 
 
@@ -46,6 +47,13 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('', 'store');
             Route::put('{brand}', 'update');
             Route::delete('{brand}', 'delete');
+        });
+
+        Route::prefix('leadsources')->controller(LeadSourceController::class)->group(function () {
+            Route::get('', 'all')->withoutMiddleware('role:admin')->middleware('role:admin|hr');
+            Route::post('', 'store');
+            Route::put('{leadsource}', 'update');
+            Route::delete('{leadsource}', 'delete');
         });
     });
 
