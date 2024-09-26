@@ -15,6 +15,17 @@ Route::prefix('artisan')->group(function () {
         return "<pre>$output</pre>";  // Output the command result
     });
 
+    Route::get('migrate/fresh', function () {
+        // Execute the Artisan command (e.g., 'migrate')
+        Artisan::call('migrate:fresh');
+
+        // Get the output of the command
+        $output = Artisan::output();
+
+        // Display the output (you can return it as a response)
+        return "<pre>$output</pre>";  // Output the command result
+    });
+
     Route::get('seed', function () {
         // Execute the Artisan command (e.g., 'migrate')
         Artisan::call('db:seed');
