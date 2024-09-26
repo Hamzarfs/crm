@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\{AuthController, DepartmentController, BrandController, CustomerController, NotificationController, RoleController, ServiceController, TaskController, UserController};
+use App\Http\Controllers\{AuthController, DepartmentController, BrandController, CustomerController, LeadController, NotificationController, RoleController, ServiceController, TaskController, UserController};
 use Illuminate\Support\Facades\Route;
 
 
@@ -101,5 +101,17 @@ Route::middleware('auth:sanctum')->group(function () {
                 Route::put('{customer}', 'update');
                 Route::delete('{customer}', 'delete');
             });
+        });
+
+    Route::prefix('leads')
+        ->controller(LeadController::class)
+        ->middleware('department:admin,sales')
+        ->group(function () {
+            Route::get('', 'list');
+            Route::post('', 'store');
+            Route::put('{lead}', 'update');
+            Route::delete('{lead}', 'delete');
+            // Route::middleware('role:admin|team_lead')->group(function () {
+            // });
         });
 });

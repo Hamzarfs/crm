@@ -17,13 +17,13 @@ return new class extends Migration
             $table->foreignIdFor(Customer::class)->constrained()->restrictOnDelete();
             $table->foreignIdFor(LeadSource::class)->constrained()->restrictOnDelete();
             $table->foreignIdFor(Brand::class)->constrained()->restrictOnDelete();
-            $table->foreignIdFor(Service::class)->constrained()->restrictOnDelete();
+            // $table->foreignIdFor(Service::class)->constrained()->restrictOnDelete();
             $table->string('status');
             $table->text('remarks')->nullable();
             $table->unsignedInteger('lead_closed_amount')->nullable();
             $table->date('lead_closed_date')->nullable();
-            $table->unsignedInteger('upsell_amount')->nullable();
-            $table->date('upsell_date')->nullable();
+            // $table->unsignedInteger('upsell_amount')->nullable();
+            // $table->date('upsell_date')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
