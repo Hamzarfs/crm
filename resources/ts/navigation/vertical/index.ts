@@ -79,7 +79,7 @@ export default [
             {
                 title: 'Lead Sources',
                 role: ['admin', 'team_lead'],
-                to: { name: 'lead-sources' },
+                // to: { name: 'lead-sources' },
             },
             {
                 title: 'Customers',
@@ -88,7 +88,7 @@ export default [
             },
             {
                 title: 'Leads',
-                to: { name: 'leads' },
+                // to: { name: 'leads' },
             },
         ],
     },

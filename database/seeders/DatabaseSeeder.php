@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
             ServiceSeeder::class,
             BrandSeeder::class,
             CustomerSeeder::class,
-            LeadSeeder::class,
+            // LeadSeeder::class,
         ]);
     }
 }

@@ -78,6 +78,15 @@ const query = computed(() => {
     return query
 })
 
+const usersQuery = computed(() => {
+    const query: any = {}
+
+    if (userData?.department?.id && userData?.department?.id !== 1)
+        query['department'] = userData?.department?.id
+
+    return query
+})
+
 // 👉 Fetching tasks
 const { data: tasksData, execute: fetchTasks, isFetching } = await useApi<any>(createUrl('tasks', { query }))
 
@@ -111,11 +120,7 @@ const statuses = [
 const users = ref([])
 const departments = ref([])
 if (['admin', 'team_lead'].includes(userData.role.value)) {
-    const { users: fetchedUsers } = await $api('users', {
-        query: {
-            department: userData?.department?.id,
-        },
-    })
+    const { users: fetchedUsers } = await $api('users', { query: usersQuery.value })
     users.value = fetchedUsers.map((u: any) => ({
         value: u.id,
         title: u.name,
