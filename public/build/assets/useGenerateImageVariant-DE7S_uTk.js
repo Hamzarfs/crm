@@ -1,0 +1,1 @@
+import{au as o,av as i,Z as f}from"./main-DoQFmMsa.js";const m=(e,t,s,u,r=!1)=>{const a=o(),{global:n}=i();return f(()=>n.name.value==="light"?a.skin==="bordered"&&r?s:e:n.name.value==="dark"?a.skin==="bordered"&&r?u:t:e)};export{m as u};

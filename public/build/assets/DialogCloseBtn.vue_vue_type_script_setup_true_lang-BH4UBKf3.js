@@ -1,0 +1,1 @@
+import{d as c,a as s,o as t,g as a,f as i,b as l,a0 as r}from"./main-DoQFmMsa.js";const f=c({__name:"DialogCloseBtn",props:{icon:{default:"ri-close-line"},iconSize:{default:"24"}},setup(e){const o=e;return(p,_)=>{const n=s("IconBtn");return t(),a(n,{class:"v-dialog-close-btn"},{default:i(()=>[l(r,{icon:o.icon,size:o.iconSize},null,8,["icon","size"])]),_:1})}}});export{f as _};

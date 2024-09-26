@@ -1,1 +1,0 @@
-import{a5 as t,E as e,Z as s,aU as n}from"./main-FCzYu4Z5.js";function i(){const o=t(!1);return e(()=>{window.requestAnimationFrame(()=>{o.value=!0})}),{ssrBootStyles:s(()=>o.value?void 0:{transition:"none !important"}),isBooted:n(o)}}export{i as u};
