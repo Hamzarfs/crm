@@ -122,7 +122,7 @@ const errors = ref({
                 <!-- Actions -->
                 <template #item.actions="{ item }: { item: any }">
                     <IconBtn size="small" @click="openEditDepartmentForm(item)" color="primary"
-                        :disabled="item.id >= 1 && item.id <= 4">
+                        :disabled="item.id >= 1 && item.id <= 5">
                         <VIcon icon="ri-edit-box-line" />
                         <VTooltip activator="parent" location="top">
                             Edit
@@ -130,7 +130,7 @@ const errors = ref({
                     </IconBtn>
 
                     <IconBtn size="small" @click="isDeleteDialogVisible = true; departmentToDelete = item.id"
-                        color="error" :disabled="item.id >= 1 && item.id <= 4">
+                        color="error" :disabled="item.id >= 1 && item.id <= 5">
                         <VIcon icon="ri-delete-bin-7-line" />
                         <VTooltip activator="parent" location="top">
                             Delete
