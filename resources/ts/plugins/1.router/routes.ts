@@ -8,6 +8,7 @@ const BrandsComponent = () => import('@/pages/brands/list.vue')
 const TasksComponent = () => import('@/pages/tasks/list.vue')
 const ServicesComponent = () => import('@/pages/services/list.vue')
 const CustomersComponent = () => import('@/pages/customers/list.vue')
+const LeadsComponent = () => import('@/pages/leads/list.vue')
 
 
 // 👉 Redirects
@@ -123,7 +124,7 @@ export const routes: RouteRecordRaw[] = [
             {
                 path: 'leads',
                 name: 'leads',
-                component: TasksComponent,
+                component: LeadsComponent,
                 meta: {
                     navActiveLink: 'leads',
                 },
