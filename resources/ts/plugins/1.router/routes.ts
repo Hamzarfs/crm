@@ -5,6 +5,7 @@ const EmployeesComponent = () => import('@/pages/employees/list.vue')
 const RolesComponent = () => import('@/pages/roles/list.vue')
 const DepartmentsComponent = () => import('@/pages/departments/list.vue')
 const BrandsComponent = () => import('@/pages/brands/list.vue')
+const LeadSourcesComponent = () => import('@/pages/leadsource/list.vue')
 const TasksComponent = () => import('@/pages/tasks/list.vue')
 const ServicesComponent = () => import('@/pages/services/list.vue')
 const CustomersComponent = () => import('@/pages/customers/list.vue')
@@ -98,19 +99,19 @@ export const routes: RouteRecordRaw[] = [
                 },
             },
             {
+                path: 'lead-sources',
+                name: 'lead-sources',
+                component: LeadSourcesComponent,
+                meta: {
+                    navActiveLink: 'lead-sources',
+                },
+            },
+            {
                 path: 'services',
                 name: 'services',
                 component: ServicesComponent,
                 meta: {
                     navActiveLink: 'services',
-                },
-            },
-            {
-                path: 'lead-sources',
-                name: 'lead-sources',
-                component: TasksComponent,
-                meta: {
-                    navActiveLink: 'lead-sources',
                 },
             },
             {

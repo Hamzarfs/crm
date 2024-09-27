@@ -12,7 +12,7 @@ interface Props {
     status: []
     roles: []
     departments: []
-    errors: Record<string, string | undefined>
+    errors: Record<string, any>
 }
 
 const props = defineProps<Props>()
@@ -27,6 +27,11 @@ const department = ref()
 const phone = ref('')
 const role = ref()
 const status = ref()
+const optionalDetails = ref({
+    biometricId: '',
+    educationDetails: '',
+
+})
 
 const userRoles = props.roles.map((r: any) => ({ title: r.title, value: r.id }))
 const departments = props.departments.map((d: any) => ({ title: d.title, value: d.id }))
@@ -51,6 +56,7 @@ const onSubmit = () => {
                 role: role.value,
                 department: department.value,
                 status: status.value,
+                details: optionalDetails.value
             })
         }
     })
@@ -63,10 +69,11 @@ defineExpose({
 const handleDrawerModelValueUpdate = (val: boolean) => {
     emit('update:isDrawerOpen', val)
 }
+
 </script>
 
 <template>
-    <VNavigationDrawer temporary :width="400" location="end" class="scrollable-content"
+    <VNavigationDrawer temporary :width="1600" location="end" class="scrollable-content"
         :model-value="props.isDrawerOpen" @update:model-value="handleDrawerModelValueUpdate">
 
         <!-- 👉 Title -->
@@ -80,42 +87,87 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                     <!-- 👉 Form -->
                     <VForm ref="refForm" v-model="isFormValid" @submit.prevent="onSubmit">
                         <VRow>
-                            <!-- 👉 Full name -->
-                            <VCol cols="12">
-                                <VTextField v-model="name" :rules="[requiredValidator]" label="Full Name"
-                                    :error-messages="props.errors.name" placeholder="John Doe" />
+                            <VCol cols="3">
+                                <h1 class="mb-4">Required Fields</h1>
+                                <VRow>
+                                    <!-- 👉 Full name -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="name" :rules="[requiredValidator]" label="Full Name"
+                                            :error-messages="props.errors.name" placeholder="John Doe" />
+                                    </VCol>
+
+                                    <!-- 👉 Email -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="email" :rules="[requiredValidator, emailValidator]"
+                                            label="Email" :error-messages="props.errors.email"
+                                            placeholder="johndoe@email.com" />
+                                    </VCol>
+
+                                    <!-- 👉 Contact -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="phone" type="text" :rules="[numberValidator]"
+                                            label="Phone Number" placeholder="03001234567" />
+                                    </VCol>
+
+                                    <!-- 👉 Department -->
+                                    <VCol cols="12">
+                                        <VSelect v-model="department" label="Select Department"
+                                            placeholder="Select Department" :rules="[requiredValidator]"
+                                            :items="departments" />
+                                    </VCol>
+
+                                    <!-- 👉 Role -->
+                                    <VCol cols="12">
+                                        <VSelect v-model="role" label="Select Role" placeholder="Select Role"
+                                            :rules="[requiredValidator]" :items="userRoles" />
+                                    </VCol>
+
+                                    <!-- 👉 Status -->
+                                    <VCol cols="12">
+                                        <VSelect v-model="status" label="Select Status" placeholder="Select Status"
+                                            :rules="[requiredValidator]" :items="props.status" />
+                                    </VCol>
+
+                                </VRow>
                             </VCol>
 
-                            <!-- 👉 Email -->
-                            <VCol cols="12">
-                                <VTextField v-model="email" :rules="[requiredValidator, emailValidator]" label="Email"
-                                    :error-messages="props.errors.email" placeholder="johndoe@email.com" />
-                            </VCol>
+                            <VDivider vertical />
 
-                            <!-- 👉 Contact -->
-                            <VCol cols="12">
-                                <VTextField v-model="phone" type="number" :rules="[numberValidator]"
-                                    label="Phone Number" placeholder="03001234567" />
-                            </VCol>
+                            <VCol cols="9">
+                                <h1 class="mb-4">Optional Fields</h1>
+                                <VRow>
+                                    <VCol cols="4">
+                                        <VRow>
+                                            <!-- 👉 Biometric ID -->
+                                            <VCol cols="12">
+                                                <VTextField v-model="optionalDetails.biometricId" label="Biometric ID"
+                                                    placeholder="Biometric ID" />
+                                            </VCol>
 
-                            <!-- 👉 Department -->
-                            <VCol cols="12">
-                                <VSelect v-model="department" label="Select Department" placeholder="Select Department"
-                                    :rules="[requiredValidator]" :items="departments" />
-                            </VCol>
+                                            <!-- 👉 Education Details -->
+                                            <VCol cols="12">
+                                                <VTextField v-model="optionalDetails.educationDetails"
+                                                    label="Education Details" placeholder="Education Details" />
+                                            </VCol>
+                                        </VRow>
+                                    </VCol>
 
-                            <!-- 👉 Role -->
-                            <VCol cols="12">
-                                <VSelect v-model="role" label="Select Role" placeholder="Select Role"
-                                    :rules="[requiredValidator]" :items="userRoles" />
-                            </VCol>
+                                    <VCol cols="4">
+                                        <VRow>
 
-                            <!-- 👉 Status -->
-                            <VCol cols="12">
-                                <VSelect v-model="status" label="Select Status" placeholder="Select Status"
-                                    :rules="[requiredValidator]" :items="props.status" />
-                            </VCol>
+                                        </VRow>
+                                    </VCol>
 
+                                    <VCol cols="4">
+                                        <VRow>
+
+                                        </VRow>
+                                    </VCol>
+                                </VRow>
+                            </VCol>
+                        </VRow>
+
+                        <VRow>
                             <!-- 👉 Submit and Cancel -->
                             <VCol cols="12">
                                 <VBtn type="submit" class="me-4">
@@ -126,6 +178,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                                 </VBtn>
                             </VCol>
                         </VRow>
+
                     </VForm>
                 </VCardText>
             </VCard>

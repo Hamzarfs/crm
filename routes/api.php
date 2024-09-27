@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\{AuthController, DepartmentController, BrandController, CustomerController, LeadController, NotificationController, RoleController, ServiceController, TaskController, UserController};
+use App\Http\Controllers\{AuthController, DepartmentController, BrandController, CustomerController, LeadController, LeadSourceController, NotificationController, RoleController, ServiceController, TaskController, UserController};
 use Illuminate\Support\Facades\Route;
 
 
@@ -41,13 +41,6 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('{department}', 'update');
             Route::delete('{department}', 'delete');
         });
-
-        // Route::prefix('brands')->controller(BrandController::class)->group(function () {
-        //     Route::get('', 'all')->withoutMiddleware('role:admin')->middleware('role:admin|hr');
-        //     Route::post('', 'store');
-        //     Route::put('{brand}', 'update');
-        //     Route::delete('{brand}', 'delete');
-        // });
     });
 
     Route::prefix('tasks')
@@ -88,6 +81,19 @@ Route::middleware('auth:sanctum')->group(function () {
                 Route::post('', 'store');
                 Route::put('{brand}', 'update');
                 Route::delete('{brand}', 'delete');
+            });
+        });
+
+
+    Route::prefix('leadsources')
+        ->controller(LeadSourceController::class)
+        ->middleware('department:admin,sales')
+        ->group(function () {
+            Route::get('', 'all');
+            Route::middleware('role:admin|team_lead')->group(function () {
+                Route::post('', 'store');
+                Route::put('{leadsource}', 'update');
+                Route::delete('{leadsource}', 'delete');
             });
         });
 

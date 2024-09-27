@@ -9,6 +9,8 @@ use App\Http\Resources\Collections\UserResourceCollection;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -118,6 +120,8 @@ class UserController extends Controller
 
         $user->assignRole($data['role']);
 
+        $this->addEmployeeDetails($user, $data['details']);
+
         return response()->json([
             'success' => true,
             'message' => 'Employee created successfully!'
@@ -171,5 +175,25 @@ class UserController extends Controller
             'success' => true,
             'message' => 'Employee deleted successfully!'
         ]);
+    }
+
+    protected function addEmployeeDetails(User $employee, array $data): void
+    {
+        DB::beginTransaction();
+        try {
+            foreach ($data as $key => $value) {
+                $employee->details()->updateOrCreate([
+                    'key' => $key
+                ], [
+                    'value' => $value
+                ]);
+            }
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error($th->getMessage());
+            Log::error($th->getTraceAsString());
+            throw $th;
+        }
+        DB::commit();
     }
 }
