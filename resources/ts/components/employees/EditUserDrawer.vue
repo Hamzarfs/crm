@@ -12,7 +12,7 @@ interface Props {
     status: []
     roles: []
     departments: []
-    errors: Record<string, string | undefined>
+    errors: Record<string, any>
     user: Record<string, any>
 }
 

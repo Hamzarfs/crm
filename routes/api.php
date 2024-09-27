@@ -1,7 +1,6 @@
 <?php
 
-use App\Http\Controllers\{AuthController, DepartmentController, BrandController, LeadSourceController, NotificationController, RoleController, ServiceController, TaskController, UserController};
-use App\Models\LeadSource;
+use App\Http\Controllers\{AuthController, DepartmentController, BrandController, CustomerController, LeadController, LeadSourceController, NotificationController, RoleController, ServiceController, TaskController, UserController};
 use Illuminate\Support\Facades\Route;
 
 
@@ -16,6 +15,7 @@ Route::group(['prefix' => 'auth'], function () {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
+
     Route::prefix('users')->controller(UserController::class)->group(function () {
         Route::get('', 'list')->middleware('role:admin|hr|team_lead');
         Route::middleware('role:admin|hr')->group(function () {
@@ -42,19 +42,12 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('{department}', 'delete');
         });
 
-        Route::prefix('brands')->controller(BrandController::class)->group(function () {
-            Route::get('', 'all')->withoutMiddleware('role:admin')->middleware('role:admin|hr');
-            Route::post('', 'store');
-            Route::put('{brand}', 'update');
-            Route::delete('{brand}', 'delete');
-        });
-
-        Route::prefix('leadsources')->controller(LeadSourceController::class)->group(function () {
-            Route::get('', 'all')->withoutMiddleware('role:admin')->middleware('role:admin|hr');
-            Route::post('', 'store');
-            Route::put('{leadsource}', 'update');
-            Route::delete('{leadsource}', 'delete');
-        });
+        // Route::prefix('brands')->controller(BrandController::class)->group(function () {
+        //     Route::get('', 'all')->withoutMiddleware('role:admin')->middleware('role:admin|hr');
+        //     Route::post('', 'store');
+        //     Route::put('{brand}', 'update');
+        //     Route::delete('{brand}', 'delete');
+        // });
     });
 
     Route::prefix('tasks')
@@ -84,5 +77,54 @@ Route::middleware('auth:sanctum')->group(function () {
                 Route::put('{service}', 'update');
                 Route::delete('{service}', 'delete');
             });
+        });
+
+    Route::prefix('brands')
+        ->controller(BrandController::class)
+        ->middleware('department:admin,sales')
+        ->group(function () {
+            Route::get('', 'all');
+            Route::middleware('role:admin|team_lead')->group(function () {
+                Route::post('', 'store');
+                Route::put('{brand}', 'update');
+                Route::delete('{brand}', 'delete');
+            });
+        });
+
+
+    Route::prefix('leadsources')
+        ->controller(LeadSourceController::class)
+        ->middleware('department:admin,sales')
+        ->group(function () {
+            Route::get('', 'all');
+            Route::middleware('role:admin|team_lead')->group(function () {
+                Route::post('', 'store');
+                Route::put('{leadsource}', 'update');
+                Route::delete('{leadsource}', 'delete');
+            });
+        });
+
+    Route::prefix('customers')
+        ->controller(CustomerController::class)
+        ->middleware('department:admin,sales')
+        ->group(function () {
+            Route::get('', 'list');
+            Route::middleware('role:admin|team_lead')->group(function () {
+                Route::post('', 'store');
+                Route::put('{customer}', 'update');
+                Route::delete('{customer}', 'delete');
+            });
+        });
+
+    Route::prefix('leads')
+        ->controller(LeadController::class)
+        ->middleware('department:admin,sales')
+        ->group(function () {
+            Route::get('', 'list');
+            Route::post('', 'store');
+            Route::put('{lead}', 'update');
+            Route::delete('{lead}', 'delete');
+            // Route::middleware('role:admin|team_lead')->group(function () {
+            // });
         });
 });

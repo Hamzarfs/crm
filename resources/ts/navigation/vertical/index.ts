@@ -72,14 +72,14 @@ export default [
                 to: { name: 'brands' },
             },
             {
-                title: 'Lead Sources',
-                role: ['admin', 'team_lead'],
-                to: { name: 'leadsource' },
-            },
-            {
                 title: 'Services',
                 role: ['admin', 'team_lead'],
                 to: { name: 'services' },
+            },
+            {
+                title: 'Lead Sources',
+                role: ['admin', 'team_lead'],
+                to: { name: 'lead-sources' },
             },
             {
                 title: 'Customers',
@@ -91,7 +91,5 @@ export default [
                 to: { name: 'leads' },
             },
         ],
-        // to: { name: 'tasks' },
-
     },
 ] as VerticalNavItems

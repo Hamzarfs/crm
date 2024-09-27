@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Sales\Brand;
 
+use App\Enums\RolesEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class Update extends FormRequest
@@ -11,7 +12,7 @@ class Update extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->hasRole([RolesEnum::ADMIN, RolesEnum::TEAM_LEAD]);
+        return $this->user()->hasRole([RolesEnum::ADMIN, RolesEnum::TEAM_LEAD]) && $this->user()->hasDepartment('admin', 'sales');
     }
 
     /**
@@ -23,12 +24,18 @@ class Update extends FormRequest
     {
         return [
             'name' => "required|string|unique:brands,name,{$this->route('brand')->id},id",
-            
+        ];
+    }
 
-
-
-
-
+    /**
+     * Get custom attributes for validator errors.
+     *
+     * @return array
+     */
+    public function attributes()
+    {
+        return [
+            'name' => 'Brand name',
         ];
     }
 }

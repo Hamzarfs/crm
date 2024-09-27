@@ -3,7 +3,7 @@ import type { VForm } from 'vuetify/components/VForm';
 
 interface Emit {
     (e: 'update:isDrawerOpen', value: boolean): void
-    (e: 'brandData', value: any): void
+    (e: 'serviceData', value: any): void
 }
 
 interface Props {
@@ -24,7 +24,6 @@ const name = ref('')
 const closeNavigationDrawer = () => {
     emit('update:isDrawerOpen', false)
     nextTick(() => {
-        props.errors.name = ''
         refForm.value?.reset()
         refForm.value?.resetValidation()
     })
@@ -33,7 +32,7 @@ const closeNavigationDrawer = () => {
 const onSubmit = () => {
     refForm.value?.validate().then(({ valid }) => {
         if (valid) {
-            emit('brandData', {
+            emit('serviceData', {
                 name: name.value,
             })
         }
@@ -47,8 +46,6 @@ defineExpose({
 const handleDrawerModelValueUpdate = (val: boolean) => {
     emit('update:isDrawerOpen', val)
 }
-
-
 </script>
 
 <template>
@@ -56,7 +53,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
         @update:model-value="handleDrawerModelValueUpdate">
 
         <!-- 👉 Title -->
-        <AppDrawerHeaderSection title="Add Brand" @cancel="closeNavigationDrawer" />
+        <AppDrawerHeaderSection title="Add Service" @cancel="closeNavigationDrawer" />
 
         <VDivider />
 
@@ -68,7 +65,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                         <!-- 👉 Name -->
                         <VCol cols="12">
                             <VTextField v-model="name" :rules="[requiredValidator]" label="Name"
-                                :error-messages="props.errors.name" placeholder="Brand Name" />
+                                :error-messages="props.errors.name" placeholder="Service name" />
                         </VCol>
 
                         <!-- 👉 Submit and Cancel -->

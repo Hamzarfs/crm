@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Sales\Brand\Store;
+use App\Http\Requests\Sales\Brand\Update;
 use App\Models\Brand;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class BrandController extends Controller
 {
@@ -14,7 +14,7 @@ class BrandController extends Controller
             'brands' => Brand::orderBy('id', 'asc')->get()->map(function ($brand) {
                 return [
                     'id' => $brand->id,
-                    'name' => Str::title(str_replace('_', ' ', $brand->name)),
+                    'name' => $brand->name,
                 ];
             })
         ]);
@@ -23,42 +23,40 @@ class BrandController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Store $request)
     {
         $brand = Brand::create([
-            'name' => Str::slug($request->name, '_')
+            'name' => $request->name
         ]);
-        
+
         return response()->json([
             'message' => 'Brand created successfully',
             'success' => true,
             'brand' => [
                 'id' => $brand->id,
-                'name' => Str::title(str_replace('_', ' ', $brand->name)),
-                
+                'name' => $brand->name,
+
             ]
         ]);
-
-       
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Brand $brand)
+    public function update(Update $request, Brand $brand)
     {
         $brand->update([
-            'name' => Str::slug($request->name, '_', dictionary: ['&' => 'and']),
-            
+            'name' => $request->name,
+
         ]);
-      
+
         return response()->json([
             'message' => 'Brand updated successfully',
             'success' => true,
             'brand' => [
                 'id' => $brand->id,
-                'name' => Str::title(str_replace('_', ' ', $brand->name)),
-                 
+                'name' => $brand->name,
+
             ]
         ]);
     }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\EmployeeStatusesEnum;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -56,5 +57,23 @@ class User extends Authenticatable
     public function department()
     {
         return $this->belongsTo(Department::class);
+    }
+
+    public function hasDepartment(string ...$departments)
+    {
+        $this->load('department:id,name');
+        return array_search($this->department->name, $departments, true) !== false;
+    }
+
+    function details()
+    {
+        return $this->hasMany(UserDetail::class);
+    }
+
+    protected function employeeDetails(): Attribute
+    {
+        return new Attribute(
+            get: fn() => (object) transformEmployeeDetailsToArray($this->details->toArray())
+        );
     }
 }

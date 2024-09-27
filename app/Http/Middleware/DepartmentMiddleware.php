@@ -24,7 +24,7 @@ class DepartmentMiddleware
         abort_if(
             boolean: (is_null($user->department) || (array_search($user->department?->name, $departments, true) === false)),
             code: 403,
-            message: "Your department: {$department} doesn't have access to this page."
+            message: !is_null($user->department) ? "Your department: {$department} doesn't have access to this page." : "You don't have access to this page.",
         );
         return $next($request);
     }

@@ -6,8 +6,11 @@ const RolesComponent = () => import('@/pages/roles/list.vue')
 const DepartmentsComponent = () => import('@/pages/departments/list.vue')
 const BrandsComponent = () => import('@/pages/brands/list.vue')
 const LeadSourceComponent = () => import('@/pages/leadsource/list.vue')
-
 const TasksComponent = () => import('@/pages/tasks/list.vue')
+const ServicesComponent = () => import('@/pages/services/list.vue')
+const CustomersComponent = () => import('@/pages/customers/list.vue')
+const LeadsComponent = () => import('@/pages/leads/list.vue')
+
 
 // 👉 Redirects
 export const redirects: RouteRecordRaw[] = [
@@ -83,57 +86,50 @@ export const routes: RouteRecordRaw[] = [
     {
         path: '/sales',
         name: 'sales',
+        meta: {
+            authenticatedOnly: true,
+        },
         children: [
             {
-                path: '/brands',
+                path: 'brands',
                 name: 'brands',
                 component: BrandsComponent,
                 meta: {
                     navActiveLink: 'brands',
-                    authenticatedOnly: true,
                 },
             },
             {
-                path: '/leadsource',
-                name: 'leadsource',
+                path: 'lead-sources',
+                name: 'lead-sources',
                 component: LeadSourceComponent,
                 meta: {
-                    navActiveLink: 'leadsource',
-                    authenticatedOnly: true,
+                    navActiveLink: 'lead-sources',
                 },
             },
             {
-                path: '/services',
+                path: 'services',
                 name: 'services',
-                component: TasksComponent,
+                component: ServicesComponent,
                 meta: {
                     navActiveLink: 'services',
-                    authenticatedOnly: true,
                 },
             },
             {
-                path: '/customers',
+                path: 'customers',
                 name: 'customers',
-                component: TasksComponent,
+                component: CustomersComponent,
                 meta: {
                     navActiveLink: 'customers',
-                    authenticatedOnly: true,
                 },
             },
             {
-                path: '/leads',
+                path: 'leads',
                 name: 'leads',
-                component: TasksComponent,
+                component: LeadsComponent,
                 meta: {
                     navActiveLink: 'leads',
-                    authenticatedOnly: true,
                 },
             },
         ],
     },
-
-
-
-
-
 ]

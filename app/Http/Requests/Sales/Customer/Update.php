@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Sales\Brand;
+namespace App\Http\Requests\Sales\Customer;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Enums\RolesEnum;
+use Illuminate\Foundation\Http\FormRequest;
 
-
-class Store extends FormRequest
+class Update extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,7 +23,13 @@ class Store extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|unique:brands',
+            'first_name' => ['required', 'string'],
+            'last_name' => ['required', 'string'],
+            'email' => ['required', 'email'],
+            'contact' => ['required', 'numeric'],
+            'area' => ['required', 'string'],
+            'zip' => ['required', 'string'],
+            'country' => ['required', 'string'],
         ];
     }
 
@@ -36,7 +41,8 @@ class Store extends FormRequest
     public function attributes()
     {
         return [
-            'name' => 'Brand name',
+            'first_name' => 'first name',
+            'last_name' => 'last name',
         ];
     }
 }

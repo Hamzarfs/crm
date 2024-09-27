@@ -4,6 +4,7 @@ namespace App\Enums;
 
 enum DepartmentsEnum: string
 {
+    case ADMIN = 'admin';
     case SALES = 'sales';
     case DEVELOPMENT = 'development';
     case DESIGNING = 'designing';
@@ -12,6 +13,7 @@ enum DepartmentsEnum: string
     public function label(): string
     {
         return match ($this) {
+            self::ADMIN => 'Admin',
             self::SALES => 'Sales',
             self::DEVELOPMENT => 'Development',
             self::DESIGNING => 'Designing',

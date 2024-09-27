@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Lead extends Model
+{
+    use HasFactory, SoftDeletes;
+
+    protected $guarded = [];
+
+    public function servicesSold()
+    {
+        return $this->belongsToMany(Service::class, 'leads_sold_services')->withTimestamps()->withPivot('id');
+    }
+
+    public function upsells()
+    {
+        return $this->hasMany(Upsell::class);
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function leadSource()
+    {
+        return $this->belongsTo(LeadSource::class);
+    }
+
+    public function brand()
+    {
+        return $this->belongsTo(Brand::class);
+    }
+}
