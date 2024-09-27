@@ -15,7 +15,6 @@ declare module 'vue' {
     AddNewCustomerDrawer: typeof import('./resources/ts/components/customers/AddNewCustomerDrawer.vue')['default']
     AddNewDepartmentDrawer: typeof import('./resources/ts/components/departments/AddNewDepartmentDrawer.vue')['default']
     AddNewLeadSourceDrawer: typeof import('./resources/ts/components/leadsource/AddNewLeadSourceDrawer.vue')['default']
-    AddNewLeadSourcesDrawer: typeof import('./resources/ts/components/leadsource/AddNewLeadSourcesDrawer.vue')['default']
     AddNewRoleDrawer: typeof import('./resources/ts/components/roles/AddNewRoleDrawer.vue')['default']
     AddNewServiceDrawer: typeof import('./resources/ts/components/services/AddNewServiceDrawer.vue')['default']
     AddNewTaskDrawer: typeof import('./resources/ts/components/tasks/AddNewTaskDrawer.vue')['default']

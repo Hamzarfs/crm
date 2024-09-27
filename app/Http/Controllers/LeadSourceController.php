@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Sales\LeadSource\Store;
+use App\Http\Requests\Sales\LeadSource\Update;
 use Illuminate\Http\Request;
 use App\Models\LeadSource;
 use Illuminate\Support\Str;
@@ -34,7 +36,7 @@ class LeadSourceController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Store $request)
     {
         $leadSource = LeadSource::create([
             'name' => $request->name
@@ -45,7 +47,7 @@ class LeadSourceController extends Controller
             'success' => true,
             'leadsource' => [
                 'id' => $leadSource->id,
-                'name' => Str::title(str_replace('_', ' ', $leadSource->name)),
+                'name' => $leadSource->name,
 
             ]
         ]);
@@ -70,7 +72,7 @@ class LeadSourceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, LeadSource $leadsource)
+    public function update(Update $request, LeadSource $leadsource)
     {
         $leadsource->update([
             'name' => $request->name

@@ -68,7 +68,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
         @update:model-value="handleDrawerModelValueUpdate">
 
         <!-- 👉 Title -->
-        <AppDrawerHeaderSection title="Edit leadsource" @cancel="closeNavigationDrawer" />
+        <AppDrawerHeaderSection title="Edit Lead Source" @cancel="closeNavigationDrawer" />
 
         <VDivider />
 
