@@ -30,6 +30,11 @@ const status = ref()
 const optionalDetails = ref({
     biometricId: '',
     educationDetails: '',
+    salary: '',
+    emergencyContactName: '',
+    emergencyContactNumber: '',
+    vehiclePlateNumber: '',
+    bloodGroup: '',
 
 })
 
@@ -148,6 +153,38 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                                             <VCol cols="12">
                                                 <VTextField v-model="optionalDetails.educationDetails"
                                                     label="Education Details" placeholder="Education Details" />
+                                            </VCol>
+
+                                            <!-- 👉 Salary -->
+                                            <VCol cols="12">
+                                                <VTextField v-model="optionalDetails.salary" label="Salary"
+                                                    placeholder="Salary" />
+                                            </VCol>
+
+                                            <!-- 👉 Emergency Contact Name -->
+                                            <VCol cols="12">
+                                                <VTextField v-model="optionalDetails.emergencyContactName"
+                                                    label="Emergency Contact Name"
+                                                    placeholder="Emergency Contact Name" />
+                                            </VCol>
+
+                                            <!-- 👉 Emergency Contact Number -->
+                                            <VCol cols="12">
+                                                <VTextField v-model="optionalDetails.emergencyContactNumber"
+                                                    label="Emergency Contact Number"
+                                                    placeholder="Emergency Contact Number" />
+                                            </VCol>
+
+                                            <!-- 👉 Vehicle Plate Number -->
+                                            <VCol cols="12">
+                                                <VTextField v-model="optionalDetails.vehiclePlateNumber"
+                                                    label="Vehicle Plate Number" placeholder="Vehicle Plate Number" />
+                                            </VCol>
+
+                                            <!-- 👉 Blood Group -->
+                                            <VCol cols="12">
+                                                <VTextField v-model="optionalDetails.bloodGroup" label="Blood Group"
+                                                    placeholder="Blood Group" />
                                             </VCol>
                                         </VRow>
                                     </VCol>
