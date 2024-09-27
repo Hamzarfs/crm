@@ -30,7 +30,9 @@ class Store extends FormRequest
             'department' => 'required|exists:departments,id',
             'phone' => 'required|numeric',
             'role' => 'required|exists:roles,id',
-            'status' => ['required', Rule::in(array_column(EmployeeStatusesEnum::class::cases(), 'value'))]
+            'status' => ['required', Rule::in(array_column(EmployeeStatusesEnum::class::cases(), 'value'))],
+            'details' => 'array',
+            'details.*' => 'string|nullable',
         ];
     }
 }
