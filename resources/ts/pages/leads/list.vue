@@ -5,14 +5,7 @@ const searchQuery = ref('')
 const selectedRole = ref()
 const selectedStatus = ref()
 const selectedDepartment = ref()
-const selectedLead = ref({
-    // name: '',
-    // email: '',
-    // phone: '',
-    // role: undefined,
-    // department: undefined,
-    // status: undefined,
-})
+const selectedLead = ref<Record<string, any>>({})
 let leadToDelete: number
 
 // Data table options
@@ -22,7 +15,6 @@ const sortBy = ref('id')
 const orderBy = ref('DESC')
 const selectedRows = ref([])
 const tableLoading = ref(false)
-
 
 // Add a ref for the AddNewLeadDrawer & editLeadDrawerRef component
 const addNewLeadDrawerRef = ref()
@@ -40,8 +32,8 @@ const headers = [
     { title: 'Customer name', key: 'customer', sortable: false },
     { title: 'Lead Source', key: 'lead_source', sortable: false },
     { title: 'Brand', key: 'brand', sortable: false },
-    { title: 'Services sold', key: 'services' },
-    { title: 'Upsells', key: 'upsells' },
+    { title: 'Services sold', key: 'services', sortable: false },
+    { title: 'Upsells', key: 'upsells', sortable: false },
     { title: 'Status', key: 'status' },
     { title: 'Remarks', key: 'remarks' },
     { title: 'Lead closed date', key: 'lead_closed_date' },
@@ -74,39 +66,36 @@ const totalLeads = computed(() => leadsData.value.totalLeads)
 
 const statuses = ['No answer', 'Hung up', 'Wrong number', 'Voice mail', 'Found someone', 'Follow up', 'Not interested', 'Blocked', 'Sale closed', 'Cant connect', 'Not in service', 'Invalid lead', 'Email done', 'Call done', 'No number', 'Not interested', 'Interested']
 
+/**
+ * @TODO TO be deleted
+ */
 const { roles } = await $api('roles')
 // const { status } = await $api('users/statuses')
 const { departments } = await $api('departments')
+/**
+ * @TODO TO be deleted
+ */
 
-const resolveUserRoleVariant = (role: string): string => {
-    switch (role) {
-        case 'admin':
-            return 'success'
-        case 'employee':
-            return 'primary'
-        case 'hr':
-            return 'red'
-        case 'team_lead':
-            return 'blue-grey'
-        case 'account_manager':
-            return 'deep-orange'
-        case 'accountant':
-            return 'amber'
-        case 'sales_agent':
-            return 'teal'
-        default:
-            return 'info'
-    }
-}
+const { services } = await $api('services')
+const { brands } = await $api('brands')
+const { customers } = await $api('customers')
+const { leadsources } = await $api('leadsources')
 
-const resolveUserStatusVariant = (stat: string) => {
-    const statLowerCase = stat.toLowerCase()
-    if (statLowerCase === 'active')
+const _services = services.map((s: any) => ({ title: s.name, value: s.id }))
+const _brands = brands.map((b: any) => ({ title: b.name, value: b.id }))
+const _customers = customers.map((c: any) => ({ title: c.full_name, value: c.id }))
+const _leadSources = leadsources.map((ls: any) => ({ title: ls.name, value: ls.id }))
+
+const resolveLeadStatusVariant = (status: string) => {
+    const successStatuses = ['Follow up', 'Sale closed', 'Email done', 'Call done', 'Interested']
+    const errorStatuses = ['No answer', 'Hung up', 'Wrong number', 'Voice mail', 'Found someone', 'Not interested', 'Blocked', 'Cant connect', 'Not in service', 'Invalid lead', 'No number', 'Not interested']
+
+    if (successStatuses.includes(status))
         return 'success'
-    if (statLowerCase === 'inactive')
-        return 'warning'
-
-    return 'primary'
+    else if (errorStatuses.includes(status))
+        return 'error'
+    else
+        return 'primary'
 }
 
 const isAddNewLeadDrawerVisible = ref(false)
@@ -135,7 +124,7 @@ const addNewLead = async (leadData: any) => {
 
 // 👉 Edit lead
 const editLead = async (leadData: any) => {
-    const { success, message } = await $api(`leads/${leadData.id}`, {
+    const { success, message } = await $api(`leads/${selectedLead.value.id}`, {
         method: 'PUT',
         body: leadData,
         onResponseError({ response }) {
@@ -173,7 +162,7 @@ const deleteLead = async () => {
 
 const errors = ref({
     customer: undefined,
-    service: undefined,
+    services: undefined,
     lead_source: undefined,
     brand: undefined,
     status: undefined,
@@ -191,6 +180,11 @@ const widgetData = ref([
     { title: 'Closed leads', value: 5, icon: 'ri-user-add-line', iconColor: 'error' },
     { title: 'Total amount', value: '$1,000', icon: 'ri-user-search-line', iconColor: 'warning' },
 ])
+
+watch(isEditLeadDrawerVisible, editDrawer => {
+    if (!editDrawer)
+        selectedLead.value = {}
+})
 
 </script>
 
@@ -301,11 +295,11 @@ const widgetData = ref([
 
                 <!-- Status -->
                 <template #item.status="{ item }: { item: any }">
-                    {{ item.status }}
-                    <!-- <VChip :color="resolveUserStatusVariant(item.status.value)" size="small" class="text-uppercase"
+                    <!-- {{ item.status }} -->
+                    <VChip :color="resolveLeadStatusVariant(item.status)" size="small" class="text-uppercase"
                         elevation="5">
-                        {{ item.status.label }}
-                    </VChip> -->
+                        {{ item.status }}
+                    </VChip>
                 </template>
 
                 <!-- Remarks -->
@@ -313,9 +307,7 @@ const widgetData = ref([
                     <span v-if="item.remarks">
                         {{ item.remarks }}
                     </span>
-                    <span v-else>
-                        None
-                    </span>
+                    <span v-else class="text-error font-weight-bold">None</span>
                 </template>
 
                 <!-- Lead closed date -->
@@ -323,14 +315,21 @@ const widgetData = ref([
                     <span v-if="item.lead_closed_date">
                         {{ item.lead_closed_date }}
                     </span>
-                    <span v-else>
+                    <span v-else class="text-error font-weight-bold">
                         Not closed
                     </span>
                 </template>
 
                 <!-- Lead closed amount -->
                 <template #item.lead_closed_amount="{ item }: { item: any }">
-                    {{ item.lead_closed_amount }}
+                    <span v-if="item.lead_closed_date">
+                        {{ currencyFormatter(item.lead_closed_amount) }}
+                        <!-- ${{ item.lead_closed_amount }} -->
+                    </span>
+                    <span v-else class="text-error font-weight-bold">
+                        Not closed
+                    </span>
+                    <!-- ${{ item.lead_closed_amount }} -->
                 </template>
 
                 <!-- Created at -->
@@ -393,12 +392,14 @@ const widgetData = ref([
         </VCard>
 
         <!-- 👉 Add New Lead -->
-        <!-- <AddNewUserDrawer v-model:isDrawerOpen="isAddNewLeadDrawerVisible" @user-data="addNewLead" :status="statuses"
-            ref="addNewLeadDrawerRef" :roles="roles" :departments="departments" :errors="errors" /> -->
+        <AddNewLeadDrawer ref="addNewLeadDrawerRef" v-model:isDrawerOpen="isAddNewLeadDrawerVisible"
+            @lead-data="addNewLead" :statuses :brands="_brands" :customers="_customers" :lead-sources="_leadSources"
+            :services="_services" :errors="errors" />
 
         <!-- 👉 Edit Lead -->
-        <!-- <EditUserDrawer v-model:isDrawerOpen="isEditLeadDrawerVisible" @user-data="editLead" :status="statuses"
-            :user="selectedLead" ref="editLeadDrawerRef" :roles="roles" :departments="departments" :errors="errors" /> -->
+        <EditLeadDrawer ref="editLeadDrawerRef" v-model:isDrawerOpen="isEditLeadDrawerVisible" @lead-data="editLead"
+            :statuses :brands="_brands" :customers="_customers" :lead-sources="_leadSources" :services="_services"
+            :lead="selectedLead" :errors="errors" />
 
         <VSnackbar v-model="isSnackBarVisible">
             {{ leadResponsemessage }}

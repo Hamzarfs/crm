@@ -24,7 +24,7 @@ class LeadResource extends JsonResource
                 $this->servicesSold->map(function (Service $service) {
                     return [
                         'id' => $service->pivot->id,
-                        'serive_id' => $service->id,
+                        'service_id' => $service->id,
                         'name' => $service->name,
                         'created_at' => $service->pivot->created_at->format('d M Y, g:i A'),
                     ];
@@ -69,8 +69,8 @@ class LeadResource extends JsonResource
             'upsells_count' => $this->whenCounted('upsells', $this->upsells_count),
             'status' => $this->status,
             'remarks' => $this->remarks,
-            'lead_closed_date' => $this->lead_closed_date ? (new Carbon($this->lead_closed_date, config('app.timezone')))->format('d M Y') : null,
-            'lead_closed_amount' => number_format($this->lead_closed_amount, 2),
+            'lead_closed_date' => $this->lead_closed_date,
+            'lead_closed_amount' => $this->lead_closed_amount,
             'created_at' => $this->created_at->format('d M Y, g:i A'),
             'updated_at' => $this->updated_at->format('d M Y, g:i A'),
         ];

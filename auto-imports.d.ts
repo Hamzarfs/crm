@@ -37,6 +37,7 @@ declare global {
   const createTemplatePromise: typeof import('@vueuse/core')['createTemplatePromise']
   const createUnrefFn: typeof import('@vueuse/core')['createUnrefFn']
   const createUrl: typeof import('./resources/ts/@core/composable/createUrl')['createUrl']
+  const currencyFormatter: typeof import('./resources/ts/@core/utils/formatters')['currencyFormatter']
   const customRef: typeof import('vue')['customRef']
   const debouncedRef: typeof import('@vueuse/core')['debouncedRef']
   const debouncedWatch: typeof import('@vueuse/core')['debouncedWatch']
@@ -109,8 +110,10 @@ declare global {
   const onUpdated: typeof import('vue')['onUpdated']
   const paginationMeta: typeof import('./resources/ts/utils/paginationMeta')['paginationMeta']
   const parseDate: typeof import('./resources/ts/@core/utils/formatters')['parseDate']
+  const parseDateWithFormat: typeof import('./resources/ts/@core/utils/formatters')['parseDateWithFormat']
   const passwordValidator: typeof import('./resources/ts/@core/utils/validators')['passwordValidator']
   const pausableWatch: typeof import('@vueuse/core')['pausableWatch']
+  const phoneNumberValidator: typeof import('./resources/ts/@core/utils/validators')['phoneNumberValidator']
   const prefixWithPlus: typeof import('./resources/ts/@core/utils/formatters')['prefixWithPlus']
   const provide: typeof import('vue')['provide']
   const provideLocal: typeof import('@vueuse/core')['provideLocal']
@@ -400,6 +403,7 @@ declare module 'vue' {
     readonly createTemplatePromise: UnwrapRef<typeof import('@vueuse/core')['createTemplatePromise']>
     readonly createUnrefFn: UnwrapRef<typeof import('@vueuse/core')['createUnrefFn']>
     readonly createUrl: UnwrapRef<typeof import('./resources/ts/@core/composable/createUrl')['createUrl']>
+    readonly currencyFormatter: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['currencyFormatter']>
     readonly customRef: UnwrapRef<typeof import('vue')['customRef']>
     readonly debouncedRef: UnwrapRef<typeof import('@vueuse/core')['debouncedRef']>
     readonly debouncedWatch: UnwrapRef<typeof import('@vueuse/core')['debouncedWatch']>
@@ -470,8 +474,10 @@ declare module 'vue' {
     readonly onUpdated: UnwrapRef<typeof import('vue')['onUpdated']>
     readonly paginationMeta: UnwrapRef<typeof import('./resources/ts/utils/paginationMeta')['paginationMeta']>
     readonly parseDate: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['parseDate']>
+    readonly parseDateWithFormat: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['parseDateWithFormat']>
     readonly passwordValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['passwordValidator']>
     readonly pausableWatch: UnwrapRef<typeof import('@vueuse/core')['pausableWatch']>
+    readonly phoneNumberValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['phoneNumberValidator']>
     readonly prefixWithPlus: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['prefixWithPlus']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
     readonly provideLocal: UnwrapRef<typeof import('@vueuse/core')['provideLocal']>

@@ -4,9 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Sales\LeadSource\Store;
 use App\Http\Requests\Sales\LeadSource\Update;
-use Illuminate\Http\Request;
 use App\Models\LeadSource;
-use Illuminate\Support\Str;
 
 class LeadSourceController extends Controller
 {

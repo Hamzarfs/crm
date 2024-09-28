@@ -8,19 +8,24 @@ export const requiredValidator = (value: unknown) => {
     return !!String(value).trim().length || 'This field is required'
 }
 
-// 👉 Number Validator
-export const numberValidator = (value: unknown) => {
-    // if (typeof value !== 'number')
-    //     return 'This field must be a number'
-
-    // return !!String(value).trim().length || 'This field must be a number'
-    if (typeof value !== 'string')
-        return 'This field must be a string';
-
+// 👉 Phone Number Validator
+export const phoneNumberValidator = (value: string) => {
+    if (isEmpty(value))
+        return true
     // Regular expression to check if string contains numbers 0-9 and a + sign
     const regex = /^[+]?[\d]+$/;
 
     return regex.test(value.trim()) || 'This field must contain numbers and optionally a + sign in start';
+}
+
+// 👉 Number Validator
+export const numberValidator = (value: string) => {
+    if (isEmpty(value))
+        return true
+    // Regular expression to check if string contains positive numbers
+    const regex = /^[\d]+(\.[\d]+)?$/;
+
+    return regex.test(value.trim()) || 'This field must contain positive numbers';
 }
 
 // 👉 Email Validator

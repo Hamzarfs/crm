@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Sales\Lead\Store;
+use App\Http\Requests\Sales\Lead\Update;
 use App\Http\Resources\Collections\Sales\LeadResourceCollection;
 use App\Models\Lead;
 use App\Models\Upsell;
@@ -96,50 +98,81 @@ class LeadController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Store a newly created Lead in DB.
      */
-    public function create()
+    public function store(Store $request)
     {
-        //
+        $data = (object) $request->validated();
+
+        $leadAttributes = [
+            'customer_id' => $data->customer,
+            'lead_source_id' => $data->lead_source,
+            'brand_id' => $data->brand,
+            'status' => $data->status,
+            'remarks' => $data->remarks ?? '',
+        ];
+
+        if (isset($data->lead_closed_date)) {
+            $leadAttributes['lead_closed_date'] = $data->lead_closed_date;
+        }
+        if (isset($data->lead_closed_amount)) {
+            $leadAttributes['lead_closed_amount'] = $data->lead_closed_amount;
+        }
+
+        $lead = Lead::create($leadAttributes);
+
+        $lead->servicesSold()->attach($data->services);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Lead created successfully!'
+        ]);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Update the specified lead in DB.
      */
-    public function store(Request $request)
+    public function update(Update $request, Lead $lead)
     {
-        //
+        $data = (object) $request->validated();
+
+        $leadAttributes = [
+            'customer_id' => $data->customer,
+            'lead_source_id' => $data->lead_source,
+            'brand_id' => $data->brand,
+            'status' => $data->status,
+            'remarks' => $data->remarks ?? '',
+        ];
+
+        if (isset($data->lead_closed_date)) {
+            $leadAttributes['lead_closed_date'] = $data->lead_closed_date;
+        }
+        if (isset($data->lead_closed_amount)) {
+            $leadAttributes['lead_closed_amount'] = $data->lead_closed_amount;
+        }
+
+        $lead->update($leadAttributes);
+
+        $lead->servicesSold()->sync($data->services);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Lead updated successfully!'
+        ]);
     }
 
     /**
-     * Display the specified resource.
+     * Remove the specified lead from DB.
      */
-    public function show(Lead $lead)
+    public function delete(Lead $lead)
     {
-        //
-    }
+        $lead->servicesSold()->detach();
+        $lead->upsells()->delete();
+        $lead->delete();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Lead $lead)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Lead $lead)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Lead $lead)
-    {
-        //
+        return response()->json([
+            'success' => true,
+            'message' => 'Lead deleted successfully!'
+        ]);
     }
 }
