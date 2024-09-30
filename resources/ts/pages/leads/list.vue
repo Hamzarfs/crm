@@ -1,10 +1,16 @@
 <script setup lang="ts">
 
 // 👉 Store
-const searchQuery = ref('')
-const selectedRole = ref()
-const selectedStatus = ref()
-const selectedDepartment = ref()
+const selectedCustomers = ref([])
+const selectedLeadSources = ref([])
+const selectedBrands = ref([])
+const searchRemarks = ref()
+const selectedServices = ref([])
+const selectedStatuses = ref([])
+const selectedClosedDateRange = ref()
+const selectedCreatedAtRange = ref()
+const selectedCloseAmount = ref()
+
 const selectedLead = ref<Record<string, any>>({})
 let leadToDelete: number
 
@@ -12,7 +18,7 @@ let leadToDelete: number
 const itemsPerPage = ref(20)
 const page = ref(1)
 const sortBy = ref('id')
-const orderBy = ref('DESC')
+const orderBy = ref<boolean | 'asc' | 'desc'>('desc')
 const selectedRows = ref([])
 const tableLoading = ref(false)
 
@@ -45,10 +51,15 @@ const headers = [
 // 👉 Fetching leads
 const { data: leadsData, execute: fetchLeads, isFetching } = await useApi<any>(createUrl('leads', {
     query: {
-        q: searchQuery,
-        status: selectedStatus,
-        role: selectedRole,
-        department: selectedDepartment,
+        'customers[]': selectedCustomers,
+        'leadSources[]': selectedLeadSources,
+        'brands[]': selectedBrands,
+        'services[]': selectedServices,
+        'statuses[]': selectedStatuses,
+        remarks: searchRemarks,
+        leadClosedDateRange: selectedClosedDateRange,
+        createdAtRange: selectedCreatedAtRange,
+        leadClosedAmount: selectedCloseAmount,
         itemsPerPage,
         page,
         sortBy,
@@ -65,16 +76,6 @@ const leads = computed(() => leadsData.value.leads)
 const totalLeads = computed(() => leadsData.value.totalLeads)
 
 const statuses = ['No answer', 'Hung up', 'Wrong number', 'Voice mail', 'Found someone', 'Follow up', 'Not interested', 'Blocked', 'Sale closed', 'Cant connect', 'Not in service', 'Invalid lead', 'Email done', 'Call done', 'No number', 'Not interested', 'Interested']
-
-/**
- * @TODO TO be deleted
- */
-const { roles } = await $api('roles')
-// const { status } = await $api('users/statuses')
-const { departments } = await $api('departments')
-/**
- * @TODO TO be deleted
- */
 
 const { services } = await $api('services')
 const { brands } = await $api('brands')
@@ -219,29 +220,63 @@ watch(isEditLeadDrawerVisible, editDrawer => {
         <VCard title="Filters" class="mb-6">
             <VCardText>
                 <VRow align="center">
-                    <!-- 👉 Select Role -->
-                    <VCol cols="12" sm="3">
-                        <VSelect v-model="selectedRole" label="Filter by Role" placeholder="Filter by Role"
-                            :items="roles" clearable clear-icon="ri-close-line" chips />
+                    <!-- 👉 Select Customers -->
+                    <VCol>
+                        <VAutocomplete v-model="selectedCustomers" multiple label="Filter by Customers"
+                            placeholder="Filter by Customers" :items="_customers" clearable chips />
                     </VCol>
 
-                    <!-- 👉 Select Department -->
-                    <VCol cols="12" sm="3">
-                        <VSelect v-model="selectedDepartment" label="Filter by Department"
-                            placeholder="Filter by Department" :items="departments" clearable clear-icon="ri-close-line"
-                            chips />
+                    <!-- 👉 Select Lead Sources -->
+                    <VCol>
+                        <VAutocomplete v-model="selectedLeadSources" multiple label="Filter by Lead Sources"
+                            placeholder="Filter by Lead Sources" :items="_leadSources" clearable chips />
                     </VCol>
 
-                    <!-- 👉 Select Status -->
-                    <VCol cols="12" sm="3">
-                        <VSelect v-model="selectedStatus" label="Filter by Status" placeholder="Filter by Status"
-                            :items="statuses" clearable clear-icon="ri-close-line" chips />
+                    <!-- 👉 Select Brands -->
+                    <VCol>
+                        <VAutocomplete v-model="selectedBrands" multiple label="Filter by Brands"
+                            placeholder="Filter by Brands" :items="_brands" clearable chips />
                     </VCol>
 
-                    <VCol cols="12" sm="3">
-                        <!-- 👉 Search  -->
-                        <VTextField v-model="searchQuery" placeholder="Filter by User" label="Filter by User"
-                            density="comfortable" clearable class="me-4" />
+                    <!-- 👉 Select Services -->
+                    <VCol>
+                        <VAutocomplete v-model="selectedServices" multiple label="Filter by Services sold"
+                            placeholder="Filter by Services sold" :items="_services" clearable chips />
+                    </VCol>
+
+                    <!-- 👉 Search Remarks  -->
+                    <VCol>
+                        <VTextField v-model="searchRemarks" density="comfortable" clearable
+                            placeholder="Filter by Remarks" label="Filter by Remarks" />
+                    </VCol>
+                </VRow>
+
+                <VRow>
+                    <!-- 👉 Select Statuses -->
+                    <VCol>
+                        <VSelect v-model="selectedStatuses" multiple label="Filter by Statuses"
+                            placeholder="Filter by Statuses" :items="statuses" clearable chips />
+                    </VCol>
+
+                    <!-- 👉 Select Lead closed date range -->
+                    <VCol>
+                        <AppDateTimePicker v-model="selectedClosedDateRange" label="Filter by lead closed date range"
+                            placeholder="Filter by lead closed date range" clearable
+                            :config="{ dateFormat: 'd-m-Y', mode: 'range' }" />
+                    </VCol>
+
+                    <!-- 👉 Select Lead closed amount  -->
+                    <VCol>
+                        <VTextField v-model="selectedCloseAmount" type="number"
+                            placeholder="Filter by Lead closed amount" label="Filter by Lead closed amount"
+                            density="comfortable" clearable />
+                    </VCol>
+
+                    <!-- 👉 Select Lead closed date range -->
+                    <VCol>
+                        <AppDateTimePicker v-model="selectedCreatedAtRange" label="Filter by lead created at date range"
+                            placeholder="Filter by lead created at date range" clearable
+                            :config="{ dateFormat: 'd-m-Y, G:i K', mode: 'range', enableTime: true }" />
                     </VCol>
                 </VRow>
             </VCardText>
@@ -264,9 +299,10 @@ watch(isEditLeadDrawerVisible, editDrawer => {
 
             <!-- SECTION datatable -->
             <VDataTableServer v-model:items-per-page="itemsPerPage" v-model:model-value="selectedRows" hover show-select
-                :loading="tableLoading" loading-text="Loading Employees..." :disable-sort="tableLoading" fixed-header
-                style="max-height: 500px;" v-model:page="page" :items="leads" item-value="id" :items-length="totalLeads"
-                :headers="headers" class="text-no-wrap rounded-0" @update:options="updateOptions" density="default">
+                :sort-by="[{ key: sortBy, order: orderBy }]" :loading="tableLoading" loading-text="Loading Leads..."
+                :disable-sort="tableLoading" fixed-header style="max-height: 500px;" v-model:page="page" :items="leads"
+                item-value="id" :items-length="totalLeads" :headers="headers" class="text-no-wrap rounded-0"
+                @update:options="updateOptions" density="default">
 
                 <!-- Customer Name -->
                 <template #item.customer="{ item }: { item: any }">

@@ -6,9 +6,11 @@ use App\Http\Requests\Sales\Lead\Store;
 use App\Http\Requests\Sales\Lead\Update;
 use App\Http\Resources\Collections\Sales\LeadResourceCollection;
 use App\Models\Lead;
-use App\Models\Upsell;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class LeadController extends Controller
@@ -21,65 +23,62 @@ class LeadController extends Controller
         $page = (int) $request->input('page', 1);
         $itemsPerPage = (int) $request->input('itemsPerPage', 10);
 
-        $department = $request->input('department');
-        $user = $request->input('user');
-        $date = $request->input('date');
-        $assignedToMe = $request->input('assignedToMe');
-        $status = $request->input('status');
-        $query = $request->input('q');
+        $customers = $request->input('customers');
+        $leadSources = $request->input('leadSources');
+        $brands = $request->input('brands');
+        $services = $request->input('services');
+        $statuses = $request->input('statuses');
+        $remarks = $request->input('remarks');
+        $leadClosedDateRange = $request->input('leadClosedDateRange');
+        $createdAtRange = $request->input('createdAtRange');
+        $leadClosedAmount = $request->input('leadClosedAmount');
+
+        if ($leadClosedDateRange)
+            $leadClosedDateRange = explode(' to ', $request->input('leadClosedDateRange'));
+        if ($createdAtRange)
+            $createdAtRange = explode(' to ', $request->input('createdAtRange'));
 
         $orderByColumn = $request->input('sortBy');
         $orderByDir = $request->input('orderBy');
 
         $leads = Lead::with(['servicesSold', 'upsells.serviceSold', 'customer', 'leadSource', 'brand'])->withCount(['servicesSold', 'upsells']);
 
-        // dd($leads->get()->toArray());
-
-
-
-        /**
-         * @TODO apply filters later
-         */
         // Applying DT filters
-        // $leads = $leads->when(
-        //     value: $department,
-        //     callback: fn(Builder $tasksQuery, $department) => $tasksQuery->whereRelation('assignee', 'department_id', '=', $department)
-        // )->when(
-        //     value: $user,
-        //     callback: fn(Builder $tasksQuery, $user) => $tasksQuery->where(
-        //         column: [
-        //             ['created_by', '=', $user, 'OR'],
-        //             ['assigned_to', '=', $user, 'OR'],
-        //         ],
-        //     )
-        // )->when(
-        //     value: $date,
-        //     callback: function (Builder $tasksQuery, $date) {
-        //         $formattedDate = Carbon::createFromFormat('d-m-Y', $date);
-        //         return $tasksQuery->where(fn($q) => $q->whereDate('deadline', '=', $formattedDate)
-        //             ->orWhereDate('completed_at', '=', $formattedDate)
-        //             ->orWhereDate('started_at', '=', $formattedDate)
-        //             ->orWhereDate('created_at', '=', $formattedDate)
-        //             ->orWhereDate('updated_at', '=', $formattedDate));
-        //     }
-        // )->when(
-        //     value: $status,
-        //     callback: fn(Builder $tasksQuery, $status) => $tasksQuery->where('status', $status)
-        // )->when(
-        //     value: $assignedToMe,
-        //     callback: fn(Builder $tasksQuery, $assignedToMe) => $assignedToMe === 'yes' ? $tasksQuery->where('assigned_to', Auth::id()) : $tasksQuery->where('created_by', Auth::id()),
-        // )->when(
-        //     value: $query,
-        //     callback: fn(Builder $tasksQuery, $query) => $tasksQuery->where(
-        //         column: [
-        //             ['title', 'LIKE', "%$query%", 'OR'],
-        //             ['description', 'LIKE', "%$query%", 'OR'],
-        //         ],
-        //     )
-        // )->when(        // Apply ordering
-        //     value: fn() => (!is_null($orderByColumn) && !is_null($orderByDir)) ? ['column' => $orderByColumn, 'dir' => $orderByDir] : null,
-        //     callback: fn(Builder $tasksQuery, array $orderBy) => $tasksQuery->orderBy($orderBy['column'], $orderBy['dir'])
-        // );
+        $leads = $leads->when(
+            value: $customers,
+            callback: fn(Builder $leadsQuery, array $customers) => $leadsQuery->whereHas('customer', fn(Builder $customerQuery) => $customerQuery->whereIn('id', $customers))
+        )->when(
+            value: $leadSources,
+            callback: fn(Builder $leadsQuery, array $leadSources) => $leadsQuery->whereHas('leadSource', fn(Builder $leadSourceQuery) => $leadSourceQuery->whereIn('id', $leadSources))
+        )->when(
+            value: $brands,
+            callback: fn(Builder $leadsQuery, array $brands) => $leadsQuery->whereHas('brand', fn(Builder $brandQuery) => $brandQuery->whereIn('id', $brands))
+        )->when(
+            value: $services,
+            callback: fn(Builder $leadsQuery, array $services) => $leadsQuery->whereHas('servicesSold', fn(Builder $servicesSoldQuery) => $servicesSoldQuery->whereIn('service_id', $services))
+        )->when(
+            value: $statuses,
+            callback: fn(Builder $leadsQuery, array $statuses) => $leadsQuery->whereIn('status', $statuses)
+        )->when(
+            value: $remarks,
+            callback: fn(Builder $leadsQuery, string $remarks) => $leadsQuery->where('remarks', 'LIKE', "%$remarks%")
+        )->when(
+            value: fn() => $leadClosedDateRange ? array_map(fn(string $leadClosedDate) => Carbon::createFromFormat('d-m-Y', $leadClosedDate)->format('Y-m-d'), $leadClosedDateRange) : null,
+            callback: fn(Builder $leadsQuery, array $leadClosedDateRange) => count($leadClosedDateRange) > 1 ?
+                $leadsQuery->whereBetween('lead_closed_date', $leadClosedDateRange) :
+                $leadsQuery->whereDate('lead_closed_date', '>=', $leadClosedDateRange[0])
+        )->when(
+            value: fn() => $createdAtRange ? array_map(fn(string $createdAtDateTime) => Carbon::createFromFormat('d-m-Y, h:i A', $createdAtDateTime)->format('Y-m-d H:i:s'), $createdAtRange) : null,
+            callback: fn(Builder $leadsQuery, array $createdAtRange) => count($createdAtRange) > 1 ?
+                $leadsQuery->whereBetween('created_at', $createdAtRange) :
+                $leadsQuery->whereDate('created_at', '>=', $createdAtRange[0])
+        )->when(
+            value: $leadClosedAmount,
+            callback: fn(Builder $leadsQuery, string $leadClosedAmount) => $leadsQuery->where('lead_closed_amount', '>=', "$leadClosedAmount")
+        )->when(        // Apply ordering
+            value: fn() => (!is_null($orderByColumn) && !is_null($orderByDir)) ? ['column' => $orderByColumn, 'dir' => $orderByDir] : null,
+            callback: fn(Builder $tasksQuery, array $orderBy) => $tasksQuery->orderBy($orderBy['column'], $orderBy['dir'])
+        );
 
         // Apply pagination
         $paginatedLeads = $leads->paginate($itemsPerPage, page: $page);
