@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 class Lead extends Model
 {
@@ -36,4 +38,19 @@ class Lead extends Model
     {
         return $this->belongsTo(Brand::class);
     }
+
+    public function leadClosedDate(): Attribute
+    {
+        return new Attribute(
+            get: fn($value) => $value ? Carbon::parse($value)->format('d M Y') : null,
+            set: fn($value) => Carbon::createFromFormat('d-m-Y', $value)->format('Y-m-d')
+        );
+    }
+
+    // public function leadClosedAmount(): Attribute
+    // {
+    //     return new Attribute(
+    //         get: fn($value) => $value ? number_format($value, 2) : null,
+    //     );
+    // }
 }

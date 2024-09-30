@@ -97,7 +97,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
 
                             <!-- 👉 Contact -->
                             <VCol cols="12">
-                                <VTextField v-model="contact" :rules="[requiredValidator, numberValidator]"
+                                <VTextField v-model="contact" :rules="[requiredValidator, phoneNumberValidator]"
                                     label="Contact number" :error-messages="props.errors.contact"
                                     placeholder="Customer name" />
                             </VCol>

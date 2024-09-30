@@ -117,7 +117,5 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('', 'store');
             Route::put('{lead}', 'update');
             Route::delete('{lead}', 'delete');
-            // Route::middleware('role:admin|team_lead')->group(function () {
-            // });
         });
 });

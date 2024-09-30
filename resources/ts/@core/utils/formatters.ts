@@ -55,9 +55,9 @@ export const slugToTitleCase = (slug: string) => {
         .join(' '); // Join the words back with a space
 }
 
-export const parseDate = (date: string, format: string = 'DD-MM-YYYY') => {
-    return moment(date, 'YYYY-MM-DD').format(format)
-}
+export const parseDate = (date: string, format: string = 'DD-MM-YYYY') => moment(date, 'YYYY-MM-DD').format(format)
+
+export const parseDateWithFormat = (date: string, fromFormat: string, toFormat: string) => moment(date, fromFormat).format(toFormat)
 
 /**
  * Check the status of a deadline
@@ -76,5 +76,11 @@ export const checkDeadlineStatus = (deadlineDate: string): 'exceeded' | 'approac
         return 'today';
     }
 }
+
+export const currencyFormatter = (amount: number, currency: string = 'usd') => new Intl.NumberFormat('us', {
+    style: 'currency',
+    maximumFractionDigits: 2,
+    currency
+}).format(amount)
 
 
