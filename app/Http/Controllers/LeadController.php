@@ -7,8 +7,7 @@ use App\Http\Requests\Sales\Lead\Update;
 use App\Http\Resources\Collections\Sales\LeadResourceCollection;
 use App\Models\Lead;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Query\Builder as QueryBuilder;
-use Illuminate\Database\Query\Expression;
+use Illuminate\Http\Client\ResponseSequence;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -141,14 +140,9 @@ class LeadController extends Controller
             'brand_id' => $data->brand,
             'status' => $data->status,
             'remarks' => $data->remarks ?? '',
+            'lead_closed_date' => $data->lead_closed_date,
+            'lead_closed_amount' => $data->lead_closed_amount,
         ];
-
-        if (isset($data->lead_closed_date)) {
-            $leadAttributes['lead_closed_date'] = $data->lead_closed_date;
-        }
-        if (isset($data->lead_closed_amount)) {
-            $leadAttributes['lead_closed_amount'] = $data->lead_closed_amount;
-        }
 
         $lead->update($leadAttributes);
 
@@ -172,6 +166,31 @@ class LeadController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Lead deleted successfully!'
+        ]);
+    }
+
+    /**
+     * Get Leads widgets count
+     */
+    public function leadCount()
+    {
+        $totalLeads = Lead::count();
+
+        $thisMonth = now();
+        $startOfThisMonth = $thisMonth->startOfMonth()->format('Y-m-d H:i:s');
+        $endOfThisMonth = $thisMonth->endOfMonth()->format('Y-m-d H:i:s');
+
+        $leadsThisMonth = Lead::whereBetween('created_at', [$startOfThisMonth, $endOfThisMonth])->count();
+
+        $closedLeads = Lead::whereNotNull('lead_closed_date')->count();
+
+        $totalAmount = Lead::select('lead_closed_amount')->withSum('upsells', 'amount')->get()->sum(fn(Lead $lead) => $lead->lead_closed_amount + $lead->upsells_sum_amount);
+
+        return response()->json([
+            'totalLeads' => $totalLeads,
+            'leadsThisMonth' => $leadsThisMonth,
+            'closedLeads' => $closedLeads,
+            'totalAmount' => $totalAmount,
         ]);
     }
 }

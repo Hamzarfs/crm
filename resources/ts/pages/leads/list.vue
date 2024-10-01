@@ -1,5 +1,6 @@
 <script setup lang="ts">
 
+
 // 👉 Store
 const selectedCustomers = ref([])
 const selectedLeadSources = ref([])
@@ -88,7 +89,7 @@ const _customers = customers.map((c: any) => ({ title: c.full_name, value: c.id 
 const _leadSources = leadsources.map((ls: any) => ({ title: ls.name, value: ls.id }))
 
 const resolveLeadStatusVariant = (status: string) => {
-    const successStatuses = ['Follow up', 'Sale closed', 'Email done', 'Call done', 'Interested']
+    const successStatuses = ['Sale closed']
     const errorStatuses = ['No answer', 'Hung up', 'Wrong number', 'Voice mail', 'Found someone', 'Not interested', 'Blocked', 'Cant connect', 'Not in service', 'Invalid lead', 'No number', 'Not interested']
 
     if (successStatuses.includes(status))
@@ -120,6 +121,7 @@ const addNewLead = async (leadData: any) => {
         leadResponsemessage = message
         addNewLeadDrawerRef.value.closeNavigationDrawer()
         fetchLeads()
+        fetchLeadsCount()
     }
 }
 
@@ -138,6 +140,7 @@ const editLead = async (leadData: any) => {
         leadResponsemessage = message
         editLeadDrawerRef.value.closeNavigationDrawer()
         fetchLeads()
+        fetchLeadsCount()
     }
 }
 
@@ -158,6 +161,7 @@ const deleteLead = async () => {
         isSnackBarVisible.value = true
         leadResponsemessage = message
         fetchLeads()
+        fetchLeadsCount()
     }
 }
 
@@ -172,15 +176,31 @@ const errors = ref({
     lead_closed_date: undefined,
 })
 
-// 👉 Get leads count for top cards
-// const { total: totalEmployees, new: newEmployees, active: activeEmployees, inactive: inactiveEmployees } = await $api('users/count')
+const leadsCountData = ref({
+    totalLeads: 0,
+    leadsThisMonth: 0,
+    closedLeads: 0,
+    totalAmount: 0,
+})
 
-const widgetData = ref([
-    { title: 'Total Leads', value: 10, icon: 'ri-group-line', iconColor: 'primary' },
-    { title: 'Leads this month', value: 5, icon: 'ri-user-follow-line', iconColor: 'success' },
-    { title: 'Closed leads', value: 5, icon: 'ri-user-add-line', iconColor: 'error' },
-    { title: 'Total amount', value: '$1,000', icon: 'ri-user-search-line', iconColor: 'warning' },
-])
+// 👉 Get leads count for top cards
+const { execute: fetchLeadsCount, isFetching: isLeadsCountFetching } = await useApi<any>(createUrl('leads/count'), {
+    afterFetch: ctx => {
+        leadsCountData.value.totalLeads = ctx.data.totalLeads
+        leadsCountData.value.leadsThisMonth = ctx.data.leadsThisMonth
+        leadsCountData.value.closedLeads = ctx.data.closedLeads
+        leadsCountData.value.totalAmount = ctx.data.totalAmount
+
+        return ctx
+    },
+})
+
+const widgetData = computed(() => ([
+    { title: 'Total Leads', value: leadsCountData.value.totalLeads, icon: 'ri-group-line', iconColor: 'primary' },
+    { title: 'Leads this month', value: leadsCountData.value.leadsThisMonth, icon: 'ri-user-follow-line', iconColor: 'success' },
+    { title: 'Closed leads', value: leadsCountData.value.closedLeads, icon: 'ri-user-add-line', iconColor: 'error' },
+    { title: 'Total amount', value: currencyFormatter(leadsCountData.value.totalAmount as number), icon: 'ri-user-search-line', iconColor: 'warning' },
+]))
 
 watch(isEditLeadDrawerVisible, editDrawer => {
     if (!editDrawer)
@@ -190,14 +210,13 @@ watch(isEditLeadDrawerVisible, editDrawer => {
 </script>
 
 <template>
-
     <section>
         <!-- 👉 Widgets -->
         <div class="d-flex mb-6">
             <VRow>
                 <template v-for="(data, id) in widgetData" :key="id">
                     <VCol cols="12" md="3" sm="6">
-                        <VCard class="d-flex align-center" height="100%">
+                        <VCard class="d-flex align-center" height="100%" :loading="isLeadsCountFetching">
                             <VCardText>
                                 <div class="d-flex justify-space-between align-center">
                                     <div class="d-flex flex-column gap-y-1">

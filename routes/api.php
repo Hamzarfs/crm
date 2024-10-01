@@ -117,5 +117,6 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('', 'store');
             Route::put('{lead}', 'update');
             Route::delete('{lead}', 'delete');
+            Route::get('count', 'leadCount');
         });
 });

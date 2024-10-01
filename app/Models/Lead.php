@@ -43,14 +43,7 @@ class Lead extends Model
     {
         return new Attribute(
             get: fn($value) => $value ? Carbon::parse($value)->format('d M Y') : null,
-            set: fn($value) => Carbon::createFromFormat('d-m-Y', $value)->format('Y-m-d')
+            set: fn($value) => $value ? Carbon::createFromFormat('d-m-Y', $value)->format('Y-m-d') : null
         );
     }
-
-    // public function leadClosedAmount(): Attribute
-    // {
-    //     return new Attribute(
-    //         get: fn($value) => $value ? number_format($value, 2) : null,
-    //     );
-    // }
 }
