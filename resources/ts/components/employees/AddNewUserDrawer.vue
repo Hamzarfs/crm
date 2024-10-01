@@ -218,7 +218,6 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
 
                             <VCol cols="12" sm="6" md="4" lg="3" class="mt-13">
                                 <VRow>
-
                                     <!-- 👉 Experience Details -->
                                     <VCol cols="12">
                                         <VTextField v-model="optionalDetails.experienceDetails"
@@ -276,9 +275,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                             </VCol>
 
                             <VCol cols="12" sm="6" md="4" lg="3" class="mt-13 st-0">
-
                                 <VRow>
-
                                     <!-- 👉 PC Details -->
                                     <VCol cols="12">
                                         <VTextField v-model="optionalDetails.pcDetails" label="PC Details"
@@ -312,8 +309,8 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
 
                                     <!-- 👉 Select Date Joining Date -->
                                     <VCol cols="12">
-                                        <AppDateTimePicker v-model="optionalDetails.joiningDate" label="Filter by Date"
-                                            placeholder="Filter by Date" clearable :config="{ dateFormat: 'd-m-Y' }" />
+                                        <AppDateTimePicker v-model="optionalDetails.joiningDate" label="Joining Date"
+                                            placeholder="Joining Date" clearable :config="{ dateFormat: 'd-m-Y' }" />
                                     </VCol>
 
                                     <!-- 👉 First Salary Increment -->
@@ -336,11 +333,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                                             label="Third Salary increment (Amount & Month)"
                                             placeholder="Third Salary Increment" />
                                     </VCol>
-
                                 </VRow>
-
-
-
                             </VCol>
 
                             <!-- 👉 Submit and Cancel -->
@@ -352,21 +345,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                                     Cancel
                                 </VBtn>
                             </VCol>
-
                         </VRow>
-
-                        <!-- <VRow>
-                           
-                            <VCol cols="12">
-                                <VBtn type="submit" class="me-4">
-                                    Submit
-                                </VBtn>
-                                <VBtn type="reset" variant="outlined" color="error" @click="closeNavigationDrawer">
-                                    Cancel
-                                </VBtn>
-                            </VCol>
-                        </VRow> -->
-
                     </VForm>
                 </VCardText>
             </VCard>

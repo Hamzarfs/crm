@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import AddNewUserDrawer from '@/components/employees/AddNewUserDrawer.vue';
-import EditUserDrawer from '@/components/employees/EditUserDrawer.vue';
 
 // 👉 Store
 const searchQuery = ref('')
@@ -119,6 +117,7 @@ const addNewUser = async (userData: any) => {
         userResponsemessage = message
         addNewUserDrawerRef.value.closeNavigationDrawer()
         fetchUsers()
+        fetchEmployeesCount()
     }
 }
 
@@ -137,6 +136,7 @@ const editUser = async (userData: any) => {
         userResponsemessage = message
         editUserDrawerRef.value.closeNavigationDrawer()
         fetchUsers()
+        fetchEmployeesCount()
     }
 }
 
@@ -157,6 +157,7 @@ const deleteUser = async () => {
         isSnackBarVisible.value = true
         userResponsemessage = message
         fetchUsers()
+        fetchEmployeesCount()
     }
 }
 
@@ -169,15 +170,31 @@ const errors = ref({
     status: undefined,
 })
 
-// 👉 Get employee count for top cards
-const { total: totalEmployees, new: newEmployees, active: activeEmployees, inactive: inactiveEmployees } = await $api('users/count')
+const employeesCountData = ref({
+    totalEmployees: 0,
+    activeEmployees: 0,
+    inactiveEmployees: 0,
+    newEmployees: 0,
+})
 
-const widgetData = ref([
-    { title: 'Total Employees', value: totalEmployees, icon: 'ri-group-line', iconColor: 'primary' },
-    { title: 'Active Employees', value: activeEmployees, icon: 'ri-user-follow-line', iconColor: 'success' },
-    { title: 'Inactive Employees', value: inactiveEmployees, icon: 'ri-user-add-line', iconColor: 'error' },
-    { title: 'New Employees', value: newEmployees, icon: 'ri-user-search-line', iconColor: 'warning', desc: 'Joined last month' },
-])
+// 👉 Get employee count for top cards
+const { execute: fetchEmployeesCount, isFetching: isEmployeesCountFetching } = await useApi<any>(createUrl('users/count'), {
+    afterFetch: ctx => {
+        employeesCountData.value.totalEmployees = ctx.data.total
+        employeesCountData.value.activeEmployees = ctx.data.active
+        employeesCountData.value.inactiveEmployees = ctx.data.inactive
+        employeesCountData.value.newEmployees = ctx.data.new
+
+        return ctx
+    },
+})
+
+const widgetData = computed(() => ([
+    { title: 'Total Employees', value: employeesCountData.value.totalEmployees, icon: 'ri-group-line', iconColor: 'primary' },
+    { title: 'Active Employees', value: employeesCountData.value.activeEmployees, icon: 'ri-user-follow-line', iconColor: 'success' },
+    { title: 'Inactive Employees', value: employeesCountData.value.inactiveEmployees, icon: 'ri-user-add-line', iconColor: 'error' },
+    { title: 'New Employees', value: employeesCountData.value.newEmployees, icon: 'ri-user-search-line', iconColor: 'warning', desc: 'Joined last month' },
+]))
 
 watch(isEditUserDrawerVisible, editDrawer => {
     if (!editDrawer)
@@ -194,7 +211,7 @@ watch(isEditUserDrawerVisible, editDrawer => {
             <VRow>
                 <template v-for="(data, id) in widgetData" :key="id">
                     <VCol cols="12" md="3" sm="6">
-                        <VCard class="d-flex align-center" height="100%">
+                        <VCard class="d-flex align-center" height="100%" :loading="isEmployeesCountFetching">
                             <VCardText>
                                 <div class="d-flex justify-space-between align-center">
                                     <div class="d-flex flex-column gap-y-1">
@@ -255,9 +272,9 @@ watch(isEditUserDrawerVisible, editDrawer => {
                 <VBtn color="success" prepend-icon="ri-upload-2-line">
                     Import
                 </VBtn>
-                <VBtn color="secondary" prepend-icon="ri-download-2-line">
+                <!-- <VBtn color="secondary" prepend-icon="ri-download-2-line">
                     Export
-                </VBtn>
+                </VBtn> -->
                 <VSpacer />
                 <VBtn @click="isAddNewUserDrawerVisible = true" prepend-icon="ri-user-add-fill">
                     Add New Employee

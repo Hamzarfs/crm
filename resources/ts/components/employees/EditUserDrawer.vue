@@ -62,11 +62,6 @@ const optionalDetails = ref({
 
 })
 
-
-
-
-
-
 const userRoles = props.roles.map((r: any) => ({ title: r.title, value: r.id }))
 const departments = props.departments.map((d: any) => ({ title: d.title, value: d.id }))
 
@@ -109,7 +104,6 @@ watch(() => props.user, newVal => {
     deep: true
 })
 
-
 // 👉 drawer close
 const closeNavigationDrawer = () => {
     emit('update:isDrawerOpen', false)
@@ -137,8 +131,6 @@ const onSubmit = () => {
     })
 }
 
-
-
 defineExpose({
     closeNavigationDrawer
 })
@@ -163,7 +155,6 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                     <!-- 👉 Form -->
                     <VForm ref="refForm" v-model="isFormValid" @submit.prevent="onSubmit">
                         <VRow>
-
                             <VCol cols="12" sm="12" md="4" lg="3" class="mt-2 ">
                                 <VRow>
                                     <VCol cols="12">
@@ -210,7 +201,6 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                                             :rules="[requiredValidator]" :items="props.status" />
                                     </VCol>
                                 </VRow>
-
                             </VCol>
 
                             <VCol cols="12" sm="6" md="4" lg="3" class="mt-2">
@@ -218,7 +208,6 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                                     <VCol cols="12">
                                         <h1>Additional Details</h1>
                                     </VCol>
-
 
                                     <!-- 👉 Biometric ID -->
                                     <VCol cols="12">
@@ -277,7 +266,6 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
 
                             <VCol cols="12" sm="6" md="4" lg="3">
                                 <VRow>
-
                                     <!-- 👉 Experience Details -->
                                     <VCol cols="12" class="mt-13">
                                         <VTextField v-model="optionalDetails.experienceDetails"
@@ -332,15 +320,10 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                                             placeholder="PC Password" />
                                     </VCol>
                                 </VRow>
-
-
-
-
                             </VCol>
 
                             <VCol cols="12" sm="6" md="4" lg="3" class="mt-13">
                                 <VRow>
-
                                     <!-- 👉 PC Details -->
                                     <VCol cols="12">
                                         <VTextField v-model="optionalDetails.pcDetails" label="PC Details"
@@ -372,7 +355,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                                             placeholder="Job Type" />
                                     </VCol>
 
-                                    <!-- 👉 Edit Date Joining Date -->
+                                    <!-- 👉 Joining Date -->
                                     <VCol cols="12">
                                         <AppDateTimePicker v-model="optionalDetails.joiningDate" label="Joining Date"
                                             placeholder="Joining Date" clearable :config="{ dateFormat: 'd-m-Y' }" />
@@ -399,14 +382,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                                             placeholder="Third Salary Increment" />
                                     </VCol>
                                 </VRow>
-
                             </VCol>
-
-
-
-
-
-
 
                             <!-- 👉 Submit and Cancel -->
                             <VCol cols="12" class="d-flex justify-end">

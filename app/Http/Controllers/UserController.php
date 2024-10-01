@@ -141,7 +141,9 @@ class UserController extends Controller
         ]);
 
         $user->syncRoles($data['role']);
+
         $this->addEmployeeDetails($user, $data['details']);
+
         return response()->json([
             'success' => true,
             'message' => 'Employee updated successfully!'

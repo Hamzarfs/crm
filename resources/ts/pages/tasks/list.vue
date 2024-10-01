@@ -336,12 +336,12 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
 
             <VCardText v-if="['admin', 'team_lead'].includes(userData.role.value)" class="d-flex flex-wrap gap-4">
                 <!-- 👉 Export & import buttons -->
-                <VBtn color="success" prepend-icon="ri-upload-2-line">
+                <!-- <VBtn color="success" prepend-icon="ri-upload-2-line">
                     Import
                 </VBtn>
                 <VBtn color="secondary" prepend-icon="ri-download-2-line">
                     Export
-                </VBtn>
+                </VBtn> -->
                 <VSpacer />
                 <VBtn @click="isAddNewTaskDrawerVisible = true" prepend-icon="ri-task-fill">
                     Add New Task
