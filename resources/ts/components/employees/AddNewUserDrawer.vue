@@ -35,6 +35,25 @@ const optionalDetails = ref({
     emergencyContactNumber: '',
     vehiclePlateNumber: '',
     bloodGroup: '',
+    allergyOrDisease: '',
+    shiftTimings: '',
+    experienceDetails: '',
+    designation: '',
+    homeAddress: '',
+    maritalStatus: '',
+    workEmail: '',
+    workEmailPassword: '',
+    companyEmail: '',
+    companyEmailPassword: '',
+    pcPassword: '',
+    pcDetails: '',
+    anyPaidPlatform: '',
+    idAndPasswordOfAnyPaidPlatforms: '',
+    peripheralDevices: '',
+    jobType: '',
+    firstSalaryIncrement: '',
+    secondSalaryIncrement: '',
+    thirdSalaryIncrement: '',
 
 })
 
@@ -61,7 +80,7 @@ const onSubmit = () => {
                 role: role.value,
                 department: department.value,
                 status: status.value,
-                details: optionalDetails.value
+                details: optionalDetails.value,
             })
         }
     })
@@ -92,9 +111,10 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                     <!-- 👉 Form -->
                     <VForm ref="refForm" v-model="isFormValid" @submit.prevent="onSubmit">
                         <VRow>
-                            <VCol cols="3">
-                                <h1 class="mb-4">Required Fields</h1>
+                            <VCol cols="12" xs="12" sm="6" md="4" lg="3">
                                 <VRow>
+                                    <h1 class="my-4 ms-4">Required Details</h1>
+
                                     <!-- 👉 Full name -->
                                     <VCol cols="12">
                                         <VTextField v-model="name" :rules="[requiredValidator]" label="Full Name"
@@ -110,9 +130,8 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
 
                                     <!-- 👉 Contact -->
                                     <VCol cols="12">
-                                        <VTextField v-model="phone" type="text"
-                                            :rules="[requiredValidator, phoneNumberValidator]" label="Phone Number"
-                                            placeholder="03001234567" />
+                                        <VTextField v-model="phone" type="text" :rules="[numberValidator]"
+                                            label="Phone Number" placeholder="03001234567" />
                                     </VCol>
 
                                     <!-- 👉 Department -->
@@ -133,80 +152,204 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                                         <VSelect v-model="status" label="Select Status" placeholder="Select Status"
                                             :rules="[requiredValidator]" :items="props.status" />
                                     </VCol>
-
                                 </VRow>
+
                             </VCol>
 
-                            <VDivider vertical />
-
-                            <VCol cols="9">
-                                <h1 class="mb-4">Optional Fields</h1>
+                            <VCol cols="12" sm="6" md="4" lg="3">
                                 <VRow>
-                                    <VCol cols="4">
-                                        <VRow>
-                                            <!-- 👉 Biometric ID -->
-                                            <VCol cols="12">
-                                                <VTextField v-model="optionalDetails.biometricId" label="Biometric ID"
-                                                    placeholder="Biometric ID" />
-                                            </VCol>
+                                    <h1 class="mb-4">Additional Details</h1>
 
-                                            <!-- 👉 Education Details -->
-                                            <VCol cols="12">
-                                                <VTextField v-model="optionalDetails.educationDetails"
-                                                    label="Education Details" placeholder="Education Details" />
-                                            </VCol>
-
-                                            <!-- 👉 Salary -->
-                                            <VCol cols="12">
-                                                <VTextField v-model="optionalDetails.salary" label="Salary"
-                                                    placeholder="Salary" />
-                                            </VCol>
-
-                                            <!-- 👉 Emergency Contact Name -->
-                                            <VCol cols="12">
-                                                <VTextField v-model="optionalDetails.emergencyContactName"
-                                                    label="Emergency Contact Name"
-                                                    placeholder="Emergency Contact Name" />
-                                            </VCol>
-
-                                            <!-- 👉 Emergency Contact Number -->
-                                            <VCol cols="12">
-                                                <VTextField v-model="optionalDetails.emergencyContactNumber"
-                                                    label="Emergency Contact Number"
-                                                    placeholder="Emergency Contact Number" />
-                                            </VCol>
-
-                                            <!-- 👉 Vehicle Plate Number -->
-                                            <VCol cols="12">
-                                                <VTextField v-model="optionalDetails.vehiclePlateNumber"
-                                                    label="Vehicle Plate Number" placeholder="Vehicle Plate Number" />
-                                            </VCol>
-
-                                            <!-- 👉 Blood Group -->
-                                            <VCol cols="12">
-                                                <VTextField v-model="optionalDetails.bloodGroup" label="Blood Group"
-                                                    placeholder="Blood Group" />
-                                            </VCol>
-                                        </VRow>
+                                    <!-- 👉 Biometric ID -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.biometricId" label="Biometric ID"
+                                            placeholder="Biometric ID" />
                                     </VCol>
 
-                                    <VCol cols="4">
-                                        <VRow>
-
-                                        </VRow>
+                                    <!-- 👉 Education Details -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.educationDetails" label="Education Details"
+                                            placeholder="Education Details" />
                                     </VCol>
 
-                                    <VCol cols="4">
-                                        <VRow>
+                                    <!-- 👉 Salary -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.salary" label="Salary"
+                                            placeholder="Salary" />
+                                    </VCol>
 
-                                        </VRow>
+                                    <!-- 👉 Emergency Contact Name -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.emergencyContactName"
+                                            label="Emergency Contact Name" placeholder="Emergency Contact Name" />
+                                    </VCol>
+
+                                    <!-- 👉 Emergency Contact Number -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.emergencyContactNumber"
+                                            label="Emergency Contact Number" placeholder="Emergency Contact Number" />
+                                    </VCol>
+
+                                    <!-- 👉 Vehicle Plate Number -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.vehiclePlateNumber"
+                                            label="Vehicle Plate Number" placeholder="Vehicle Plate Number" />
+                                    </VCol>
+
+                                    <!-- 👉 Blood Group -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.bloodGroup" label="Blood Group"
+                                            placeholder="Blood Group" />
+                                    </VCol>
+
+                                    <!-- 👉 Any allergy or disease -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.allergyOrDisease"
+                                            label="Any allergy or disease" placeholder="Any allergy or disease" />
+                                    </VCol>
+                                    <!-- 👉 Any allergy or disease -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.shiftTimings" label="Shift Timings"
+                                            placeholder="Shift Timings" />
                                     </VCol>
                                 </VRow>
                             </VCol>
+
+                            <VCol cols="12" sm="6" md="4" lg="3" class="mt-9">
+                                <VRow>
+
+                                    <!-- 👉 Experience Details -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.experienceDetails"
+                                            label="Experience Details" placeholder="Experience Details" />
+                                    </VCol>
+
+                                    <!-- 👉 Designation -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.designation" label="Designation"
+                                            placeholder="Designation" />
+                                    </VCol>
+
+                                    <!-- 👉 Home Address -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.homeAddress" label="Home Address"
+                                            placeholder="Home Address" />
+                                    </VCol>
+
+                                    <!-- 👉 Marital Status -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.maritalStatus" label="Marital Status"
+                                            placeholder="Marital Status" />
+                                    </VCol>
+
+                                    <!-- 👉 Work Email -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.workEmail" label="Work Email"
+                                            placeholder="Work Email" />
+                                    </VCol>
+
+                                    <!-- 👉 Work Email Password -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.workEmailPassword"
+                                            label="Work Email Password" placeholder="Work Email Password" />
+                                    </VCol>
+
+                                    <!-- 👉 Company Email -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.companyEmail" label="Company Email"
+                                            placeholder="Company Email" />
+                                    </VCol>
+
+                                    <!-- 👉 Company Email Password -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.companyEmailPassword"
+                                            label="Company Email Password" placeholder="Company Email Password" />
+                                    </VCol>
+
+                                    <!-- 👉 PC Password -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.pcPassword" label="PC Password"
+                                            placeholder="PC Password" />
+                                    </VCol>
+                                </VRow>
+                            </VCol>
+
+                            <VCol cols="12" sm="6" md="4" lg="3" class="mt-9">
+
+                                <VRow>
+
+                                    <!-- 👉 PC Details -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.pcDetails" label="PC Details"
+                                            placeholder="PC Details" />
+                                    </VCol>
+
+                                    <!-- 👉 Any Paid Platform -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.anyPaidPlatform" label="Any Paid Platform"
+                                            placeholder="Any Paid Platform" />
+                                    </VCol>
+
+                                    <!-- 👉 ID and Password of Any Paid Platforms -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.idAndPasswordOfAnyPaidPlatforms"
+                                            label="ID and Password of Any Paid Platforms"
+                                            placeholder="ID and Password of Any Paid Platforms" />
+                                    </VCol>
+
+                                    <!-- 👉 Peripheral Devices -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.peripheralDevices"
+                                            label="Peripheral Devices" placeholder="Peripheral Devices" />
+                                    </VCol>
+
+                                    <!-- 👉 Job Type -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.jobType" label="Job Type"
+                                            placeholder="Job Type" />
+                                    </VCol>
+
+                                    <!-- 👉 First Salary Increment -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.firstSalaryIncrement"
+                                            label="First Salary increment (Amount & Month)"
+                                            placeholder="First Salary Increment" />
+                                    </VCol>
+
+                                    <!-- 👉 Second Salary Increment -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.secondSalaryIncrement"
+                                            label="Second Salary increment (Amount & Month)"
+                                            placeholder="Second Salary increment (Amount & Month)" />
+                                    </VCol>
+
+                                    <!-- 👉 Third Salary Increment -->
+                                    <VCol cols="12">
+                                        <VTextField v-model="optionalDetails.thirdSalaryIncrement"
+                                            label="Third Salary increment (Amount & Month)"
+                                            placeholder="Third Salary Increment" />
+                                    </VCol>
+
+                                </VRow>
+
+
+
+                            </VCol>
+
+                            <!-- 👉 Submit and Cancel -->
+                            <VCol cols="12" class="d-flex justify-end">
+                                <VBtn type="submit" class="me-4">
+                                    Submit
+                                </VBtn>
+                                <VBtn type="reset" variant="outlined" color="error" @click="closeNavigationDrawer">
+                                    Cancel
+                                </VBtn>
+                            </VCol>
+
                         </VRow>
 
-                        <VRow>
-                            <!-- 👉 Submit and Cancel -->
+                        <!-- <VRow>
+                           
                             <VCol cols="12">
                                 <VBtn type="submit" class="me-4">
                                     Submit
@@ -215,7 +358,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                                     Cancel
                                 </VBtn>
                             </VCol>
-                        </VRow>
+                        </VRow> -->
 
                     </VForm>
                 </VCardText>
