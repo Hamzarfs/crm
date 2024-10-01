@@ -7,14 +7,7 @@ const searchQuery = ref('')
 const selectedRole = ref()
 const selectedStatus = ref()
 const selectedDepartment = ref()
-const selectedUser = ref({
-    name: '',
-    email: '',
-    phone: '',
-    role: undefined,
-    department: undefined,
-    status: undefined,
-})
+const selectedUser = ref({})
 let userToDelete: number
 
 // Data table options
@@ -185,6 +178,11 @@ const widgetData = ref([
     { title: 'Inactive Employees', value: inactiveEmployees, icon: 'ri-user-add-line', iconColor: 'error' },
     { title: 'New Employees', value: newEmployees, icon: 'ri-user-search-line', iconColor: 'warning', desc: 'Joined last month' },
 ])
+
+watch(isEditUserDrawerVisible, editDrawer => {
+    if (!editDrawer)
+        selectedUser.value = {}
+})
 
 </script>
 
