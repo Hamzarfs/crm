@@ -12,10 +12,10 @@ class UserDetail extends Model
 
     protected $guarded = [];
 
-    protected function value(): Attribute
-    {
-        return new Attribute(
-            get: fn(string $value, array $attributes) => $attributes['key'] == 'joiningDate' ? date('Y-m-d', strtotime($value)) : $value,
-        );
-    }
+        // protected function value(): Attribute
+        // {
+        //     return new Attribute(
+        //         get: fn(string $value, array $attributes) => $attributes['key'] == 'joiningDate' ? date('Y-m-d', strtotime($value)) : $value,
+        //     );
+        // }
 }

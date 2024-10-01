@@ -51,6 +51,7 @@ const optionalDetails = ref({
     idAndPasswordOfAnyPaidPlatforms: '',
     peripheralDevices: '',
     jobType: '',
+    joiningDate: '',
     firstSalaryIncrement: '',
     secondSalaryIncrement: '',
     thirdSalaryIncrement: '',
@@ -111,7 +112,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                     <!-- 👉 Form -->
                     <VForm ref="refForm" v-model="isFormValid" @submit.prevent="onSubmit">
                         <VRow>
-                            <VCol cols="12" xs="12" sm="6" md="4" lg="3">
+                            <VCol cols="12" sm="12" md="4" lg="3">
                                 <VRow>
                                     <h1 class="my-4 ms-4">Required Details</h1>
 
@@ -130,7 +131,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
 
                                     <!-- 👉 Contact -->
                                     <VCol cols="12">
-                                        <VTextField v-model="phone" type="text" :rules="[numberValidator]"
+                                        <VTextField v-model="phone" type="text" :rules="[phoneNumberValidator]"
                                             label="Phone Number" placeholder="03001234567" />
                                     </VCol>
 
@@ -158,7 +159,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
 
                             <VCol cols="12" sm="6" md="4" lg="3">
                                 <VRow>
-                                    <h1 class="mb-4">Additional Details</h1>
+                                    <h1 class="my-4 ms-4">Additional Details</h1>
 
                                     <!-- 👉 Biometric ID -->
                                     <VCol cols="12">
@@ -215,7 +216,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                                 </VRow>
                             </VCol>
 
-                            <VCol cols="12" sm="6" md="4" lg="3" class="mt-9">
+                            <VCol cols="12" sm="6" md="4" lg="3" class="mt-13">
                                 <VRow>
 
                                     <!-- 👉 Experience Details -->
@@ -274,7 +275,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                                 </VRow>
                             </VCol>
 
-                            <VCol cols="12" sm="6" md="4" lg="3" class="mt-9">
+                            <VCol cols="12" sm="6" md="4" lg="3" class="mt-13 st-0">
 
                                 <VRow>
 
@@ -307,6 +308,12 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                                     <VCol cols="12">
                                         <VTextField v-model="optionalDetails.jobType" label="Job Type"
                                             placeholder="Job Type" />
+                                    </VCol>
+
+                                    <!-- 👉 Select Date Joining Date -->
+                                    <VCol cols="12">
+                                        <AppDateTimePicker v-model="optionalDetails.joiningDate" label="Filter by Date"
+                                            placeholder="Filter by Date" clearable :config="{ dateFormat: 'd-m-Y' }" />
                                     </VCol>
 
                                     <!-- 👉 First Salary Increment -->
