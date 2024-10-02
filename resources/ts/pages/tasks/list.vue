@@ -1,8 +1,5 @@
 <script setup lang="ts">
 
-import AddNewTaskDrawer from '@/components/tasks/AddNewTaskDrawer.vue';
-import EditTaskDrawer from '@/components/tasks/EditTaskDrawer.vue';
-import ViewTaskDrawer from '@/components/tasks/ViewTaskDrawer.vue';
 import { mergeProps } from 'vue';
 
 // Get currently logged in user data

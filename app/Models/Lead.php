@@ -39,6 +39,11 @@ class Lead extends Model
         return $this->belongsTo(Brand::class);
     }
 
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
     public function leadClosedDate(): Attribute
     {
         return new Attribute(

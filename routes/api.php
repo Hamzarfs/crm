@@ -17,7 +17,7 @@ Route::group(['prefix' => 'auth'], function () {
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('users')->controller(UserController::class)->group(function () {
-        Route::get('', 'list')->middleware('role:admin|hr|team_lead');
+        Route::get('', 'list')->middleware('role_or_department:admin|hr|team_lead,sales');
         Route::middleware('role:admin|hr')->group(function () {
             Route::get('statuses', 'getStatuses');
             Route::post('', 'store');

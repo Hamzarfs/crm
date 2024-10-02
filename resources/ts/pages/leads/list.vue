@@ -1,7 +1,11 @@
 <script setup lang="ts">
 
+// Get currently logged in user data
+const userData = useCookie('userData').value
+
 
 // 👉 Store
+const selectedUser = ref([])
 const selectedCustomers = ref([])
 const selectedLeadSources = ref([])
 const selectedBrands = ref([])
@@ -36,9 +40,10 @@ const updateOptions = (options: any) => {
 // Headers
 const headers = [
     { title: 'ID', key: 'id' },
-    { title: 'Customer name', key: 'customer', sortable: false },
-    { title: 'Lead Source', key: 'lead_source', sortable: false },
-    { title: 'Brand', key: 'brand', sortable: false },
+    { title: 'Created By', key: 'created_by' },
+    { title: 'Customer name', key: 'customer_id' },
+    { title: 'Lead Source', key: 'lead_source_id' },
+    { title: 'Brand', key: 'brand_id' },
     { title: 'Services sold', key: 'services', sortable: false },
     { title: 'Upsells', key: 'upsells', sortable: false },
     { title: 'Status', key: 'status' },
@@ -52,6 +57,7 @@ const headers = [
 // 👉 Fetching leads
 const { data: leadsData, execute: fetchLeads, isFetching } = await useApi<any>(createUrl('leads', {
     query: {
+        'users[]': selectedUser,
         'customers[]': selectedCustomers,
         'leadSources[]': selectedLeadSources,
         'brands[]': selectedBrands,
@@ -82,11 +88,18 @@ const { services } = await $api('services')
 const { brands } = await $api('brands')
 const { customers } = await $api('customers')
 const { leadsources } = await $api('leadsources')
+const { users } = await $api('users', {
+    query: {
+        'department[]': [1, 2] // Sales & Admin departments
+    }
+})
 
 const _services = services.map((s: any) => ({ title: s.name, value: s.id }))
 const _brands = brands.map((b: any) => ({ title: b.name, value: b.id }))
 const _customers = customers.map((c: any) => ({ title: c.full_name, value: c.id }))
 const _leadSources = leadsources.map((ls: any) => ({ title: ls.name, value: ls.id }))
+const _salesUser = users.map((u: any) => ({ title: u.name, value: u.id }))
+_salesUser.unshift({ title: 'Me', value: userData.id })
 
 const resolveLeadStatusVariant = (status: string) => {
     const successStatuses = ['Sale closed']
@@ -271,6 +284,12 @@ watch(isEditLeadDrawerVisible, editDrawer => {
                 </VRow>
 
                 <VRow>
+                    <!-- 👉 Select Agent -->
+                    <VCol>
+                        <VAutocomplete v-model="selectedUser" multiple label="Filter by Created by"
+                            placeholder="Filter by Created by" :items="_salesUser" clearable chips />
+                    </VCol>
+
                     <!-- 👉 Select Statuses -->
                     <VCol>
                         <VSelect v-model="selectedStatuses" multiple label="Filter by Statuses"
@@ -304,12 +323,12 @@ watch(isEditLeadDrawerVisible, editDrawer => {
 
             <VCardText class="d-flex flex-wrap gap-4">
                 <!-- 👉 Export & import buttons -->
-                <VBtn color="success" prepend-icon="ri-upload-2-line">
+                <!-- <VBtn color="success" prepend-icon="ri-upload-2-line">
                     Import
                 </VBtn>
                 <VBtn color="secondary" prepend-icon="ri-download-2-line">
                     Export
-                </VBtn>
+                </VBtn> -->
                 <VSpacer />
                 <VBtn @click="isAddNewLeadDrawerVisible = true" prepend-icon="ri-user-add-fill">
                     Add New Lead
@@ -323,18 +342,23 @@ watch(isEditLeadDrawerVisible, editDrawer => {
                 item-value="id" :items-length="totalLeads" :headers="headers" class="text-no-wrap rounded-0"
                 @update:options="updateOptions" density="default">
 
+                <!-- Create BY -->
+                <template #item.created_by="{ item }: { item: any }">
+                    {{ item.created_by?.name }}
+                </template>
+
                 <!-- Customer Name -->
-                <template #item.customer="{ item }: { item: any }">
+                <template #item.customer_id="{ item }: { item: any }">
                     {{ item.customer.name }}
                 </template>
 
                 <!-- Lead Source -->
-                <template #item.lead_source="{ item }: { item: any }">
+                <template #item.lead_source_id="{ item }: { item: any }">
                     {{ item.lead_source.name }}
                 </template>
 
                 <!-- Lead Source -->
-                <template #item.brand="{ item }: { item: any }">
+                <template #item.brand_id="{ item }: { item: any }">
                     {{ item.brand.name }}
                 </template>
 
@@ -379,12 +403,10 @@ watch(isEditLeadDrawerVisible, editDrawer => {
                 <template #item.lead_closed_amount="{ item }: { item: any }">
                     <span v-if="item.lead_closed_date">
                         {{ currencyFormatter(item.lead_closed_amount) }}
-                        <!-- ${{ item.lead_closed_amount }} -->
                     </span>
                     <span v-else class="text-error font-weight-bold">
                         Not closed
                     </span>
-                    <!-- ${{ item.lead_closed_amount }} -->
                 </template>
 
                 <!-- Created at -->

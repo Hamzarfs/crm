@@ -2,11 +2,11 @@
 
 namespace App\Http\Resources\Sales;
 
+use App\Http\Resources\UserResource;
 use App\Models\Service;
 use App\Models\Upsell;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Carbon;
 
 class LeadResource extends JsonResource
 {
@@ -19,6 +19,7 @@ class LeadResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'created_by' => $this->whenLoaded('createdBy', new UserResource($this->createdBy)),
             'services_sold' => $this->whenLoaded(
                 'servicesSold',
                 $this->servicesSold->map(function (Service $service) {

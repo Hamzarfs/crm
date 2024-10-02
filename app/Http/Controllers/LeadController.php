@@ -7,10 +7,9 @@ use App\Http\Requests\Sales\Lead\Update;
 use App\Http\Resources\Collections\Sales\LeadResourceCollection;
 use App\Models\Lead;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Client\ResponseSequence;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class LeadController extends Controller
 {
@@ -22,6 +21,7 @@ class LeadController extends Controller
         $page = (int) $request->input('page', 1);
         $itemsPerPage = (int) $request->input('itemsPerPage', 10);
 
+        $users = $request->input('users');
         $customers = $request->input('customers');
         $leadSources = $request->input('leadSources');
         $brands = $request->input('brands');
@@ -40,10 +40,13 @@ class LeadController extends Controller
         $orderByColumn = $request->input('sortBy');
         $orderByDir = $request->input('orderBy');
 
-        $leads = Lead::with(['servicesSold', 'upsells.serviceSold', 'customer', 'leadSource', 'brand'])->withCount(['servicesSold', 'upsells']);
+        $leads = Lead::with(['servicesSold', 'upsells.serviceSold', 'customer', 'leadSource', 'brand', 'createdBy'])->withCount(['servicesSold', 'upsells']);
 
         // Applying DT filters
         $leads = $leads->when(
+            value: $users,
+            callback: fn(Builder $leadsQuery, array $users) => $leadsQuery->whereHas('createdBy', fn(Builder $userQuery) => $userQuery->whereIn('id', $users))
+        )->when(
             value: $customers,
             callback: fn(Builder $leadsQuery, array $customers) => $leadsQuery->whereHas('customer', fn(Builder $customerQuery) => $customerQuery->whereIn('id', $customers))
         )->when(
@@ -103,6 +106,7 @@ class LeadController extends Controller
         $data = (object) $request->validated();
 
         $leadAttributes = [
+            'created_by' => Auth::id(),
             'customer_id' => $data->customer,
             'lead_source_id' => $data->lead_source,
             'brand_id' => $data->brand,

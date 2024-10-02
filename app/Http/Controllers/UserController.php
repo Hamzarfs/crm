@@ -31,7 +31,7 @@ class UserController extends Controller
             ['id', '!=', $request->user()->id]
         ])->when(
             value: $department,
-            callback: fn(Builder $userQuery, string $department) => $userQuery->where('department_id', $department)
+            callback: fn(Builder $userQuery, string | array $department) => is_array($department) ? $userQuery->whereIn('department_id', $department) : $userQuery->where('department_id', $department)
         )->get();
 
         return response()->json([
