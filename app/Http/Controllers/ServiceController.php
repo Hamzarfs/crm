@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Sales\Service\Store;
 use App\Http\Requests\Sales\Service\Update;
 use App\Models\Service;
-use Illuminate\Http\Request;
 
 class ServiceController extends Controller
 {
@@ -75,6 +74,12 @@ class ServiceController extends Controller
      */
     public function delete(Service $service)
     {
+        if ($service->leads()->exists())
+            return response()->json([
+                'success' => false,
+                'message' => "Service: {$service->name} is associated with lead(s). Please delete the corresponding lead first."
+            ]);
+
         $service->delete();
         return response()->json([
             'success' => true,

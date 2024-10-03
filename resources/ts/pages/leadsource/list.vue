@@ -1,14 +1,10 @@
 <script setup lang="ts">
 
-import addNewLeadSourceDrawer from '@/components/leadsource/AddNewLeadSourceDrawer.vue';
-import EditLeadSourceDrawer from '@/components/leadsource/EditLeadSourceDrawer.vue';
-
 
 const selectedLeadSource = ref({
     name: '',
 })
 let leadsourceToDelete: number
-let leadsourceToUpdate: number
 
 
 // Add a ref for the AddNewUserDrawer & editUserDrawerRef component
@@ -27,14 +23,13 @@ const headers = [
 // 👉 Fetching roles
 const { leadsources } = await $api('leadsources')
 
-
 const leadsourcesData = ref(leadsources)
 
 const isAddNewLeadSourceDrawerVisible = ref(false)
 const isEditLeadSourceDrawerVisible = ref(false)
 const isSnackBarVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
-let leadsourceResponsemessage: string
+const leadsourceResponsemessage = ref('')
 
 // 👉 Add new leadsource
 const addNewLeadSource = async (leadsourceData: any) => {
@@ -49,7 +44,7 @@ const addNewLeadSource = async (leadsourceData: any) => {
     if (success) {
         isSnackBarVisible.value = true
         leadsourcesData.value = [...leadsourcesData.value, leadsource]
-        leadsourceResponsemessage = message
+        leadsourceResponsemessage.value = message
         addNewLeadSourceDrawerRef.value.closeNavigationDrawer()
         nextTick(() => {
             dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollTop = dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollHeight
@@ -69,7 +64,7 @@ const editleadsource = async (leadsourceData: any) => {
     if (success) {
         isSnackBarVisible.value = true
         leadsourcesData.value[leadsourceToDelete] = leadsource
-        leadsourceResponsemessage = message
+        leadsourceResponsemessage.value = message
         editLeadSourceDrawerRef.value.closeNavigationDrawer()
     }
 }
@@ -80,8 +75,7 @@ const openeditleadsourceForm = (leadsource: any) => {
     isEditLeadSourceDrawerVisible.value = true
 }
 
-
-// 👉 Delete role
+// 👉 Delete lead source
 const deleteLeadSource = async () => {
     const { success, message } = await $api(`leadsources/${leadsourceToDelete}`, {
         method: 'DELETE',
@@ -89,9 +83,9 @@ const deleteLeadSource = async () => {
 
     isDeleteDialogVisible.value = false
 
+    isSnackBarVisible.value = true
+    leadsourceResponsemessage.value = message
     if (success) {
-        isSnackBarVisible.value = true
-        leadsourceResponsemessage = message
         leadsourcesData.value = leadsourcesData.value.filter((leadsource: any) => leadsource.id !== leadsourceToDelete)
     }
 }

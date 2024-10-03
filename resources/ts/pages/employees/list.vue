@@ -100,7 +100,7 @@ const isAddNewUserDrawerVisible = ref(false)
 const isEditUserDrawerVisible = ref(false)
 const isSnackBarVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
-let userResponsemessage: string
+const userResponsemessage = ref('')
 
 // 👉 Add new user
 const addNewUser = async (userData: any) => {
@@ -114,7 +114,7 @@ const addNewUser = async (userData: any) => {
 
     if (success) {
         isSnackBarVisible.value = true
-        userResponsemessage = message
+        userResponsemessage.value = message
         addNewUserDrawerRef.value.closeNavigationDrawer()
         fetchUsers()
         fetchEmployeesCount()
@@ -133,7 +133,7 @@ const editUser = async (userData: any) => {
 
     if (success) {
         isSnackBarVisible.value = true
-        userResponsemessage = message
+        userResponsemessage.value = message
         editUserDrawerRef.value.closeNavigationDrawer()
         fetchUsers()
         fetchEmployeesCount()
@@ -153,9 +153,9 @@ const deleteUser = async () => {
 
     isDeleteDialogVisible.value = false
 
+    isSnackBarVisible.value = true
+    userResponsemessage.value = message
     if (success) {
-        isSnackBarVisible.value = true
-        userResponsemessage = message
         fetchUsers()
         fetchEmployeesCount()
     }

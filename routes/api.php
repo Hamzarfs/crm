@@ -65,11 +65,9 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware('department:admin,sales')
         ->group(function () {
             Route::get('', 'list');
-            Route::middleware('role:admin|team_lead')->group(function () {
-                Route::post('', 'store');
-                Route::put('{service}', 'update');
-                Route::delete('{service}', 'delete');
-            });
+            Route::post('', 'store');
+            Route::put('{service}', 'update');
+            Route::delete('{service}', 'delete');
         });
 
     Route::prefix('brands')
@@ -77,11 +75,9 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware('department:admin,sales')
         ->group(function () {
             Route::get('', 'all');
-            Route::middleware('role:admin|team_lead')->group(function () {
-                Route::post('', 'store');
-                Route::put('{brand}', 'update');
-                Route::delete('{brand}', 'delete');
-            });
+            Route::post('', 'store');
+            Route::put('{brand}', 'update');
+            Route::delete('{brand}', 'delete');
         });
 
 
@@ -90,11 +86,9 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware('department:admin,sales')
         ->group(function () {
             Route::get('', 'all');
-            Route::middleware('role:admin|team_lead')->group(function () {
-                Route::post('', 'store');
-                Route::put('{leadsource}', 'update');
-                Route::delete('{leadsource}', 'delete');
-            });
+            Route::post('', 'store');
+            Route::put('{leadsource}', 'update');
+            Route::delete('{leadsource}', 'delete');
         });
 
     Route::prefix('customers')
@@ -102,11 +96,9 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware('department:admin,sales')
         ->group(function () {
             Route::get('', 'list');
-            Route::middleware('role:admin|team_lead')->group(function () {
-                Route::post('', 'store');
-                Route::put('{customer}', 'update');
-                Route::delete('{customer}', 'delete');
-            });
+            Route::post('', 'store');
+            Route::put('{customer}', 'update');
+            Route::delete('{customer}', 'delete');
         });
 
     Route::prefix('leads')

@@ -14,17 +14,6 @@ class User extends Authenticatable
 {
     use HasFactory, HasApiTokens, SoftDeletes, HasRoles;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    // protected $fillable = [
-    //     'name',
-    //     'email',
-    //     'password',
-    // ];
-
     protected $guarded = [];
 
     /**
@@ -59,6 +48,11 @@ class User extends Authenticatable
         return $this->belongsTo(Department::class);
     }
 
+    public function leadingDepartment()
+    {
+        return $this->hasOne(Department::class, 'leader_id');
+    }
+
     public function hasDepartment(string ...$departments): bool
     {
         $this->load('department:id,name');
@@ -73,7 +67,27 @@ class User extends Authenticatable
     protected function employeeDetails(): Attribute
     {
         return new Attribute(
-            get: fn() => (object) transformEmployeeDetailsToArray($this->details->toArray())
+            get: fn() => (object) transformEmployeeDetailsToArray($this->details?->toArray())
         );
+    }
+
+    public function leads()
+    {
+        return $this->hasMany(Lead::class, 'created_by');
+    }
+
+    public function createdTasks()
+    {
+        return $this->hasMany(Task::class, 'created_by');
+    }
+
+    public function assignedTasks()
+    {
+        return $this->hasMany(Task::class, 'assigned_to');
+    }
+
+    public function taskComments()
+    {
+        return $this->hasMany(TaskComment::class, 'created_by');
     }
 }

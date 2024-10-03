@@ -28,7 +28,7 @@ const isAddNewBrandDrawerVisible = ref(false)
 const isEditBrandDrawerVisible = ref(false)
 const isSnackBarVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
-let brandResponsemessage: string
+const brandResponsemessage = ref('')
 
 // 👉 Fetching brands
 const { brands } = await $api('brands')
@@ -47,7 +47,7 @@ const addNewbrand = async (brandData: any) => {
     if (success) {
         isSnackBarVisible.value = true
         brandsData.value = [...brandsData.value, brand]
-        brandResponsemessage = message
+        brandResponsemessage.value = message
         addNewBrandDrawerRef.value.closeNavigationDrawer()
         nextTick(() => {
             dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollTop = dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollHeight
@@ -67,7 +67,7 @@ const editbrand = async (brandData: any) => {
     if (success) {
         isSnackBarVisible.value = true
         brandsData.value[brandToUpdateIndex] = brand
-        brandResponsemessage = message
+        brandResponsemessage.value = message
         editBrandDrawerRef.value.closeNavigationDrawer()
     }
 }
@@ -78,8 +78,7 @@ const openeditbrandForm = (brand: any) => {
     isEditBrandDrawerVisible.value = true
 }
 
-
-// 👉 Delete role
+// 👉 Delete brand
 const deleteBrand = async () => {
     const { success, message } = await $api(`brands/${brandToDelete}`, {
         method: 'DELETE',
@@ -87,9 +86,10 @@ const deleteBrand = async () => {
 
     isDeleteDialogVisible.value = false
 
+    isSnackBarVisible.value = true
+    brandResponsemessage.value = message
+
     if (success) {
-        isSnackBarVisible.value = true
-        brandResponsemessage = message
         brandsData.value = brandsData.value.filter((brand: any) => brand.id !== brandToDelete)
     }
 }

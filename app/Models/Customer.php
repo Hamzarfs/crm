@@ -22,12 +22,17 @@ class Customer extends Model
         );
     }
 
-    protected function casts(): array
+    // protected function casts(): array
+    // {
+    //     return [
+    //         'created_at' => 'date:d M Y, g:i A',
+    //         'updated_at' => 'date:d M Y, g:i A',
+    //         'deleted_at' => 'date:d M Y, g:i A',
+    //     ];
+    // }
+
+    public function leads()
     {
-        return [
-            'created_at' => 'date:d M Y, g:i A',
-            'updated_at' => 'date:d M Y, g:i A',
-            'deleted_at' => 'date:d M Y, g:i A',
-        ];
+        return $this->hasMany(Lead::class);
     }
 }

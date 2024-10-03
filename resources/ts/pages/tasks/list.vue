@@ -143,7 +143,7 @@ const isEditTaskDrawerVisible = ref(false)
 const isViewTaskDrawerVisible = ref(false)
 const isSnackBarVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
-let taskResponsemessage: string
+const taskResponsemessage = ref('')
 
 // 👉 Add new task
 const addNewTask = async (taskData: FormData) => {
@@ -155,10 +155,10 @@ const addNewTask = async (taskData: FormData) => {
         },
     })
 
+    isSnackBarVisible.value = true
+    taskResponsemessage.value = message
+    addNewTaskDrawerRef.value.closeNavigationDrawer()
     if (success) {
-        isSnackBarVisible.value = true
-        taskResponsemessage = message
-        addNewTaskDrawerRef.value.closeNavigationDrawer()
         fetchTasks()
     }
 }
@@ -173,10 +173,10 @@ const editTask = async (taskData: any) => {
         },
     })
 
+    isSnackBarVisible.value = true
+    taskResponsemessage.value = message
+    editTaskDrawerRef.value.closeNavigationDrawer()
     if (success) {
-        isSnackBarVisible.value = true
-        taskResponsemessage = message
-        editTaskDrawerRef.value.closeNavigationDrawer()
         fetchTasks()
     }
 }
@@ -195,9 +195,9 @@ const deleteTask = async () => {
 
     isDeleteDialogVisible.value = false
 
+    isSnackBarVisible.value = true
+    taskResponsemessage.value = message
     if (success) {
-        isSnackBarVisible.value = true
-        taskResponsemessage = message
         fetchTasks()
     }
 }
@@ -209,9 +209,9 @@ const addComment = async (commentData: FormData) => {
         body: commentData,
     })
 
+    isSnackBarVisible.value = true
+    taskResponsemessage.value = message
     if (success) {
-        isSnackBarVisible.value = true
-        taskResponsemessage = message
         selectedTask.value.comments.push(comment)
         viewTaskDrawerRef.value.commentForm.reset()
     }
@@ -242,14 +242,14 @@ const handleStatusUpdate = async ({ id, status }: { id: number, status: string }
             onResponseError({ response }) {
                 console.error(response._data.message)
                 isSnackBarVisible.value = true
-                taskResponsemessage = "Something went wrong! Please try again."
+                taskResponsemessage.value = "Something went wrong! Please try again."
             },
         })
 
+        isSnackBarVisible.value = true
+        taskResponsemessage.value = message
         if (success) {
             task.status = status
-            isSnackBarVisible.value = true
-            taskResponsemessage = message
         }
     }
 }
@@ -264,14 +264,14 @@ const deleteComment = async (commentIndex: number) => {
         onResponseError({ response }) {
             console.error(response._data.message)
             isSnackBarVisible.value = true
-            taskResponsemessage = "Something went wrong! Please try again."
+            taskResponsemessage.value = "Something went wrong! Please try again."
         },
     })
 
+    isSnackBarVisible.value = true
+    taskResponsemessage.value = message
     if (success) {
         selectedTask.value.comments.splice(commentIndex, 1)
-        isSnackBarVisible.value = true
-        taskResponsemessage = message
     }
 }
 

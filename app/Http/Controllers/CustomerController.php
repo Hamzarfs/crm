@@ -63,6 +63,12 @@ class CustomerController extends Controller
      */
     public function delete(Customer $customer)
     {
+        if ($customer->leads()->exists())
+            return response()->json([
+                'success' => false,
+                'message' => "Customer: {$customer->full_name} is associated with lead(s). Please delete the corresponding lead first."
+            ]);
+
         $customer->delete();
         return response()->json([
             'success' => true,

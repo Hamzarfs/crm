@@ -71,6 +71,12 @@ class DepartmentController extends Controller
 
     public function delete(Department $department)
     {
+        if ($department->users()->exists())
+            return response()->json([
+                'success' => false,
+                'message' => "Department: {$department->name} is assigned to user(s). Please unassign the users from this department first."
+            ]);
+
         $department->delete();
         return response()->json([
             'success' => true,

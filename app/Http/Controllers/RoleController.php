@@ -54,6 +54,12 @@ class RoleController extends Controller
 
     public function delete(Role $role)
     {
+        if ($role->users()->exists())
+            return response()->json([
+                'success' => false,
+                'message' => sprintf("Role: %s is assigned to user(s). Please unassign the users from this role first. ", Str::title(str_replace('_', ' ', $role->name)))
+            ]);
+
         $role->delete();
         return response()->json([
             'success' => true,

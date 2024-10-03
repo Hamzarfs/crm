@@ -63,6 +63,12 @@ class BrandController extends Controller
 
     public function delete(Brand $brand)
     {
+        if ($brand->leads()->exists())
+            return response()->json([
+                'success' => false,
+                'message' => "Brand: {$brand->name} is associated with lead(s). Please delete the corresponding lead first."
+            ]);
+
         $brand->delete();
         return response()->json([
             'success' => true,

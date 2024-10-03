@@ -30,7 +30,7 @@ const isAddNewRoleDrawerVisible = ref(false)
 const isEditRoleDrawerVisible = ref(false)
 const isSnackBarVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
-let roleResponsemessage: string
+const roleResponsemessage = ref('')
 
 // 👉 Add new role
 const addNewRole = async (roleData: any) => {
@@ -45,7 +45,7 @@ const addNewRole = async (roleData: any) => {
     if (success) {
         isSnackBarVisible.value = true
         rolesData.value = [...rolesData.value, role]
-        roleResponsemessage = message
+        roleResponsemessage.value = message
         addNewRoleDrawerRef.value.closeNavigationDrawer()
         nextTick(() => {
             dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollTop = dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollHeight
@@ -65,7 +65,7 @@ const editRole = async (roleData: any) => {
     if (success) {
         isSnackBarVisible.value = true
         rolesData.value[roleToUpdateIndex] = role
-        roleResponsemessage = message
+        roleResponsemessage.value = message
         editRoleDrawerRef.value.closeNavigationDrawer()
     }
 }
@@ -85,9 +85,9 @@ const deleteRole = async () => {
 
     isDeleteDialogVisible.value = false
 
+    isSnackBarVisible.value = true
+    roleResponsemessage.value = message
     if (success) {
-        isSnackBarVisible.value = true
-        roleResponsemessage = message
         rolesData.value = rolesData.value.filter((role: any) => role.id !== roleToDelete)
     }
 }

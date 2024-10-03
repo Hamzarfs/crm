@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Test\Constraint\ResponseFormatSame;
 
 class UserController extends Controller
 {
@@ -172,6 +174,27 @@ class UserController extends Controller
 
     public function delete(User $user)
     {
+        $message = false;
+
+        if ($user->leadingDepartment()->exists())
+            $message = sprintf("Employee: %s is assigned as leader of Department: %s. Please unassign the employee from department leader.", $user->name, Str::title(str_replace('_', ' ', $user->leadingDepartment->name)));
+
+        if ($user->leads()->exists())
+            $message = "Employee: {$user->name} has created lead(s). Please delete the associated lead(s) first to proceed.";
+
+        if ($user->assignedTasks()->exists())
+            $message = "Employee: {$user->name} is assigned to task(s). Please unassign the employee from the corresponding task(s) first.";
+
+        if ($user->createdTasks()->exists())
+            $message = "Employee: {$user->name} has created task(s). Please delete the corresponding task(s) first.";
+
+        if ($message)
+            return response()->json([
+                'success' => false,
+                'message' => $message
+            ]);
+
+        $user->details()->delete();
         $user->delete();
         return response()->json([
             'success' => true,

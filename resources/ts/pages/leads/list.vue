@@ -117,7 +117,7 @@ const isAddNewLeadDrawerVisible = ref(false)
 const isEditLeadDrawerVisible = ref(false)
 const isSnackBarVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
-let leadResponsemessage: string
+const leadResponsemessage = ref('')
 
 // 👉 Add new lead
 const addNewLead = async (leadData: any) => {
@@ -131,7 +131,7 @@ const addNewLead = async (leadData: any) => {
 
     if (success) {
         isSnackBarVisible.value = true
-        leadResponsemessage = message
+        leadResponsemessage.value = message
         addNewLeadDrawerRef.value.closeNavigationDrawer()
         fetchLeads()
         fetchLeadsCount()
@@ -150,7 +150,7 @@ const editLead = async (leadData: any) => {
 
     if (success) {
         isSnackBarVisible.value = true
-        leadResponsemessage = message
+        leadResponsemessage.value = message
         editLeadDrawerRef.value.closeNavigationDrawer()
         fetchLeads()
         fetchLeadsCount()
@@ -170,9 +170,9 @@ const deleteLead = async () => {
 
     isDeleteDialogVisible.value = false
 
+    isSnackBarVisible.value = true
+    leadResponsemessage.value = message
     if (success) {
-        isSnackBarVisible.value = true
-        leadResponsemessage = message
         fetchLeads()
         fetchLeadsCount()
     }

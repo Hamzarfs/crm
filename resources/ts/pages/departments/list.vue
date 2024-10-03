@@ -34,7 +34,7 @@ const isAddNewDepartmentDrawerVisible = ref(false)
 const isEditDepartmentDrawerVisible = ref(false)
 const isSnackBarVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
-let departmentResponsemessage: string
+const departmentResponsemessage = ref('')
 
 // 👉 Add new department
 const addNewDepartment = async (departmentData: any) => {
@@ -49,7 +49,7 @@ const addNewDepartment = async (departmentData: any) => {
     if (success) {
         isSnackBarVisible.value = true
         departmentsData.value = [...departmentsData.value, department]
-        departmentResponsemessage = message
+        departmentResponsemessage.value = message
         addNewDepartmentDrawerRef.value.closeNavigationDrawer()
         nextTick(() => {
             dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollTop = dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollHeight
@@ -69,7 +69,7 @@ const editDepartment = async (departmentData: any) => {
     if (success) {
         isSnackBarVisible.value = true
         departmentsData.value[departmentToUpdateIndex] = department
-        departmentResponsemessage = message
+        departmentResponsemessage.value = message
         editDepartmentDrawerRef.value.closeNavigationDrawer()
     }
 }
@@ -80,8 +80,7 @@ const openEditDepartmentForm = (department: any) => {
     isEditDepartmentDrawerVisible.value = true
 }
 
-
-// 👉 Delete role
+// 👉 Delete department
 const deleteDepartment = async () => {
     const { success, message } = await $api(`departments/${departmentToDelete}`, {
         method: 'DELETE',
@@ -89,9 +88,9 @@ const deleteDepartment = async () => {
 
     isDeleteDialogVisible.value = false
 
+    isSnackBarVisible.value = true
+    departmentResponsemessage.value = message
     if (success) {
-        isSnackBarVisible.value = true
-        departmentResponsemessage = message
         departmentsData.value = departmentsData.value.filter((department: any) => department.id !== departmentToDelete)
     }
 }
@@ -122,7 +121,7 @@ const errors = ref({
                 <!-- Actions -->
                 <template #item.actions="{ item }: { item: any }">
                     <IconBtn size="small" @click="openEditDepartmentForm(item)" color="primary"
-                        :disabled="item.id >= 1 && item.id <= 4">
+                        :disabled="item.id >= 1 && item.id <= 5">
                         <VIcon icon="ri-edit-box-line" />
                         <VTooltip activator="parent" location="top">
                             Edit
@@ -130,7 +129,7 @@ const errors = ref({
                     </IconBtn>
 
                     <IconBtn size="small" @click="isDeleteDialogVisible = true; departmentToDelete = item.id"
-                        color="error" :disabled="item.id >= 1 && item.id <= 4">
+                        color="error" :disabled="item.id >= 1 && item.id <= 5">
                         <VIcon icon="ri-delete-bin-7-line" />
                         <VTooltip activator="parent" location="top">
                             Delete

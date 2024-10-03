@@ -52,22 +52,6 @@ class LeadSourceController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
     public function update(Update $request, LeadSource $leadsource)
@@ -92,6 +76,12 @@ class LeadSourceController extends Controller
      */
     public function delete(LeadSource $leadsource)
     {
+        if ($leadsource->leads()->exists())
+            return response()->json([
+                'success' => false,
+                'message' => "Lead source: {$leadsource->name} is associated with lead(s). Please delete the corresponding lead first."
+            ]);
+
         $leadsource->delete();
         return response()->json([
             'success' => true,

@@ -12,7 +12,7 @@ class Store extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->hasRole([RolesEnum::ADMIN, RolesEnum::TEAM_LEAD]) && $this->user()->hasDepartment('admin', 'sales');
+        return $this->user()->hasDepartment('admin', 'sales');
     }
 
     /**
