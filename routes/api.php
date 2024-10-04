@@ -16,16 +16,23 @@ Route::group(['prefix' => 'auth'], function () {
 
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::prefix('users')->controller(UserController::class)->group(function () {
-        Route::get('', 'list')->middleware('role_or_department:admin|hr|team_lead,sales');
-        Route::middleware('role:admin|hr')->group(function () {
-            Route::get('statuses', 'getStatuses');
-            Route::post('', 'store');
-            Route::put('{user}', 'update');
-            Route::delete('{user}', 'delete');
-            Route::get('count', 'employeeCount');
+    Route::prefix('users')
+        ->controller(UserController::class)
+        ->group(function () {
+            Route::get('', 'list')->middleware('role_or_department:admin|hr|team_lead,sales');
+            Route::middleware('role:admin|hr')->group(function () {
+                Route::get('statuses', 'getStatuses');
+                Route::post('', 'store');
+                Route::put('{user}', 'update');
+                Route::delete('{user}', 'delete');
+                Route::get('count', 'employeeCount');
+                Route::prefix('import')
+                    ->group(function () {
+                        Route::get('sample/download', 'downloadSample');
+                        Route::post('', 'importEmployees');
+                    });
+            });
         });
-    });
 
     Route::middleware('role:admin')->group(function () {
         Route::prefix('roles')->controller(RoleController::class)->group(function () {

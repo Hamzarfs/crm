@@ -3,15 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Enums\EmployeeStatusesEnum;
+use App\Http\Requests\User\Import;
 use App\Http\Requests\User\Store;
 use App\Http\Requests\User\Update;
 use App\Http\Resources\Collections\UserResourceCollection;
+use App\Imports\EmployeeImport;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\Test\Constraint\ResponseFormatSame;
 
 class UserController extends Controller
@@ -220,5 +225,29 @@ class UserController extends Controller
             throw $th;
         }
         DB::commit();
+    }
+
+    public function downloadSample()
+    {
+        return Storage::download('sample.xlsx');
+    }
+
+    public function importEmployees(Import $request)
+    {
+        $file = $request->validated('file');
+
+        try {
+            Excel::import(new EmployeeImport, $file);
+        } catch (ValidationException $e) {
+            $errors = transformErrorMessagesToIncludeRowNumber($e->errors());
+            return response()->json([
+                'success' => false,
+                'message' => $errors
+            ], 422);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Employee imported successfully'
+        ]);
     }
 }

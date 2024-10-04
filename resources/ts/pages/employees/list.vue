@@ -11,8 +11,8 @@ let userToDelete: number
 // Data table options
 const itemsPerPage = ref(20)
 const page = ref(1)
-const sortBy = ref()
-const orderBy = ref()
+const sortBy = ref('id')
+const orderBy = ref<boolean | "desc" | "asc">('desc')
 const selectedRows = ref([])
 const tableLoading = ref(false)
 
@@ -112,10 +112,10 @@ const addNewUser = async (userData: any) => {
         },
     })
 
+    isSnackBarVisible.value = true
+    userResponsemessage.value = message
+    addNewUserDrawerRef.value.closeNavigationDrawer()
     if (success) {
-        isSnackBarVisible.value = true
-        userResponsemessage.value = message
-        addNewUserDrawerRef.value.closeNavigationDrawer()
         fetchUsers()
         fetchEmployeesCount()
     }
@@ -201,6 +201,50 @@ watch(isEditUserDrawerVisible, editDrawer => {
         selectedUser.value = {}
 })
 
+const isImportShow = ref(false)
+const importFile = ref(undefined)
+
+const downloadSampleImportFile = async () => {
+    const fileBlob = await $api('users/import/sample/download', { responseType: 'blob' })
+    const url = URL.createObjectURL(new Blob([fileBlob]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', 'sample.xlsx')
+    document.body.appendChild(link)
+    link.click()
+    link.parentNode?.removeChild(link)
+}
+
+const isFileUploading = ref(false)
+
+const uploadImportFile = async (file: File | File[]) => {
+    if (file) {
+        isFileUploading.value = true
+        const formData = new FormData()
+        formData.append('file', file as File)
+
+        const { success, message } = await $api('users/import', {
+            method: 'POST',
+            body: formData,
+            onResponseError: context => {
+                isFileUploading.value = false
+                isSnackBarVisible.value = true
+                userResponsemessage.value = context.response._data.message.join('<br>')
+            },
+        })
+        isFileUploading.value = false
+        isSnackBarVisible.value = true
+        userResponsemessage.value = message
+
+        if (success) {
+            importFile.value = undefined
+            isImportShow.value = false
+            fetchUsers()
+            fetchEmployeesCount()
+        }
+    }
+}
+
 </script>
 
 <template>
@@ -267,25 +311,52 @@ watch(isEditUserDrawerVisible, editDrawer => {
 
             <VDivider />
 
-            <VCardText class="d-flex flex-wrap gap-4">
-                <!-- 👉 Export & import buttons -->
-                <VBtn color="success" prepend-icon="ri-upload-2-line">
-                    Import
-                </VBtn>
-                <!-- <VBtn color="secondary" prepend-icon="ri-download-2-line">
-                    Export
-                </VBtn> -->
-                <VSpacer />
-                <VBtn @click="isAddNewUserDrawerVisible = true" prepend-icon="ri-user-add-fill">
-                    Add New Employee
-                </VBtn>
+            <VCardText>
+                <VRow align="center">
+                    <VCol>
+                        <div class="d-flex align-center gap-10">
+                            <div class="d-flex align-center gap-5">
+                                <!-- 👉 Export & import buttons -->
+                                <VBtn color="success" prepend-icon="ri-upload-2-line"
+                                    @click="isImportShow = !isImportShow">
+                                    Import
+                                </VBtn>
+
+                                <!-- <VBtn color="secondary" prepend-icon="ri-download-2-line">
+                                    Export
+                                </VBtn> -->
+                            </div>
+
+                            <Transition>
+                                <div class="w-100" v-if="isImportShow">
+                                    <VFileInput v-model="importFile" class="mb-2" accept=".xlsx"
+                                        :loading="isFileUploading" @update:model-value="uploadImportFile"
+                                        placeholder="Upload file to import employees" prepend-icon=""
+                                        label="Upload file to import employees" chips show-size clearable />
+
+                                    <a href="javascript:void(0)" @click="downloadSampleImportFile">Download sample
+                                        file</a>
+                                </div>
+                            </Transition>
+                        </div>
+                    </VCol>
+
+                    <VCol>
+                        <VBtn @click="isAddNewUserDrawerVisible = true" prepend-icon="ri-user-add-fill"
+                            style="float: right;">
+                            Add New Employee
+                        </VBtn>
+
+                    </VCol>
+                </VRow>
             </VCardText>
 
             <!-- SECTION datatable -->
             <VDataTableServer v-model:items-per-page="itemsPerPage" v-model:model-value="selectedRows" hover show-select
-                :loading="tableLoading" loading-text="Loading Employees..." :disable-sort="tableLoading" fixed-header
-                style="max-height: 500px;" v-model:page="page" :items="users" item-value="id" :items-length="totalUsers"
-                :headers="headers" class="text-no-wrap rounded-0" @update:options="updateOptions" density="default">
+                :sort-by="[{ key: sortBy, order: orderBy }]" :loading="tableLoading" loading-text="Loading Employees..."
+                :disable-sort="tableLoading" fixed-header style="max-height: 500px;" v-model:page="page" :items="users"
+                item-value="id" :items-length="totalUsers" :headers="headers" class="text-no-wrap rounded-0"
+                @update:options="updateOptions" density="default">
 
                 <!-- Name -->
                 <template #item.name="{ item }: { item: any }">
@@ -386,7 +457,7 @@ watch(isEditUserDrawerVisible, editDrawer => {
             :user="selectedUser" ref="editUserDrawerRef" :roles="roles" :departments="departments" :errors="errors" />
 
         <VSnackbar v-model="isSnackBarVisible">
-            {{ userResponsemessage }}
+            <span v-html="userResponsemessage"></span>
             <template #actions>
                 <VBtn color="error" @click="isSnackBarVisible = false">
                     Close
@@ -415,5 +486,16 @@ watch(isEditUserDrawerVisible, editDrawer => {
             </VCard>
         </VDialog>
     </section>
-
 </template>
+
+<style lang="css" scoped>
+.v-enter-active,
+.v-leave-active {
+    transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+    opacity: 0;
+}
+</style>

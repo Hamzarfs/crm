@@ -20,3 +20,20 @@ if (!function_exists('transformEmployeeDetailsToArray')) {
         return $returnData;
     }
 }
+
+if (!function_exists('transformErrorMessagesToIncludeRowNumber')) {
+    function transformErrorMessagesToIncludeRowNumber(array $errors): array
+    {
+        $returnArray = [];
+        foreach ($errors as $key => $messages) {
+            // Extract the row number from the key
+            $row = intval(explode('.', $key)[0]) + 2;
+
+            foreach ($messages as $message) {
+                // Modify the message with the correct row number
+                $returnArray[] = str_replace(':row', $row, $message);
+            }
+        }
+        return $returnArray;
+    }
+}
