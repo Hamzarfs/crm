@@ -1,13 +1,10 @@
 <script setup lang="ts">
 
 
-const selectedLeadSource = ref({
-    name: '',
-})
+const selectedLeadSource = ref({})
 let leadsourceToDelete: number
 
-
-// Add a ref for the AddNewUserDrawer & editUserDrawerRef component
+// Add a ref for the AddNewLeadSourceDrawer & editLeadSourceDrawerRef component
 const addNewLeadSourceDrawerRef = ref()
 const editLeadSourceDrawerRef = ref()
 
@@ -17,10 +14,11 @@ const dataTableRef = ref()
 const headers = [
     { title: 'ID', key: 'id' },
     { title: 'Name', key: 'name' },
+    { title: 'Type', key: 'type' },
     { title: 'Actions', key: 'actions', sortable: false },
 ]
 
-// 👉 Fetching roles
+// 👉 Fetching leadsources
 const { leadsources } = await $api('leadsources')
 
 const leadsourcesData = ref(leadsources)
@@ -41,11 +39,11 @@ const addNewLeadSource = async (leadsourceData: any) => {
         },
     })
 
+    isSnackBarVisible.value = true
+    leadsourceResponsemessage.value = message
+    addNewLeadSourceDrawerRef.value.closeNavigationDrawer()
     if (success) {
-        isSnackBarVisible.value = true
         leadsourcesData.value = [...leadsourcesData.value, leadsource]
-        leadsourceResponsemessage.value = message
-        addNewLeadSourceDrawerRef.value.closeNavigationDrawer()
         nextTick(() => {
             dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollTop = dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollHeight
         })
@@ -61,10 +59,10 @@ const editleadsource = async (leadsourceData: any) => {
             errors.value = response._data.errors
         },
     })
+    isSnackBarVisible.value = true
+    leadsourceResponsemessage.value = message
     if (success) {
-        isSnackBarVisible.value = true
         leadsourcesData.value[leadsourceToDelete] = leadsource
-        leadsourceResponsemessage.value = message
         editLeadSourceDrawerRef.value.closeNavigationDrawer()
     }
 }
@@ -91,7 +89,24 @@ const deleteLeadSource = async () => {
 }
 
 const errors = ref({
-    name: undefined
+    name: undefined,
+    type: undefined
+})
+
+const leadSourceTypes = [
+    {
+        title: 'Paid',
+        value: 'paid'
+    },
+    {
+        title: 'Unpaid',
+        value: 'unpaid'
+    }
+]
+
+watch(isEditLeadSourceDrawerVisible, newValue => {
+    if (!newValue)
+        selectedLeadSource.value = {}
 })
 
 </script>
@@ -100,7 +115,7 @@ const errors = ref({
     <section>
         <VCard class="mb-6">
             <VCardTitle class="d-flex align-center my-2">
-                <span>Lead Source</span>
+                <span>Lead Sources</span>
                 <VSpacer />
                 <VBtn @click="isAddNewLeadSourceDrawerVisible = true" prepend-icon="ri-user-add-fill">
                     Add New Lead Source
@@ -112,6 +127,13 @@ const errors = ref({
             <!-- SECTION datatable -->
             <VDataTable hover fixed-header style="max-height: 600px;" :items="leadsourcesData" item-value="id"
                 ref="dataTableRef" :headers="headers" class="text-no-wrap rounded-0" density="default">
+
+                <!-- Type -->
+                <template #item.type="{ item }: { item: any }">
+                    <VChip :color="item.type === 'paid' ? 'success' : 'error'">
+                        {{ strToTitleCase(item.type) }}
+                    </VChip>
+                </template>
 
                 <!-- Actions -->
                 <template #item.actions="{ item }: { item: any }">
@@ -135,13 +157,13 @@ const errors = ref({
             <!-- SECTION -->
         </VCard>
 
-        <!-- 👉 Add New Role -->
-        <addNewLeadSourceDrawer v-model:isDrawerOpen="isAddNewLeadSourceDrawerVisible"
+        <!-- 👉 Add New Lead Source -->
+        <AddNewLeadSourceDrawer v-model:isDrawerOpen="isAddNewLeadSourceDrawerVisible" :types="leadSourceTypes"
             @leadsource-data="addNewLeadSource" ref="addNewLeadSourceDrawerRef" :errors="errors" />
 
-        <!-- 👉 Edit User -->
+        <!-- 👉 Edit Lead Source -->
         <EditLeadSourceDrawer v-model:isDrawerOpen="isEditLeadSourceDrawerVisible" @leadsource-data="editleadsource"
-            :leadsource="selectedLeadSource" ref="editLeadSourceDrawerRef" :errors="errors" />
+            :types="leadSourceTypes" :leadsource="selectedLeadSource" ref="editLeadSourceDrawerRef" :errors="errors" />
 
         <VSnackbar v-model="isSnackBarVisible">
             {{ leadsourceResponsemessage }}

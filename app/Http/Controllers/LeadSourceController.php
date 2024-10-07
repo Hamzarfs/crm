@@ -18,17 +18,10 @@ class LeadSourceController extends Controller
                 return [
                     'id' => $leadSource->id,
                     'name' => $leadSource->name,
+                    'type' => $leadSource->type,
                 ];
             })
         ]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -37,7 +30,8 @@ class LeadSourceController extends Controller
     public function store(Store $request)
     {
         $leadSource = LeadSource::create([
-            'name' => $request->name
+            'name' => $request->name,
+            'type' => $request->type,
         ]);
 
         return response()->json([
@@ -46,7 +40,7 @@ class LeadSourceController extends Controller
             'leadsource' => [
                 'id' => $leadSource->id,
                 'name' => $leadSource->name,
-
+                'type' => $leadSource->type
             ]
         ]);
     }
@@ -57,8 +51,8 @@ class LeadSourceController extends Controller
     public function update(Update $request, LeadSource $leadsource)
     {
         $leadsource->update([
-            'name' => $request->name
-
+            'name' => $request->name,
+            'type' => $request->type,
         ]);
 
         return response()->json([
@@ -67,7 +61,7 @@ class LeadSourceController extends Controller
             'leadsource' => [
                 'id' => $leadsource->id,
                 'name' => $leadsource->name,
-
+                'type' => $leadsource->type
             ]
         ]);
     }

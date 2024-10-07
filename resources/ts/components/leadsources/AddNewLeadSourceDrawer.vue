@@ -9,8 +9,7 @@ interface Emit {
 interface Props {
     isDrawerOpen: boolean
     errors: Record<string, string | undefined>
-    leadsource: Record<string, any>
-
+    types: Record<string, string>[]
 }
 
 const props = defineProps<Props>()
@@ -19,21 +18,16 @@ const emit = defineEmits<Emit>()
 
 const isFormValid = ref(false)
 const refForm = ref<VForm>()
-const name = ref(props.leadsource.name)
-
-
-watch(() => props.leadsource, newVal => {
-    name.value = newVal.name
-
-}, {
-    immediate: true,
-    deep: true
-})
-
+const name = ref('')
+const type = ref()
 
 // 👉 drawer close
 const closeNavigationDrawer = () => {
     emit('update:isDrawerOpen', false)
+    Object.assign(props.errors, {
+        name: undefined,
+        type: undefined,
+    })
     nextTick(() => {
         refForm.value?.reset()
         refForm.value?.resetValidation()
@@ -44,9 +38,8 @@ const onSubmit = () => {
     refForm.value?.validate().then(({ valid }) => {
         if (valid) {
             emit('leadsourceData', {
-                id: props.leadsource.id,
                 name: name.value,
-
+                type: type.value,
             })
         }
     })
@@ -68,7 +61,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
         @update:model-value="handleDrawerModelValueUpdate">
 
         <!-- 👉 Title -->
-        <AppDrawerHeaderSection title="Edit Lead Source" @cancel="closeNavigationDrawer" />
+        <AppDrawerHeaderSection title="Add Lead Source" @cancel="closeNavigationDrawer" />
 
         <VDivider />
 
@@ -79,11 +72,16 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                     <VRow>
                         <!-- 👉 Name -->
                         <VCol cols="12">
-                            <VTextField v-model="name" :rules="[requiredValidator]" label="Name"
+                            <VTextField v-model="name" :rules="[requiredValidator]" label="Lead Source Name" clearable
                                 :error-messages="props.errors.name" placeholder="Lead Source Name" />
                         </VCol>
 
-
+                        <!-- 👉 Type -->
+                        <VCol cols="12">
+                            <VSelect v-model="type" :items="props.types" :rules="[requiredValidator]" clearable
+                                label="Lead Source Type" :error-messages="props.errors.type"
+                                placeholder="Lead Source Type" />
+                        </VCol>
 
                         <!-- 👉 Submit and Cancel -->
                         <VCol cols="12">
@@ -98,6 +96,5 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                 </VForm>
             </VCardText>
         </VCard>
-
     </VNavigationDrawer>
 </template>

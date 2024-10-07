@@ -1,4 +1,3 @@
-import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import laravel from 'laravel-vite-plugin'
@@ -57,7 +56,8 @@ export default defineConfig({
             layoutsDirs: './resources/ts/layouts/',
         }), // Docs: https://github.com/antfu/unplugin-vue-components#unplugin-vue-components
         Components({
-            dirs: ['resources/ts/@core/components', 'resources/ts/views/demos', 'resources/ts/components'],
+            // dirs: ['resources/ts/@core/components', 'resources/ts/views/demos', 'resources/ts/components'],
+            dirs: ['resources/ts/components', 'resources/ts/@core/components'],
             dts: true,
             resolvers: [
                 componentName => {
@@ -81,13 +81,13 @@ export default defineConfig({
             // ℹ️ Disabled to avoid confusion & accidental usage
             ignore: ['useCookies', 'useStorage'],
         }), // Docs: https://github.com/intlify/bundle-tools/tree/main/packages/unplugin-vue-i18n#intlifyunplugin-vue-i18n
-        VueI18nPlugin({
-            runtimeOnly: true,
-            compositionOnly: true,
-            include: [
-                fileURLToPath(new URL('./resources/ts/plugins/i18n/locales/**', import.meta.url)),
-            ],
-        }),
+        // VueI18nPlugin({
+        //     runtimeOnly: true,
+        //     compositionOnly: true,
+        //     include: [
+        //         fileURLToPath(new URL('./resources/ts/plugins/i18n/locales/**', import.meta.url)),
+        //     ],
+        // }),
         svgLoader(),
     ],
     define: { 'process.env': {} },

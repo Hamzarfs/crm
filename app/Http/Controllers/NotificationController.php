@@ -19,7 +19,7 @@ class NotificationController extends Controller
         ]);
     }
 
-    public function getTaskCreatedNotifications(string $type = 'task-created')
+    public function getTaskCreatedNotifications(string $type = 'task.created')
     {
         return DatabaseNotification::where('type', $type)->get()->map(
             function ($notification) {

@@ -24,6 +24,7 @@ class Store extends FormRequest
     {
         return [
             'name' => 'required|string|unique:lead_sources',
+            'type' => 'required|string|in:paid,unpaid',
         ];
     }
 
@@ -36,6 +37,7 @@ class Store extends FormRequest
     {
         return [
             'name' => 'Lead source name',
+            'type' => 'Lead source type',
         ];
     }
 }

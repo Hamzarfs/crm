@@ -118,7 +118,7 @@ const errors = ref({
                 <!-- Actions -->
                 <template #item.actions="{ item }: { item: any }">
                     <IconBtn size="small" @click="openEditRoleForm(item)" color="primary"
-                        :disabled="item.id >= 1 && item.id <= 7">
+                        :disabled="item.id >= 1 && item.id <= 8">
                         <VIcon icon="ri-edit-box-line" />
                         <VTooltip activator="parent" location="top">
                             Edit
@@ -126,7 +126,7 @@ const errors = ref({
                     </IconBtn>
 
                     <IconBtn size="small" @click="isDeleteDialogVisible = true; roleToDelete = item.id" color="error"
-                        :disabled="item.id >= 1 && item.id <= 7">
+                        :disabled="item.id >= 1 && item.id <= 8">
                         <VIcon icon="ri-delete-bin-7-line" />
                         <VTooltip activator="parent" location="top">
                             Delete

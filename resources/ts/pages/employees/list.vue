@@ -1,5 +1,6 @@
 <script setup lang="ts">
 
+
 // 👉 Store
 const searchQuery = ref('')
 const selectedRole = ref()
@@ -229,7 +230,15 @@ const uploadImportFile = async (file: File | File[]) => {
             onResponseError: context => {
                 isFileUploading.value = false
                 isSnackBarVisible.value = true
-                userResponsemessage.value = context.response._data.message.join('<br>')
+                if (Array.isArray(context.response._data.message))
+                    userResponsemessage.value = context.response._data.message.join('<br/>')
+                else {
+                    userResponsemessage.value = [
+                        `File: ${context.response._data.file}`,
+                        `Line: ${context.response._data.line}`,
+                        `Message: ${context.response._data.message}`,
+                    ].join('<br/>')
+                }
             },
         })
         isFileUploading.value = false

@@ -82,12 +82,13 @@ watch(() => isFetching.value, (newValue) => {
 const leads = computed(() => leadsData.value.leads)
 const totalLeads = computed(() => leadsData.value.totalLeads)
 
-const statuses = ['No answer', 'Hung up', 'Wrong number', 'Voice mail', 'Found someone', 'Follow up', 'Not interested', 'Blocked', 'Sale closed', 'Cant connect', 'Not in service', 'Invalid lead', 'Email done', 'Call done', 'No number', 'Not interested', 'Interested']
+// const statuses = ['No answer', 'Hung up', 'Wrong number', 'Voice mail', 'Found someone', 'Follow up', 'Not interested', 'Blocked', 'Sale closed', 'Cant connect', 'Not in service', 'Invalid lead', 'Email done', 'Call done', 'No number', 'Not interested', 'Interested']
 
 const { services } = await $api('services')
 const { brands } = await $api('brands')
 const { customers } = await $api('customers')
 const { leadsources } = await $api('leadsources')
+const { statuses } = await $api('leads/statuses')
 const { users } = await $api('users', {
     query: {
         'department[]': [1, 2] // Sales & Admin departments

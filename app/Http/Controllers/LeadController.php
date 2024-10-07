@@ -6,6 +6,7 @@ use App\Http\Requests\Sales\Lead\Store;
 use App\Http\Requests\Sales\Lead\Update;
 use App\Http\Resources\Collections\Sales\LeadResourceCollection;
 use App\Models\Lead;
+use App\Models\LeadStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -195,6 +196,13 @@ class LeadController extends Controller
             'leadsThisMonth' => $leadsThisMonth,
             'closedLeads' => $closedLeads,
             'totalAmount' => $totalAmount,
+        ]);
+    }
+
+    public function getLeadStatuses()
+    {
+        return response()->json([
+            'statuses' => LeadStatus::pluck('name')
         ]);
     }
 }

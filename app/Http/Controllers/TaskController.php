@@ -160,6 +160,7 @@ class TaskController extends Controller
      */
     public function delete(Task $task)
     {
+        $task->notifications()->delete();
         $task->comments()->delete();
         $task->files()->delete();
         $task->delete();

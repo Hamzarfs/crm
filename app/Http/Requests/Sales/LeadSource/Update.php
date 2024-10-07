@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Sales\LeadSource;
 
-use App\Enums\RolesEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class Update extends FormRequest
@@ -24,6 +23,7 @@ class Update extends FormRequest
     {
         return [
             'name' => "required|string|unique:lead_sources,name,{$this->route('leadsource')->id},id",
+            'type' => 'required|string|in:paid,unpaid',
         ];
     }
 
@@ -36,6 +36,7 @@ class Update extends FormRequest
     {
         return [
             'name' => 'Lead source name',
+            'type' => 'Lead source type',
         ];
     }
 }

@@ -11,7 +11,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
 
-class Created extends Notification
+class Created extends Notification implements ShouldBroadcastNow
 {
     use InteractsWithSockets;
     /**
@@ -49,7 +49,7 @@ class Created extends Notification
      */
     public function databaseType(): string
     {
-        return 'task-created';
+        return 'task.created';
     }
 
     /**
@@ -67,7 +67,8 @@ class Created extends Notification
      */
     // public function broadcastOn(): Channel
     // {
-    //     return new PrivateChannel("Task.Created.{$this->task->assigned_to}");
+    //     return new Channel("Task.Created.Notifications.{$this->task->assigned_to}");
+    //     // return new PrivateChannel("Task.Created.{$this->task->assigned_to}");
     // }
 
     /**

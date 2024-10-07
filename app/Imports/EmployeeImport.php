@@ -20,17 +20,22 @@ class EmployeeImport implements ToCollection, SkipsEmptyRows, WithHeadingRow
             rules: [
                 '*.name' => 'required|string',
                 '*.personal_email' => 'required|email|unique:users,email',
-                '*.contact_number' => 'required|numeric'
+                '*.contact_number' => 'required|numeric',
+                '*.role' => 'exists:roles,id',
+                '*.department' => 'exists:departments,id',
             ],
             attributes: [
                 '*.name' => 'Name',
                 '*.personal_email' => 'Personal email',
                 '*.contact_number' => 'Contact number',
+                '*.role' => 'role',
+                '*.department' => 'department',
             ],
             messages: [
                 '*.personal_email.unique' => ":attribute on row :row :input is already taken.",
                 '*.*.required' => ":attribute on row :row is empty.",
-                '*.*.numeric' => ":attribute on row :row must be a number."
+                '*.*.numeric' => ":attribute on row :row must be a number.",
+                '*.*.exists' => 'Invalid :attribute id given on row :row. It Doesn\'t exist in the database.'
             ]
         )->validate();
 
@@ -40,7 +45,8 @@ class EmployeeImport implements ToCollection, SkipsEmptyRows, WithHeadingRow
                 'email' => $row['personal_email'],
                 'phone' => $row['contact_number'],
                 'password' => bcrypt('crm123'),
-            ])->assignRole('employee');
+                'department_id' => $row['department'],
+            ])->assignRole($row['role']);
 
             $employeeDetails = [
                 'biometricId' => $row['bio_metric_id'],

@@ -184,18 +184,18 @@ watch(currentDir, () => {
 // check if any value set in cookie
 const isCookieHasAnyValue = ref(false)
 
-const { locale } = useI18n({ useScope: 'global' })
+// const { locale } = useI18n({ useScope: 'global' })
 
-const isActiveLangRTL = computed(() => {
-    const lang = themeConfig.app.i18n.langConfig.find(l => l.i18nLang === locale.value)
+// const isActiveLangRTL = computed(() => {
+//     const lang = themeConfig.app.i18n.langConfig.find(l => l.i18nLang === locale.value)
 
-    return lang?.isRTL ?? false
-})
+//     return lang?.isRTL ?? false
+// })
 
 watch([
     () => vuetifyTheme.current.value.colors.primary,
     configStore.$state,
-    locale,
+    // locale,
 ], () => {
     const initialConfigValue = [
         staticPrimaryColor,
@@ -205,7 +205,7 @@ watch([
         themeConfig.verticalNav.isVerticalNavSemiDark,
         themeConfig.verticalNav.isVerticalNavCollapsed,
         themeConfig.app.contentWidth,
-        isActiveLangRTL.value,
+        // isActiveLangRTL.value,
         themeConfig.app.contentLayoutNav,
     ]
 
