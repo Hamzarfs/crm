@@ -51,6 +51,7 @@ declare global {
   const emailValidator: typeof import('./resources/ts/@core/utils/validators')['emailValidator']
   const extendRef: typeof import('@vueuse/core')['extendRef']
   const extractFileExtension: typeof import('./resources/ts/@core/utils/helpers')['extractFileExtension']
+  const facebookUrlValidator: typeof import('./resources/ts/@core/utils/validators')['facebookUrlValidator']
   const fileValidator: typeof import('./resources/ts/@core/utils/validators')['fileValidator']
   const formatDate: typeof import('./resources/ts/@core/utils/formatters')['formatDate']
   const formatDateNew: typeof import('./resources/ts/@core/utils/formatters')['formatDateNew']
@@ -64,6 +65,7 @@ declare global {
   const ignorableWatch: typeof import('@vueuse/core')['ignorableWatch']
   const inject: typeof import('vue')['inject']
   const injectLocal: typeof import('@vueuse/core')['injectLocal']
+  const instagramUrlValidator: typeof import('./resources/ts/@core/utils/validators')['instagramUrlValidator']
   const integerValidator: typeof import('./resources/ts/@core/utils/validators')['integerValidator']
   const isDefined: typeof import('@vueuse/core')['isDefined']
   const isEmpty: typeof import('./resources/ts/@core/utils/helpers')['isEmpty']
@@ -421,6 +423,7 @@ declare module 'vue' {
     readonly emailValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['emailValidator']>
     readonly extendRef: UnwrapRef<typeof import('@vueuse/core')['extendRef']>
     readonly extractFileExtension: UnwrapRef<typeof import('./resources/ts/@core/utils/helpers')['extractFileExtension']>
+    readonly facebookUrlValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['facebookUrlValidator']>
     readonly fileValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['fileValidator']>
     readonly formatDate: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['formatDate']>
     readonly formatDateToMonthShort: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['formatDateToMonthShort']>
@@ -433,6 +436,7 @@ declare module 'vue' {
     readonly ignorableWatch: UnwrapRef<typeof import('@vueuse/core')['ignorableWatch']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
     readonly injectLocal: UnwrapRef<typeof import('@vueuse/core')['injectLocal']>
+    readonly instagramUrlValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['instagramUrlValidator']>
     readonly integerValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['integerValidator']>
     readonly isDefined: UnwrapRef<typeof import('@vueuse/core')['isDefined']>
     readonly isEmpty: UnwrapRef<typeof import('./resources/ts/@core/utils/helpers')['isEmpty']>

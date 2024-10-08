@@ -11,10 +11,21 @@ class BrandController extends Controller
     public function all()
     {
         return response()->json([
-            'brands' => Brand::orderBy('id', 'asc')->get()->map(function ($brand) {
+            'brands' => Brand::with('currency')->orderBy('id', 'asc')->get()->map(function ($brand) {
                 return [
                     'id' => $brand->id,
                     'name' => $brand->name,
+                    'url' => $brand->url,
+                    'fb_url' => $brand->fb_url,
+                    'ig_url' => $brand->ig_url,
+                    'phone' => $brand->phone,
+                    'whatsapp' => $brand->whatsapp,
+                    'chat_support' => $brand->chat_support,
+                    'country' => $brand->country,
+                    'currency' => $brand->currency?->name,
+                    'currency_id' => $brand->currency_id,
+                    'created_at' => $brand->created_at->format('d M Y, g:i A'),
+                    'updated_at' => $brand->updated_at->format('d M Y, g:i A'),
                 ];
             })
         ]);
@@ -25,8 +36,18 @@ class BrandController extends Controller
      */
     public function store(Store $request)
     {
+        $data = (object) $request->validated();
+
         $brand = Brand::create([
-            'name' => $request->name
+            'name' => $data->name,
+            'url' => $data->url,
+            'fb_url' => $data->fb_url,
+            'ig_url' => $data->ig_url,
+            'phone' => $data->phone,
+            'whatsapp' => $data->whatsapp,
+            'chat_support' => $data->chat_support,
+            'country' => $data->country,
+            'currency_id' => $data->currency,
         ]);
 
         return response()->json([
@@ -35,7 +56,17 @@ class BrandController extends Controller
             'brand' => [
                 'id' => $brand->id,
                 'name' => $brand->name,
-
+                'url' => $brand->url,
+                'fb_url' => $brand->fb_url,
+                'ig_url' => $brand->ig_url,
+                'phone' => $brand->phone,
+                'whatsapp' => $brand->whatsapp,
+                'chat_support' => $brand->chat_support,
+                'country' => $brand->country,
+                'currency' => $brand->currency->name,
+                'currency_id' => $brand->currency_id,
+                'created_at' => $brand->created_at->format('d M Y, g:i A'),
+                'updated_at' => $brand->updated_at->format('d M Y, g:i A'),
             ]
         ]);
     }
@@ -45,9 +76,18 @@ class BrandController extends Controller
      */
     public function update(Update $request, Brand $brand)
     {
+        $data = (object) $request->validated();
+
         $brand->update([
             'name' => $request->name,
-
+            'url' => $data->url,
+            'fb_url' => $data->fb_url,
+            'ig_url' => $data->ig_url,
+            'phone' => $data->phone,
+            'whatsapp' => $data->whatsapp,
+            'chat_support' => $data->chat_support,
+            'country' => $data->country,
+            'currency_id' => $data->currency,
         ]);
 
         return response()->json([
@@ -56,7 +96,17 @@ class BrandController extends Controller
             'brand' => [
                 'id' => $brand->id,
                 'name' => $brand->name,
-
+                'url' => $brand->url,
+                'fb_url' => $brand->fb_url,
+                'ig_url' => $brand->ig_url,
+                'phone' => $brand->phone,
+                'whatsapp' => $brand->whatsapp,
+                'chat_support' => $brand->chat_support,
+                'country' => $brand->country,
+                'currency' => $brand->currency->name,
+                'currency_id' => $brand->currency_id,
+                'created_at' => $brand->created_at->format('d M Y, g:i A'),
+                'updated_at' => $brand->updated_at->format('d M Y, g:i A'),
             ]
         ]);
     }

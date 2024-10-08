@@ -51,9 +51,7 @@ export const passwordValidator = (password: string) => {
 }
 
 // 👉 Confirm Password Validator
-export const confirmedValidator = (value: string, target: string) =>
-
-    value === target || 'The Confirm Password field confirmation does not match'
+export const confirmedValidator = (value: string, target: string) => value === target || 'The Confirm Password field confirmation does not match'
 
 // 👉 Between Validator
 export const betweenValidator = (value: unknown, min: number, max: number) => {
@@ -101,9 +99,32 @@ export const urlValidator = (value: unknown) => {
     if (isEmpty(value))
         return true
 
+    // const re = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}([^\s$.?#].\S*)?$/
     const re = /^https?:\/\/[^\s$.?#].\S*$/
 
     return re.test(String(value)) || 'URL is invalid'
+}
+
+// 👉 Instagram URL Validator
+export const instagramUrlValidator = (value: unknown) => {
+    if (isEmpty(value))
+        return true
+
+    // Regular expression to validate Instagram URLs
+    const re = /^(https?:\/\/)?(www\.)?instagram\.com\/[A-Za-z0-9._-]+\/?$/
+
+    return re.test(String(value)) || 'URL must be a valid Instagram URL'
+}
+
+// 👉 Facebook URL Validator
+export const facebookUrlValidator = (value: unknown) => {
+    if (isEmpty(value))
+        return true
+
+    // Regular expression to validate Facebook URLs
+    const re = /^(https?:\/\/)?(www\.)?facebook\.com\/[A-Za-z0-9._-]+\/?$/
+
+    return re.test(String(value)) || 'URL must be a valid Facebook URL'
 }
 
 // 👉 Length Validator

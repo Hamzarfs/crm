@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\{AuthController, DepartmentController, BrandController, CustomerController, LeadController, LeadSourceController, NotificationController, RoleController, ServiceController, TaskController, UserController};
+use App\Http\Controllers\{AuthController, DepartmentController, BrandController, CurrencyController, CustomerController, LeadController, LeadSourceController, NotificationController, RoleController, ServiceController, TaskController, UserController};
 use Illuminate\Support\Facades\Route;
 
 
@@ -87,6 +87,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('{brand}', 'delete');
         });
 
+    Route::get('currencies', [CurrencyController::class, 'all']);
 
     Route::prefix('leadsources')
         ->controller(LeadSourceController::class)
