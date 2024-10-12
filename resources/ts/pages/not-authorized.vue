@@ -24,7 +24,10 @@ definePage({
         <!-- 👉 Image -->
         <div class="misc-avatar w-100 text-center">
             <VImg :src="pages401" alt="Coming Soon" :max-width="785" :height="500" class="mx-auto" />
-            <VBtn to="/dashboard" class="mt-10" style="z-index: 1;">
+            <VBtn @click="$router.back()" class="mt-10 me-2" style="z-index: 1;" color="secondary">
+                Go back
+            </VBtn>
+            <VBtn to="/" class="mt-10" style="z-index: 1;">
                 Back to Dashboard
             </VBtn>
 

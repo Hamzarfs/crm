@@ -11,7 +11,7 @@ class Update extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->hasDepartment('admin', 'sales');
+        return $this->user()->hasDepartment('admin', 'sales', 'lead_generation');
     }
 
     /**

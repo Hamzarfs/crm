@@ -18,12 +18,15 @@ class DatabaseSeeder extends Seeder
 
             // LeadSourceSeeder::class,
             // ServiceSeeder::class,
+            // CurrencySeeder::class,
             // BrandSeeder::class,
             // CustomerSeeder::class,
             // LeadStatusSeeder::class,
-            // LeadSeeder::class,
+            // // LeadSeeder::class,
 
-            CurrencySeeder::class,
+            // CampaignSeeder::class,
+
+
         ]);
     }
 }

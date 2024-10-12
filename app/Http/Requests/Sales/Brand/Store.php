@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Sales\Brand;
 
+use App\Enums\RolesEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 
@@ -12,7 +13,7 @@ class Store extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->hasDepartment('admin', 'sales');
+        return $this->user()->hasDepartment('admin', 'sales') && $this->user()->hasRole([RolesEnum::ADMIN, RolesEnum::TEAM_LEAD]);
     }
 
     /**

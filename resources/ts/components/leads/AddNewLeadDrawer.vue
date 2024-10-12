@@ -4,7 +4,6 @@ import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
 import type { VForm } from 'vuetify/components/VForm';
 
 
-
 interface Emit {
     (e: 'update:isDrawerOpen', value: boolean): void
     (e: 'leadData', value: any): void
@@ -18,6 +17,7 @@ interface Props {
     brands: any[]
     services: any[]
     errors: Record<string, any>
+    userData: Record<string, any>
 }
 
 const props = defineProps<Props>()
@@ -30,7 +30,7 @@ const lead = ref({
     customer: undefined,
     lead_source: undefined,
     brand: undefined,
-    status: undefined,
+    status: props.userData.department.value === 'lead_generation' ? 'New lead' : undefined,
     remarks: undefined,
     lead_closed_date: undefined,
     lead_closed_amount: undefined,
@@ -114,7 +114,9 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                             <!-- 👉 Status -->
                             <VCol cols="12">
                                 <VAutocomplete v-model="lead.status" :items="props.statuses" label="Lead status"
-                                    :rules="[requiredValidator]" placeholder="Select Lead status" clearable
+                                    :readonly="props.userData.department.value === 'lead_generation'"
+                                    :rules="[requiredValidator]" placeholder="Select Lead status"
+                                    :clearable="props.userData.department.value !== 'lead_generation'"
                                     :error-messages="props.errors.status" />
                             </VCol>
 
@@ -133,14 +135,14 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                             </VCol>
 
                             <!-- 👉 Closed Date -->
-                            <VCol cols="12">
+                            <VCol cols="12" v-if="props.userData.department.value !== 'lead_generation'">
                                 <AppDateTimePicker v-model="lead.lead_closed_date" label="Lead Close Date"
                                     placeholder="Lead Close Date" clearable :config="{ dateFormat: 'd-m-Y' }"
                                     :error-messages="props.errors.lead_closed_date" />
                             </VCol>
 
                             <!-- 👉 Closed Amount -->
-                            <VCol cols="12">
+                            <VCol cols="12" v-if="props.userData.department.value !== 'lead_generation'">
                                 <VTextField type="number" v-model="lead.lead_closed_amount" label="Lead Close Amount"
                                     placeholder="Lead Close Amount" clearable min="0.1" :rules="[numberValidator]"
                                     :error-messages="props.errors.lead_closed_amount" />

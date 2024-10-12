@@ -13,8 +13,14 @@ class LeadSourceController extends Controller
      */
     public function all()
     {
+        $leadSources = LeadSource::orderBy('id', 'asc');
+
+        if (request()->user()->hasDepartment('lead_generation')) {
+            $leadSources->where('type', 'unpaid');
+        }
+
         return response()->json([
-            'leadsources' => LeadSource::orderBy('id', 'asc')->get()->map(function ($leadSource) {
+            'leadsources' => $leadSources->get()->map(function ($leadSource) {
                 return [
                     'id' => $leadSource->id,
                     'name' => $leadSource->name,

@@ -110,7 +110,7 @@ const departments = ref([])
 if (['admin', 'team_lead'].includes(userData.role.value)) {
     const { users: fetchedUsers } = await $api('users', {
         query: {
-            department: userData?.department?.id,
+            'departments[]': [userData?.department?.name],
         },
     })
     users.value = fetchedUsers.map((u: any) => ({

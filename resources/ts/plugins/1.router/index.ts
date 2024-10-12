@@ -5,7 +5,8 @@ import type { RouteRecordRaw } from 'vue-router/auto'
 
 import { createRouter, createWebHistory } from 'vue-router/auto'
 
-import { setupGuards } from './guards'
+import { setupAuthGuards } from './authGuards'
+import { setupRoleDepartmentGuard } from './rolesDeptGuard'
 import { redirects, routes } from './routes'
 
 function recursiveLayouts(route: RouteRecordRaw): RouteRecordRaw {
@@ -40,7 +41,8 @@ const router = createRouter({
 })
 
 
-setupGuards(router)
+setupAuthGuards(router)
+setupRoleDepartmentGuard(router)
 
 
 export { router }

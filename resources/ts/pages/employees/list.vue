@@ -484,7 +484,7 @@ const uploadImportFile = async (file: File | File[]) => {
                 </VCardText>
 
                 <VCardText class="d-flex align-center justify-center gap-4">
-                    <VBtn variant="elevated" @click="deleteUser()" color="error">
+                    <VBtn variant="elevated" @click="deleteUser" color="error">
                         Confirm
                     </VBtn>
 

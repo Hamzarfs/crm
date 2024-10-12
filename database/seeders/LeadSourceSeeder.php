@@ -14,7 +14,7 @@ class LeadSourceSeeder extends Seeder
     {
         $lead_sources = [
             [
-                'name' => 'PPC',
+                'name' => 'PPC Google',
                 'type' => 'paid',
             ],
             [
@@ -25,6 +25,10 @@ class LeadSourceSeeder extends Seeder
                 'name' => 'Bark',
                 'type' => 'paid',
             ],
+            [
+                'name' => 'Meta Facebook',
+                'type' => 'paid',
+            ]
         ];
 
         foreach ($lead_sources as $ls) {

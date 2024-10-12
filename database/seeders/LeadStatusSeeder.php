@@ -12,7 +12,7 @@ class LeadStatusSeeder extends Seeder
      */
     public function run(): void
     {
-        $statuses = ['No answer', 'Hung up', 'Wrong number', 'Voice mail', 'Found someone', 'Follow up', 'Not interested', 'Blocked', 'Sale closed', 'Cant connect', 'Not in service', 'Invalid lead', 'Email done', 'Call done', 'No number', 'Not interested', 'Interested'];
+        $statuses = ['New lead', 'Garbage', 'Lost (Projects with others)', 'Blocked', 'No answer', 'Hung up', 'Wrong number', 'Voice mail', 'Found someone', 'Follow up', 'Not interested', 'Blocked', 'Sale closed', 'Cant connect', 'Not in service', 'Invalid lead', 'Email done', 'Call done', 'No number', 'Not interested', 'Interested'];
 
         foreach ($statuses as $status) {
             LeadStatus::create(['name' => $status]);

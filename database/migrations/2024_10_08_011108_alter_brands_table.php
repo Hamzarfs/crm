@@ -21,7 +21,7 @@ return new class extends Migration
                 $table->string('whatsapp')->nullable();
                 $table->string('chat_support')->nullable();
                 $table->string('country');
-                $table->foreignIdFor(Currency::class)->nullable()->constrained()->restrictOnDelete();
+                $table->foreignIdFor(Currency::class)->constrained()->restrictOnDelete();
             });
         });
     }

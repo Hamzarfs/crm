@@ -1,5 +1,6 @@
 import type { RouteRecordRaw } from 'vue-router/auto'
 
+
 const DashboardComponent = () => import('@/pages/dashboard.vue')
 const EmployeesComponent = () => import('@/pages/employees/list.vue')
 const RolesComponent = () => import('@/pages/roles/list.vue')
@@ -50,6 +51,7 @@ export const routes: RouteRecordRaw[] = [
         meta: {
             navActiveLink: 'employees',
             authenticatedOnly: true,
+            roles: ['admin', 'hr'],
         },
     },
     // Roles
@@ -60,6 +62,7 @@ export const routes: RouteRecordRaw[] = [
         meta: {
             navActiveLink: 'roles',
             authenticatedOnly: true,
+            roles: ['admin', 'hr'],
         },
     },
     // Departments
@@ -70,6 +73,7 @@ export const routes: RouteRecordRaw[] = [
         meta: {
             navActiveLink: 'departments',
             authenticatedOnly: true,
+            roles: ['admin', 'hr'],
         },
     },
     // Tasks
@@ -88,6 +92,7 @@ export const routes: RouteRecordRaw[] = [
         name: 'sales',
         meta: {
             authenticatedOnly: true,
+            departments: ['admin', 'sales', 'lead_generation'],
         },
         children: [
             {
@@ -96,6 +101,8 @@ export const routes: RouteRecordRaw[] = [
                 component: BrandsComponent,
                 meta: {
                     navActiveLink: 'brands',
+                    roles: ['admin', 'team_lead'],
+                    departments: ['admin', 'sales'],
                 },
             },
             {
@@ -104,6 +111,8 @@ export const routes: RouteRecordRaw[] = [
                 component: LeadSourcesComponent,
                 meta: {
                     navActiveLink: 'lead-sources',
+                    roles: ['admin', 'team_lead'],
+                    departments: ['admin', 'sales',],
                 },
             },
             {
@@ -112,6 +121,8 @@ export const routes: RouteRecordRaw[] = [
                 component: ServicesComponent,
                 meta: {
                     navActiveLink: 'services',
+                    roles: ['admin', 'team_lead'],
+                    departments: ['admin', 'sales',],
                 },
             },
             {

@@ -1,6 +1,6 @@
 import type { RouteNamedMap, _RouterTyped } from 'unplugin-vue-router';
 
-export const setupGuards = (router: _RouterTyped<RouteNamedMap & { [key: string]: any }>) => {
+export const setupAuthGuards = (router: _RouterTyped<RouteNamedMap & { [key: string]: any }>) => {
     // 👉 router.beforeEach
     // Docs: https://router.vuejs.org/guide/advanced/navigation-guards.html#global-before-guards
     router.beforeEach(async (to, from, next) => {

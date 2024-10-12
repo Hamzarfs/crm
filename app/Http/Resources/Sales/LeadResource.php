@@ -20,6 +20,8 @@ class LeadResource extends JsonResource
         return [
             'id' => $this->id,
             'created_by' => $this->whenLoaded('createdBy', new UserResource($this->createdBy)),
+            'assigned_by' => $this->whenLoaded('assignedBy', new UserResource($this->assignedBy)),
+            'assigned_to' => $this->whenLoaded('assignedTo', new UserResource($this->assignedTo)),
             'services_sold' => $this->whenLoaded(
                 'servicesSold',
                 $this->servicesSold->map(function (Service $service) {
@@ -61,6 +63,7 @@ class LeadResource extends JsonResource
             'lead_source' => $this->whenLoaded('leadSource', [
                 'id' => $this->leadSource->id,
                 'name' => $this->leadSource->name,
+                'type' => $this->leadSource->type,
             ]),
             'brand' => $this->whenLoaded('brand', [
                 'id' => $this->brand->id,

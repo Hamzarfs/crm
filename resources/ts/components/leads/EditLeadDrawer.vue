@@ -17,6 +17,7 @@ interface Props {
     brands: any[]
     services: any[]
     errors: Record<string, any>
+    userData: Record<string, any>
 }
 
 const props = defineProps<Props>()
@@ -42,8 +43,10 @@ watch(() => props.lead, newVal => {
     leadToEdit.value.brand = newVal.brand?.id
     leadToEdit.value.status = newVal.status
     leadToEdit.value.remarks = newVal.remarks
-    leadToEdit.value.lead_closed_date = parseDateWithFormat(newVal.lead_closed_date, 'DD MMM YYYY', 'DD-MM-YYYY')
-    leadToEdit.value.lead_closed_amount = newVal.lead_closed_amount
+    if (props.userData.department.value !== 'lead_generation') {
+        leadToEdit.value.lead_closed_date = parseDateWithFormat(newVal.lead_closed_date, 'DD MMM YYYY', 'DD-MM-YYYY')
+        leadToEdit.value.lead_closed_amount = newVal.lead_closed_amount
+    }
     leadToEdit.value.services = newVal.services_sold?.map((ss: Record<string, any>) => ss.service_id)
 }, {
     deep: true,
@@ -124,7 +127,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                             </VCol>
 
                             <!-- 👉 Status -->
-                            <VCol cols="12">
+                            <VCol cols="12" v-if="props.userData.department.value !== 'lead_generation'">
                                 <VAutocomplete v-model="leadToEdit.status" :items="props.statuses" label="Lead status"
                                     :rules="[requiredValidator]" placeholder="Select Lead status" clearable
                                     :error-messages="props.errors.status" />
@@ -145,14 +148,14 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                             </VCol>
 
                             <!-- 👉 Closed Date -->
-                            <VCol cols="12">
+                            <VCol cols="12" v-if="props.userData.department.value !== 'lead_generation'">
                                 <AppDateTimePicker v-model="leadToEdit.lead_closed_date" label="Lead Close Date"
                                     placeholder="Lead Close Date" clearable :config="{ dateFormat: 'd-m-Y' }"
                                     :error-messages="props.errors.lead_closed_date" />
                             </VCol>
 
                             <!-- 👉 Closed Amount -->
-                            <VCol cols="12">
+                            <VCol cols="12" v-if="props.userData.department.value !== 'lead_generation'">
                                 <VTextField type="number" v-model="leadToEdit.lead_closed_amount"
                                     label="Lead Close Amount" placeholder="Lead Close Amount" clearable min="0.1"
                                     :rules="[numberValidator]" :error-messages="props.errors.lead_closed_amount" />

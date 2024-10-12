@@ -31,13 +31,18 @@ class UserController extends Controller
 
     private function getUserAll(Request $request)
     {
-        $department = $request->input('department');
+        $departments = $request->input('departments');
+        $roles = $request->input('roles');
+
         $users = User::where([
             ['status', EmployeeStatusesEnum::ACTIVE],
             ['id', '!=', $request->user()->id]
         ])->when(
-            value: $department,
-            callback: fn(Builder $userQuery, string | array $department) => is_array($department) ? $userQuery->whereIn('department_id', $department) : $userQuery->where('department_id', $department)
+            value: $departments,
+            callback: fn(Builder $userQuery, array $departments) => $userQuery->whereHas('department', fn(Builder $departmentsQuery) => $departmentsQuery->whereIn('name', $departments))
+        )->when(
+            value: $roles,
+            callback: fn(Builder $userQuery, array $roles) => $userQuery->whereHas('roles', fn(Builder $rolesQuery) => $rolesQuery->whereIn('name', $roles))
         )->get();
 
         return response()->json([

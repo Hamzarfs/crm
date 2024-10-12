@@ -3,8 +3,7 @@
 // Get currently logged in user data
 const userData = useCookie('userData').value
 
-
-// 👉 Store
+// 👉 Filters
 const selectedUser = ref([])
 const selectedCustomers = ref([])
 const selectedLeadSources = ref([])
@@ -18,6 +17,7 @@ const selectedCloseAmount = ref()
 
 const selectedLead = ref<Record<string, any>>({})
 let leadToDelete: number
+const assignedUser = ref()
 
 // Data table options
 const itemsPerPage = ref(20)
@@ -41,6 +41,8 @@ const updateOptions = (options: any) => {
 const headers = [
     { title: 'ID', key: 'id' },
     { title: 'Created By', key: 'created_by' },
+    { title: 'Assigned By', key: 'assigned_by' },
+    { title: 'Assigned To', key: 'assigned_to' },
     { title: 'Customer name', key: 'customer_id' },
     { title: 'Lead Source', key: 'lead_source_id' },
     { title: 'Brand', key: 'brand_id' },
@@ -82,8 +84,6 @@ watch(() => isFetching.value, (newValue) => {
 const leads = computed(() => leadsData.value.leads)
 const totalLeads = computed(() => leadsData.value.totalLeads)
 
-// const statuses = ['No answer', 'Hung up', 'Wrong number', 'Voice mail', 'Found someone', 'Follow up', 'Not interested', 'Blocked', 'Sale closed', 'Cant connect', 'Not in service', 'Invalid lead', 'Email done', 'Call done', 'No number', 'Not interested', 'Interested']
-
 const { services } = await $api('services')
 const { brands } = await $api('brands')
 const { customers } = await $api('customers')
@@ -91,20 +91,27 @@ const { leadsources } = await $api('leadsources')
 const { statuses } = await $api('leads/statuses')
 const { users } = await $api('users', {
     query: {
-        'department[]': [1, 2] // Sales & Admin departments
+        'departments[]': ['admin', 'sales', 'lead_generation'] // Sales, Lead Generation & Admin departments
     }
 })
+const salesAgentUsers = await $api('users', {
+    query: {
+        'roles[]': ['sales_agent'],
+        'departments[]': ['sales'],
+    }
+}).then(({ users }) => users.map((u: any) => ({ title: u.name, value: u.id })))
+
 
 const _services = services.map((s: any) => ({ title: s.name, value: s.id }))
 const _brands = brands.map((b: any) => ({ title: b.name, value: b.id }))
 const _customers = customers.map((c: any) => ({ title: c.full_name, value: c.id }))
-const _leadSources = leadsources.map((ls: any) => ({ title: ls.name, value: ls.id }))
-const _salesUser = users.map((u: any) => ({ title: u.name, value: u.id }))
-_salesUser.unshift({ title: 'Me', value: userData.id })
+const leadSources = leadsources.map((ls: any) => ({ title: ls.name, value: ls.id }))
+const createdByUsers = users.map((u: any) => ({ title: u.name, value: u.id }))
+createdByUsers.unshift({ title: 'Me', value: userData.id })
 
 const resolveLeadStatusVariant = (status: string) => {
     const successStatuses = ['Sale closed']
-    const errorStatuses = ['No answer', 'Hung up', 'Wrong number', 'Voice mail', 'Found someone', 'Not interested', 'Blocked', 'Cant connect', 'Not in service', 'Invalid lead', 'No number', 'Not interested']
+    const errorStatuses = ['No answer', 'Hung up', 'Wrong number', 'Voice mail', 'Found someone', 'Not interested', 'Blocked', 'Cant connect', 'Not in service', 'Invalid lead', 'No number', 'Not interested', 'Garbage', 'Lost (Projects with others)',]
 
     if (successStatuses.includes(status))
         return 'success'
@@ -118,6 +125,8 @@ const isAddNewLeadDrawerVisible = ref(false)
 const isEditLeadDrawerVisible = ref(false)
 const isSnackBarVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
+const isLeadAssigningDialogVisible = ref(false)
+const isLeadPickingDialogVisible = ref(false)
 const leadResponsemessage = ref('')
 
 // 👉 Add new lead
@@ -179,7 +188,7 @@ const deleteLead = async () => {
     }
 }
 
-const errors = ref({
+const errors = ref<Record<string, any>>({
     customer: undefined,
     services: undefined,
     lead_source: undefined,
@@ -188,6 +197,7 @@ const errors = ref({
     remarks: undefined,
     lead_closed_amount: undefined,
     lead_closed_date: undefined,
+    assigned_to: undefined
 })
 
 const leadsCountData = ref({
@@ -219,6 +229,50 @@ const widgetData = computed(() => ([
 watch(isEditLeadDrawerVisible, editDrawer => {
     if (!editDrawer)
         selectedLead.value = {}
+})
+
+const canEditOrDeleteLeads =
+    (id: any) => (userData.department.value === 'lead_generation' && userData.id == id) ||
+        (['sales', 'admin'].includes(userData.department.value))
+
+const assignLead = async (assignedTo: number) => {
+    if (!assignedTo) {
+        errors.value.assigned_to = 'Please select the sales agent'
+    }
+
+    const { success, message } = await $api(`leads/${selectedLead.value.id}/assign`, {
+        body: { assignedTo },
+        method: 'PATCH'
+    })
+
+    isSnackBarVisible.value = true
+    leadResponsemessage.value = message
+
+    if (success) {
+        isLeadAssigningDialogVisible.value = false
+        selectedLead.value = {}
+        assignedUser.value = undefined
+        fetchLeads()
+    }
+}
+
+const pickLead = async () => {
+    const { success, message } = await $api(`leads/${selectedLead.value.id}/pick`, {
+        method: 'PATCH'
+    })
+
+    isSnackBarVisible.value = true
+    leadResponsemessage.value = message
+
+    if (success) {
+        isLeadPickingDialogVisible.value = false
+        selectedLead.value = {}
+        fetchLeads()
+    }
+}
+
+watch(assignedUser, () => {
+    errors.value.assigned_to = undefined
 })
 
 </script>
@@ -262,7 +316,7 @@ watch(isEditLeadDrawerVisible, editDrawer => {
                     <!-- 👉 Select Lead Sources -->
                     <VCol>
                         <VAutocomplete v-model="selectedLeadSources" multiple label="Filter by Lead Sources"
-                            placeholder="Filter by Lead Sources" :items="_leadSources" clearable chips />
+                            placeholder="Filter by Lead Sources" :items="leadSources" clearable chips />
                     </VCol>
 
                     <!-- 👉 Select Brands -->
@@ -288,7 +342,7 @@ watch(isEditLeadDrawerVisible, editDrawer => {
                     <!-- 👉 Select Agent -->
                     <VCol>
                         <VAutocomplete v-model="selectedUser" multiple label="Filter by Created by"
-                            placeholder="Filter by Created by" :items="_salesUser" clearable chips />
+                            placeholder="Filter by Created by" :items="createdByUsers" clearable chips />
                     </VCol>
 
                     <!-- 👉 Select Statuses -->
@@ -346,6 +400,18 @@ watch(isEditLeadDrawerVisible, editDrawer => {
                 <!-- Create BY -->
                 <template #item.created_by="{ item }: { item: any }">
                     {{ item.created_by?.name }}
+                </template>
+
+                <!-- Assigned By -->
+                <template #item.assigned_by="{ item }: { item: any }">
+                    <template v-if="item.assigned_by">{{ item.assigned_by?.name }}</template>
+                    <span v-else class="text-error font-weight-bold">Not Assigned</span>
+                </template>
+
+                <!-- Assigned By -->
+                <template #item.assigned_to="{ item }: { item: any }">
+                    <template v-if="item.assigned_to">{{ item.assigned_to?.name }}</template>
+                    <span v-else class="text-error font-weight-bold">Not Assigned</span>
                 </template>
 
                 <!-- Customer Name -->
@@ -417,14 +483,39 @@ watch(isEditLeadDrawerVisible, editDrawer => {
 
                 <!-- Actions -->
                 <template #item.actions="{ item }: { item: any }">
-                    <IconBtn size="small" :disabled="tableLoading" color="info">
+                    <!-- <IconBtn size="small" :disabled="tableLoading" color="info">
                         <VIcon icon="ri-eye-line" />
                         <VTooltip activator="parent" location="top">
                             View
                         </VTooltip>
-                    </IconBtn>
+                    </IconBtn> -->
 
-                    <IconBtn size="small" @click="openEditLeadForm(item)" :disabled="tableLoading" color="primary">
+                    <template
+                        v-if="['sales', 'admin'].includes(userData.department.value) && isNullOrUndefined(item.assigned_to)">
+
+                        <IconBtn v-if="['team_lead', 'admin'].includes(userData.role.value)" size="small"
+                            @click="isLeadAssigningDialogVisible = true; selectedLead = item" color="success"
+                            :disabled="tableLoading || !canEditOrDeleteLeads(item.created_by.id)">
+                            <VIcon icon="ri-user-shared-line" />
+                            <VTooltip activator="parent" location="top">
+                                Assign lead
+                            </VTooltip>
+                        </IconBtn>
+
+                        <IconBtn size="small" @click="isLeadPickingDialogVisible = true; selectedLead = item;"
+                            v-else-if="userData.role.value === 'sales_agent' && item.lead_source.type === 'unpaid'"
+                            :disabled="tableLoading || !canEditOrDeleteLeads(item.created_by.id)" color="success">
+                            <VIcon icon="ri-user-received-line" />
+                            <VTooltip activator="parent" location="top">
+                                Pick lead
+                            </VTooltip>
+                        </IconBtn>
+
+                    </template>
+
+
+                    <IconBtn size="small" @click="openEditLeadForm(item)"
+                        :disabled="tableLoading || !canEditOrDeleteLeads(item.created_by.id)" color="primary">
                         <VIcon icon="ri-edit-box-line" />
                         <VTooltip activator="parent" location="top">
                             Edit
@@ -432,7 +523,7 @@ watch(isEditLeadDrawerVisible, editDrawer => {
                     </IconBtn>
 
                     <IconBtn size="small" @click="isDeleteDialogVisible = true; leadToDelete = item.id" color="error"
-                        :disabled="tableLoading">
+                        :disabled="tableLoading || !canEditOrDeleteLeads(item.created_by.id)">
                         <VIcon icon="ri-delete-bin-7-line" />
                         <VTooltip activator="parent" location="top">
                             Delete
@@ -471,13 +562,13 @@ watch(isEditLeadDrawerVisible, editDrawer => {
 
         <!-- 👉 Add New Lead -->
         <AddNewLeadDrawer ref="addNewLeadDrawerRef" v-model:isDrawerOpen="isAddNewLeadDrawerVisible"
-            @lead-data="addNewLead" :statuses :brands="_brands" :customers="_customers" :lead-sources="_leadSources"
-            :services="_services" :errors="errors" />
+            @lead-data="addNewLead" :statuses :brands="_brands" :customers="_customers" :lead-sources="leadSources"
+            :services="_services" :errors="errors" :userData />
 
         <!-- 👉 Edit Lead -->
         <EditLeadDrawer ref="editLeadDrawerRef" v-model:isDrawerOpen="isEditLeadDrawerVisible" @lead-data="editLead"
-            :statuses :brands="_brands" :customers="_customers" :lead-sources="_leadSources" :services="_services"
-            :lead="selectedLead" :errors="errors" />
+            :statuses :brands="_brands" :customers="_customers" :lead-sources="leadSources" :services="_services"
+            :lead="selectedLead" :errors="errors" :userData />
 
         <VSnackbar v-model="isSnackBarVisible">
             {{ leadResponsemessage }}
@@ -488,8 +579,54 @@ watch(isEditLeadDrawerVisible, editDrawer => {
             </template>
         </VSnackbar>
 
+        <!-- Lead assigning dialog -->
+        <VDialog v-model="isLeadAssigningDialogVisible" width="600">
+            <VCard title="Select sales agent" class="pb-5">
+                <DialogCloseBtn variant="text" size="default"
+                    @click="isLeadAssigningDialogVisible = false; assignedUser = undefined; errors.assigned_to = undefined" />
+
+                <VCardText>
+                    <VAutocomplete v-model="assignedUser" :items="salesAgentUsers" clearable chips
+                        :error-messages="errors.assigned_to" label="Select sales agent to assign lead"
+                        placeholder="Select sales agent to assign lead" />
+                </VCardText>
+
+                <VCardText class="d-flex align-center justify-center gap-4">
+                    <VBtn variant="elevated" @click="assignLead(assignedUser)" color="success">
+                        Confirm
+                    </VBtn>
+
+                    <VBtn color="secondary" variant="outlined"
+                        @click="isLeadAssigningDialogVisible = false; assignedUser = undefined; errors.assigned_to = undefined">
+                        Cancel
+                    </VBtn>
+                </VCardText>
+            </VCard>
+        </VDialog>
+
+        <!-- Lead picking dialog -->
+        <VDialog v-model="isLeadPickingDialogVisible" width="400">
+            <VCard title="Confirmation" class="pb-5">
+                <DialogCloseBtn variant="text" size="default" @click="isLeadPickingDialogVisible = false" />
+
+                <VCardText>
+                    Are you sure you want to pick this lead?
+                </VCardText>
+
+                <VCardText class="d-flex align-center justify-center gap-4">
+                    <VBtn variant="elevated" @click="pickLead" color="success">
+                        Confirm
+                    </VBtn>
+
+                    <VBtn color="secondary" variant="outlined" @click="isLeadPickingDialogVisible = false;">
+                        Cancel
+                    </VBtn>
+                </VCardText>
+            </VCard>
+        </VDialog>
+
+        <!-- Delete Dialog -->
         <VDialog v-model="isDeleteDialogVisible" width="400">
-            <!-- Dialog Content -->
             <VCard title="Confirmation" class="pb-5">
                 <DialogCloseBtn variant="text" size="default" @click="isDeleteDialogVisible = false" />
 

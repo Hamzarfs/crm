@@ -2,15 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\DepartmentsEnum;
+use App\Enums\RolesEnum;
+use App\Http\Requests\Sales\Lead\Assign;
 use App\Http\Requests\Sales\Lead\Store;
 use App\Http\Requests\Sales\Lead\Update;
 use App\Http\Resources\Collections\Sales\LeadResourceCollection;
 use App\Models\Lead;
 use App\Models\LeadStatus;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class LeadController extends Controller
 {
@@ -41,10 +46,18 @@ class LeadController extends Controller
         $orderByColumn = $request->input('sortBy');
         $orderByDir = $request->input('orderBy');
 
-        $leads = Lead::with(['servicesSold', 'upsells.serviceSold', 'customer', 'leadSource', 'brand', 'createdBy'])->withCount(['servicesSold', 'upsells']);
+        $leads = Lead::with(['servicesSold', 'upsells.serviceSold', 'customer', 'leadSource', 'brand', 'createdBy', 'assignedTo', 'assignedBy'])->withCount(['servicesSold', 'upsells']);
+
+        if ($request->user()->hasDepartment(DepartmentsEnum::SALES->value) && $request->user()->hasRole(RolesEnum::SALES_AGENT)) {
+            $leads->where(function (Builder $leadsQuery) use ($request) {
+                $leadsQuery->where('assigned_to', $request->user()->id)
+                    ->orWhere('created_by', $request->user()->id)
+                    ->orWhereHas('leadSource', fn(Builder $leadSourceQuery) => $leadSourceQuery->where('type', 'unpaid'));
+            });
+        }
 
         // Applying DT filters
-        $leads = $leads->when(
+        $leads->when(
             value: $users,
             callback: fn(Builder $leadsQuery, array $users) => $leadsQuery->whereHas('createdBy', fn(Builder $userQuery) => $userQuery->whereIn('id', $users))
         )->when(
@@ -145,8 +158,8 @@ class LeadController extends Controller
             'brand_id' => $data->brand,
             'status' => $data->status,
             'remarks' => $data->remarks ?? '',
-            'lead_closed_date' => $data->lead_closed_date,
-            'lead_closed_amount' => $data->lead_closed_amount,
+            'lead_closed_date' => $data?->lead_closed_date,
+            'lead_closed_amount' => $data?->lead_closed_amount,
         ];
 
         $lead->update($leadAttributes);
@@ -199,10 +212,49 @@ class LeadController extends Controller
         ]);
     }
 
+    /**
+     * Get Leads widgets count
+     */
     public function getLeadStatuses()
     {
         return response()->json([
             'statuses' => LeadStatus::pluck('name')
+        ]);
+    }
+
+    /**
+     * Pick a lead - only sales agent
+     */
+    public function pickLead(Lead $lead)
+    {
+        $lead->update([
+            'assigned_to' => request()->user()->id,
+            'assigned_by' => request()->user()->id,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Lead successfully picked!'
+        ]);
+    }
+
+    /**
+     * Assign a lead - only sales dept TL or admin
+     */
+    public function assignLead(Assign $request, Lead $lead)
+    {
+        $data = (object) $request->validated();
+
+        $lead->update([
+            'assigned_to' => $data->assignedTo,
+            'assigned_by' => request()->user()->id,
+        ]);
+
+        $user = User::find($data->assignedTo);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Lead successfully assigned to {$user->name}!"
         ]);
     }
 }

@@ -84,7 +84,7 @@ export const checkDeadlineStatus = (deadlineDate: string): 'exceeded' | 'approac
     }
 }
 
-export const currencyFormatter = (amount: number, currency: string = 'usd') => new Intl.NumberFormat('us', {
+export const currencyFormatter = (amount: number, currency: string = 'usd') => new Intl.NumberFormat('en-us', {
     style: 'currency',
     maximumFractionDigits: 2,
     currency
