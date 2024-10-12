@@ -39,6 +39,11 @@ class Lead extends Model
         return $this->belongsTo(Brand::class);
     }
 
+    public function campaign()
+    {
+        return $this->belongsTo(Campaign::class);
+    }
+
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');

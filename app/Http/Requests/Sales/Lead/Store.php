@@ -25,6 +25,7 @@ class Store extends FormRequest
             'customer' => ['required', 'exists:customers,id'],
             'lead_source' => ['required', 'exists:lead_sources,id'],
             'brand' => ['required', 'exists:brands,id'],
+            'campaign' => ['required', 'exists:campaigns,id'],
             'status' => ['required', 'string'],
             'remarks' => ['string', 'nullable'],
             'lead_closed_date' => ['date', 'date_format:d-m-Y', 'nullable', 'required_with:lead_closed_amount'],

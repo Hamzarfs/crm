@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\{AuthController, DepartmentController, BrandController, CurrencyController, CustomerController, LeadController, LeadSourceController, NotificationController, RoleController, ServiceController, TaskController, UserController};
+use App\Http\Controllers\{AuthController, DepartmentController, BrandController, CampaignController, CurrencyController, CustomerController, LeadController, LeadSourceController, NotificationController, RoleController, ServiceController, TaskController, UserController};
 use Illuminate\Support\Facades\Route;
 
 
@@ -131,5 +131,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
             Route::patch('{lead}/pick', 'pickLead')->middleware('role:sales_agent');
             Route::patch('{lead}/assign', 'assignLead')->middleware('role:admin|team_lead');
+        });
+
+    Route::prefix('campaigns')
+        ->controller(CampaignController::class)
+        ->middleware('department:admin,sales,lead_generation')
+        ->group(function () {
+            Route::get('', 'list');
+            // Route::post('', 'store');
+            // Route::put('{campaign}', 'update');
+            // Route::delete('{campaign}', 'delete');
         });
 });

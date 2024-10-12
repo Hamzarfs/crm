@@ -68,6 +68,11 @@ class LeadResource extends JsonResource
             'brand' => $this->whenLoaded('brand', [
                 'id' => $this->brand->id,
                 'name' => $this->brand->name,
+                'country' => $this->brand->country,
+            ]),
+            'campaign' => $this->whenLoaded('campaign', [
+                'id' => $this->campaign?->id,
+                'name' => $this->campaign?->name,
             ]),
             'services_sold_count' => $this->whenCounted('servicesSold', $this->services_sold_count),
             'upsells_count' => $this->whenCounted('upsells', $this->upsells_count),
@@ -77,6 +82,8 @@ class LeadResource extends JsonResource
             'lead_closed_amount' => $this->lead_closed_amount,
             'created_at' => $this->created_at->format('d M Y, g:i A'),
             'updated_at' => $this->updated_at->format('d M Y, g:i A'),
+            'created_at_country' => $this->created_at->timezone($this->brand->country === 'UK' ? 'Europe/London' : 'America/Chicago')->format('d M Y, g:i A') . " ({$this->brand->country})",
+            'updated_at_country' => $this->updated_at->timezone($this->brand->country === 'UK' ? 'Europe/London' : 'America/Chicago')->format('d M Y, g:i A') . " ({$this->brand->country})",
         ];
     }
 }

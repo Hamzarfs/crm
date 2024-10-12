@@ -18,6 +18,7 @@ interface Props {
     services: any[]
     errors: Record<string, any>
     userData: Record<string, any>
+    campaigns: Record<string, any>[]
 }
 
 const props = defineProps<Props>()
@@ -35,6 +36,7 @@ const lead = ref({
     lead_closed_date: undefined,
     lead_closed_amount: undefined,
     services: [],
+    campaign: undefined,
 })
 
 // 👉 drawer close
@@ -50,6 +52,7 @@ const closeNavigationDrawer = () => {
             remarks: undefined,
             lead_closed_amount: undefined,
             lead_closed_date: undefined,
+            campaign: undefined,
         })
         refForm.value?.reset()
         refForm.value?.resetValidation()
@@ -95,6 +98,13 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                                 <VAutocomplete v-model="lead.customer" :rules="[requiredValidator]" label="Customer"
                                     :items="props.customers" placeholder="Select Customer"
                                     :error-messages="props.errors.customer" clearable />
+                            </VCol>
+
+                            <!-- 👉 Campaign -->
+                            <VCol cols="12">
+                                <VSelect v-model="lead.campaign" :rules="[requiredValidator]" label="Campaign"
+                                    :items="props.campaigns" placeholder="Select Campaign"
+                                    :error-messages="props.errors.campaign" clearable />
                             </VCol>
 
                             <!-- 👉 Lead Source -->

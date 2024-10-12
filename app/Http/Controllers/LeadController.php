@@ -46,7 +46,7 @@ class LeadController extends Controller
         $orderByColumn = $request->input('sortBy');
         $orderByDir = $request->input('orderBy');
 
-        $leads = Lead::with(['servicesSold', 'upsells.serviceSold', 'customer', 'leadSource', 'brand', 'createdBy', 'assignedTo', 'assignedBy'])->withCount(['servicesSold', 'upsells']);
+        $leads = Lead::with(['servicesSold', 'upsells.serviceSold', 'customer', 'leadSource', 'brand', 'createdBy', 'assignedTo', 'assignedBy', 'campaign'])->withCount(['servicesSold', 'upsells']);
 
         if ($request->user()->hasDepartment(DepartmentsEnum::SALES->value) && $request->user()->hasRole(RolesEnum::SALES_AGENT)) {
             $leads->where(function (Builder $leadsQuery) use ($request) {
@@ -124,6 +124,7 @@ class LeadController extends Controller
             'customer_id' => $data->customer,
             'lead_source_id' => $data->lead_source,
             'brand_id' => $data->brand,
+            'campaign_id' => $data->campaign,
             'status' => $data->status,
             'remarks' => $data->remarks ?? '',
         ];
@@ -156,6 +157,7 @@ class LeadController extends Controller
             'customer_id' => $data->customer,
             'lead_source_id' => $data->lead_source,
             'brand_id' => $data->brand,
+            'campaign_id' => $data->campaign,
             'status' => $data->status,
             'remarks' => $data->remarks ?? '',
             'lead_closed_date' => $data?->lead_closed_date,
@@ -177,6 +179,12 @@ class LeadController extends Controller
      */
     public function delete(Lead $lead)
     {
+        if ($lead->assignedTo()->exists())
+            return response()->json([
+                'success' => false,
+                'message' => "Lead is already assigned to sales agent!! Can't be deleted."
+            ]);
+
         $lead->servicesSold()->detach();
         $lead->upsells()->delete();
         $lead->delete();

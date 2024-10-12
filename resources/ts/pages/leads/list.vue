@@ -43,6 +43,7 @@ const headers = [
     { title: 'Created By', key: 'created_by' },
     { title: 'Assigned By', key: 'assigned_by' },
     { title: 'Assigned To', key: 'assigned_to' },
+    { title: 'Campaign', key: 'campaign' },
     { title: 'Customer name', key: 'customer_id' },
     { title: 'Lead Source', key: 'lead_source_id' },
     { title: 'Brand', key: 'brand_id' },
@@ -53,6 +54,9 @@ const headers = [
     { title: 'Lead closed date', key: 'lead_closed_date' },
     { title: 'Lead closed amount', key: 'lead_closed_amount' },
     { title: 'Created at', key: 'created_at' },
+    { title: 'Updated at', key: 'updated_at' },
+    { title: 'Created at (by Country)', key: 'created_at_country' },
+    { title: 'Updated at (by Country)', key: 'updated_at_country' },
     { title: 'Actions', key: 'actions', sortable: false },
 ]
 
@@ -100,6 +104,7 @@ const salesAgentUsers = await $api('users', {
         'departments[]': ['sales'],
     }
 }).then(({ users }) => users.map((u: any) => ({ title: u.name, value: u.id })))
+const { campaigns } = await $api('campaigns')
 
 
 const _services = services.map((s: any) => ({ title: s.name, value: s.id }))
@@ -197,7 +202,8 @@ const errors = ref<Record<string, any>>({
     remarks: undefined,
     lead_closed_amount: undefined,
     lead_closed_date: undefined,
-    assigned_to: undefined
+    assigned_to: undefined,
+    campaign: undefined,
 })
 
 const leadsCountData = ref({
@@ -414,6 +420,11 @@ watch(assignedUser, () => {
                     <span v-else class="text-error font-weight-bold">Not Assigned</span>
                 </template>
 
+                <!-- Campaign -->
+                <template #item.campaign="{ item }: { item: any }">
+                    {{ item.campaign?.name }}
+                </template>
+
                 <!-- Customer Name -->
                 <template #item.customer_id="{ item }: { item: any }">
                     {{ item.customer.name }}
@@ -563,12 +574,12 @@ watch(assignedUser, () => {
         <!-- 👉 Add New Lead -->
         <AddNewLeadDrawer ref="addNewLeadDrawerRef" v-model:isDrawerOpen="isAddNewLeadDrawerVisible"
             @lead-data="addNewLead" :statuses :brands="_brands" :customers="_customers" :lead-sources="leadSources"
-            :services="_services" :errors="errors" :userData />
+            :services="_services" :errors="errors" :userData :campaigns />
 
         <!-- 👉 Edit Lead -->
         <EditLeadDrawer ref="editLeadDrawerRef" v-model:isDrawerOpen="isEditLeadDrawerVisible" @lead-data="editLead"
             :statuses :brands="_brands" :customers="_customers" :lead-sources="leadSources" :services="_services"
-            :lead="selectedLead" :errors="errors" :userData />
+            :lead="selectedLead" :errors="errors" :userData :campaigns />
 
         <VSnackbar v-model="isSnackBarVisible">
             {{ leadResponsemessage }}

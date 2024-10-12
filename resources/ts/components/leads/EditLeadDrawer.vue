@@ -18,6 +18,7 @@ interface Props {
     services: any[]
     errors: Record<string, any>
     userData: Record<string, any>
+    campaigns: Record<string, any>[]
 }
 
 const props = defineProps<Props>()
@@ -35,6 +36,7 @@ const leadToEdit = ref<Record<string, any>>({
     lead_closed_date: undefined,
     lead_closed_amount: undefined,
     services: undefined,
+    campaign: undefined,
 })
 
 watch(() => props.lead, newVal => {
@@ -48,6 +50,7 @@ watch(() => props.lead, newVal => {
         leadToEdit.value.lead_closed_amount = newVal.lead_closed_amount
     }
     leadToEdit.value.services = newVal.services_sold?.map((ss: Record<string, any>) => ss.service_id)
+    leadToEdit.value.campaign = newVal.campaign?.id
 }, {
     deep: true,
 })
@@ -65,6 +68,7 @@ const closeNavigationDrawer = () => {
             remarks: undefined,
             lead_closed_amount: undefined,
             lead_closed_date: undefined,
+            campaign: undefined,
         })
         refForm.value?.reset()
         refForm.value?.resetValidation()
@@ -110,6 +114,13 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                                 <VAutocomplete v-model="leadToEdit.customer" :rules="[requiredValidator]"
                                     label="Customer" :items="props.customers" placeholder="Select Customer"
                                     :error-messages="props.errors.customer" clearable />
+                            </VCol>
+
+                            <!-- 👉 Campaign -->
+                            <VCol cols="12">
+                                <VSelect v-model="leadToEdit.campaign" :rules="[requiredValidator]" label="Campaign"
+                                    :items="props.campaigns" placeholder="Select Campaign"
+                                    :error-messages="props.errors.campaign" clearable />
                             </VCol>
 
                             <!-- 👉 Lead Source -->
