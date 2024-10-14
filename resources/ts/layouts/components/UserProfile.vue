@@ -90,6 +90,10 @@ const userProfileList = [
                                 <VListItemSubtitle class="text-uppercase text-disabled font-weight-bold">
                                     {{ userData.role.title }}
                                 </VListItemSubtitle>
+                                <VListItemSubtitle v-if="userData.role.value !== 'admin'"
+                                    class="text-uppercase text-disabled font-weight-bold">
+                                    {{ userData.department.title }}
+                                </VListItemSubtitle>
                             </div>
                         </div>
                     </VListItem>

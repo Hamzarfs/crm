@@ -117,7 +117,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('leads')
         ->controller(LeadController::class)
-        ->middleware('department:admin,sales')
         ->group(function () {
             Route::middleware(['department:admin,sales,lead_generation'])
                 ->group(function () {
@@ -129,8 +128,11 @@ Route::middleware('auth:sanctum')->group(function () {
                     Route::delete('{lead}', 'delete');
                 });
 
-            Route::patch('{lead}/pick', 'pickLead')->middleware('role:sales_agent');
-            Route::patch('{lead}/assign', 'assignLead')->middleware('role:admin|team_lead');
+            Route::middleware(['department:admin,sales'])
+                ->group(function () {
+                    Route::patch('{lead}/pick', 'pickLead')->middleware('role:sales_agent');
+                    Route::patch('{lead}/assign', 'assignLead')->middleware('role:admin|team_lead');
+                });
         });
 
     Route::prefix('campaigns')
