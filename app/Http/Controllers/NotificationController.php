@@ -13,13 +13,11 @@ class NotificationController extends Controller
     public function all()
     {
         return response()->json([
-            'notifications' => [
-                ...$this->getTaskCreatedNotifications()
-            ]
+            // 'notifications' => 
         ]);
     }
 
-    public function getTaskCreatedNotifications(string $type = 'task.created')
+    public function getTaskCreatedNotifications(string $type = 'task.assigned')
     {
         return DatabaseNotification::where('type', $type)->get()->map(
             function ($notification) {

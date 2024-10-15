@@ -1,23 +1,28 @@
 <?php
 
-namespace App\Notifications\Tasks;
+namespace App\Notifications\Task;
 
 use App\Http\Resources\Notifications\Task\TaskCreatedResource;
 use App\Models\Task;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
+use Illuminate\Database\Eloquent\BroadcastsEventsAfterCommit;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
 
-class Created extends Notification implements ShouldBroadcastNow
+class Created extends Notification implements ShouldQueueAfterCommit, ShouldBroadcast
 {
-    use InteractsWithSockets;
+    use InteractsWithSockets, BroadcastsEventsAfterCommit;
     /**
      * Create a new notification instance.
      */
-    public function __construct(private Task $task) {}
+    public function __construct(
+        private Task $task
+    ) {}
 
     /**
      * Get the notification's delivery channels.
@@ -26,8 +31,8 @@ class Created extends Notification implements ShouldBroadcastNow
      */
     public function via(): array
     {
-        return ['database'];
-        // return ['broadcast', 'database'];
+        // return ['database'];
+        return ['broadcast', 'database'];
     }
 
     /**
@@ -49,38 +54,32 @@ class Created extends Notification implements ShouldBroadcastNow
      */
     public function databaseType(): string
     {
-        return 'task.created';
+        return 'task.assigned';
     }
 
     /**
      * Get the broadcastable representation of the notification.
      */
-    // public function toBroadcast(): BroadcastMessage
-    // {
-    //     return new BroadcastMessage([
-    //         'task' => new TaskCreatedResource($this->task),
-    //     ]);
-    // }
+    public function toBroadcast(): BroadcastMessage
+    {
+        return new BroadcastMessage([
+            'task' => new TaskCreatedResource($this->task),
+        ]);
+    }
 
     /**
      * Get the channel the event should broadcast on.
      */
-    // public function broadcastOn(): Channel
-    // {
-    //     return new Channel("Task.Created.Notifications.{$this->task->assigned_to}");
-    //     // return new PrivateChannel("Task.Created.{$this->task->assigned_to}");
-    // }
+    public function broadcastOn(): Channel
+    {
+        return new PrivateChannel("Task.Assigned.{$this->task->assigned_to}");
+    }
 
     /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
+     * Get the type of the notification being broadcast.
      */
-    // public function toArray(object $notifiable): array
-    // {
-    //     $notifiable->load(['assignee', 'creator']);
-    //     return [
-    //         'task' => new TaskResource($notifiable)
-    //     ];
-    // }
+    public function broadcastType(): string
+    {
+        return 'task.assigned';
+    }
 }

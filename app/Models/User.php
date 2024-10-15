@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\EmployeeStatusesEnum;
 use BackedEnum;
+use Illuminate\Database\Eloquent\BroadcastsEventsAfterCommit;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -96,8 +97,8 @@ class User extends Authenticatable
     /**
      * The channels the user receives notification broadcasts on.
      */
-    // public function receivesBroadcastNotificationsOn(): string
-    // {
-    //     return "Task.Created.Notifications.{$this->assigned_to}";
-    // }
+    public function receivesBroadcastNotificationsOn(): string
+    {
+        return "Task.Assigned.{$this->assigned_to}";
+    }
 }

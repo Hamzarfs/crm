@@ -1,86 +1,110 @@
 <script setup lang="ts">
-import { themeConfig } from '@themeConfig'
-import { VForm } from 'vuetify/components/VForm'
+    import { useAuthStore } from '@core/stores/auth'
+    import { themeConfig } from '@themeConfig'
+    import { VForm } from 'vuetify/components/VForm'
 
-import tree1 from '@images/misc/tree1.png'
-import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
-import authV2LoginIllustrationBorderedLight from '@images/pages/auth-v2-login-illustration-bordered-light.png'
-import authV2LoginIllustrationDark from '@images/pages/auth-v2-login-illustration-dark.png'
-import authV2LoginIllustrationLight from '@images/pages/auth-v2-login-illustration-light.png'
-import authV2MaskDark from '@images/pages/mask-v2-dark.png'
-import authV2MaskLight from '@images/pages/mask-v2-light.png'
-import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
+    import tree1 from '@images/misc/tree1.png'
+    import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
+    import authV2LoginIllustrationBorderedLight from '@images/pages/auth-v2-login-illustration-bordered-light.png'
+    import authV2LoginIllustrationDark from '@images/pages/auth-v2-login-illustration-dark.png'
+    import authV2LoginIllustrationLight from '@images/pages/auth-v2-login-illustration-light.png'
+    import authV2MaskDark from '@images/pages/mask-v2-dark.png'
+    import authV2MaskLight from '@images/pages/mask-v2-light.png'
+    import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 
-const authThemeImg = useGenerateImageVariant(
-    authV2LoginIllustrationLight,
-    authV2LoginIllustrationDark,
-    authV2LoginIllustrationBorderedLight,
-    authV2LoginIllustrationBorderedDark,
-    true)
+    const authThemeImg = useGenerateImageVariant(
+        authV2LoginIllustrationLight,
+        authV2LoginIllustrationDark,
+        authV2LoginIllustrationBorderedLight,
+        authV2LoginIllustrationBorderedDark,
+        true)
 
-const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
+    const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 
-definePage({
-    meta: {
-        layout: 'blank',
-        unauthenticatedOnly: true,
-    },
-})
+    definePage({
+        meta: {
+            layout: 'blank',
+            unauthenticatedOnly: true,
+        },
+    })
 
-const isPasswordVisible = ref(false)
+    const isPasswordVisible = ref(false)
 
-const route = useRoute()
-const router = useRouter()
+    const route = useRoute()
+    const router = useRouter()
 
 
-const errors = ref<Record<string, string | undefined>>({
-    email: undefined,
-    password: undefined,
-})
+    const errors = ref<Record<string, string | undefined>>({
+        email: undefined,
+        password: undefined,
+    })
 
-const refVForm = ref<VForm>()
+    const refVForm = ref<VForm>()
 
-const credentials = ref({
-    email: '',
-    password: '',
-})
+    const credentials = ref({
+        email: '',
+        password: '',
+    })
 
-const login = async () => {
-    try {
-        const res = await $api('/auth/login', {
-            method: 'POST',
-            body: {
-                email: credentials.value.email,
-                password: credentials.value.password,
-            },
-            onResponseError({ response }) {
-                errors.value = response._data.errors
-            },
-        })
+    const authStore = useAuthStore()
 
-        const { accessToken, userData } = res
+    const login = async () => {
+        try {
+            const res = await $api('/auth/login', {
+                method: 'POST',
+                body: {
+                    email: credentials.value.email,
+                    password: credentials.value.password,
+                },
+                onResponseError({ response }) {
+                    errors.value = response._data.errors
+                },
+            })
 
-        useCookie('userData').value = userData
-        useCookie('accessToken').value = accessToken
+            const { success, accessToken, userData, notifications } = res
 
-        // Redirect to `to` query if exist or redirect to index route
-        // ❗ nextTick is required to wait for DOM updates and later redirect
-        await nextTick(() => {
-            router.replace(route.query.to ? String(route.query.to) : { name: 'dashboard' })
-        })
+            if (success) {
+                console.log(success);
+
+                // useCookie('userData').value = userData
+                // useCookie('accessToken').value = accessToken
+
+                authStore.user = userData
+                authStore.token = accessToken
+                authStore.notifications = notifications
+
+
+
+
+
+                // authStore.setAuthenticatedUser(userData)
+                // authStore.setAllNotifications(notifications)
+
+                // authStore.setAuthToken(accessToken)
+                // authStore.setAuthenticatedUser(userData)
+                // authStore.setAllNotifications(notifications)
+
+                // console.log(authStore.$state);
+
+                // Redirect to `to` query if exist or redirect to index route
+                // ❗ nextTick is required to wait for DOM updates and later redirect
+                await nextTick(() => {
+                    router.replace(route.query.to ? String(route.query.to) : { name: 'dashboard' })
+                })
+            }
+        }
+        catch (err) {
+            console.log(err)
+        }
     }
-    catch (err) {
-        console.log(err)
-    }
-}
 
-const onSubmit = () => {
-    refVForm.value?.validate()
-        .then(({ valid: isValid }) => {
-            if (isValid)
-                login()
-        })
-}
+    const onSubmit = () => {
+        refVForm.value?.validate()
+            .then(({ valid: isValid }) => {
+                if (isValid)
+                    login()
+            })
+    }
 </script>
 
 <template>
@@ -154,5 +178,5 @@ const onSubmit = () => {
 </template>
 
 <style lang="scss">
-@use "@core-scss/template/pages/page-auth.scss";
+    @use "@core-scss/template/pages/page-auth.scss";
 </style>

@@ -67,8 +67,10 @@ class AuthController extends Controller
         $token = $tokenResult->plainTextToken;
 
         return response()->json([
+            'success' => true,
             'accessToken' => "Bearer $token",
-            'userData' => new UserResource($user)
+            'userData' => new UserResource($user),
+            'notifications' => $user->notifications()->unread(),
         ]);
     }
 
@@ -94,6 +96,7 @@ class AuthController extends Controller
         $request->user()->tokens()->delete();
 
         return response()->json([
+            'success' => true,
             'message' => 'Successfully logged out'
         ]);
     }
