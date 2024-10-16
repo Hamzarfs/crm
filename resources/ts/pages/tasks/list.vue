@@ -11,8 +11,8 @@ const selectedUser = ref()
 const selectedDepartment = ref()
 const selectedDate = ref()
 const selectedStatus = ref()
-const toggleAssignedToMe = ref(false)
-const assignedToMe = ref('no')
+const toggleAssignedToMe = ref(true)
+const assignedToMe = ref('yes')
 
 watch(toggleAssignedToMe, newValue => {
     assignedToMe.value = newValue ? 'yes' : 'no'
@@ -107,24 +107,18 @@ const statuses = [
 
 const users = ref([])
 const departments = ref([])
-if (['admin', 'team_lead'].includes(userData.role.value)) {
-    const { users: fetchedUsers } = await $api('users', {
-        query: {
-            'departments[]': [userData?.department?.name],
-        },
-    })
-    users.value = fetchedUsers.map((u: any) => ({
-        value: u.id,
-        title: u.name,
-    }))
 
-    if (userData.role.value === 'admin') {
-        const { departments: fetchedDepartments } = await $api('departments')
-        departments.value = fetchedDepartments.map((d: any) => ({
-            title: d.title,
-            value: d.id,
-        }))
-    }
+if (userData.role.value === 'admin' && userData.department.value === 'admin') {
+    users.value = await $api('users')
+        .then(({ users }) => users.map((u: any) => ({ title: u.name, value: u.id })))
+    departments.value = await $api('departments')
+        .then(({ departments }) => departments.map((d: any) => ({ title: d.title, value: d.id })))
+} else if (userData.role.value === 'team_lead') {
+    users.value = await $api('users', {
+        query: {
+            'departments[]': [userData.department.value],
+        }
+    }).then(({ users }) => users.map((u: any) => ({ title: u.name, value: u.id })))
 }
 
 const resolveTaskStatusColor = (status: string): string => {
@@ -324,7 +318,7 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
                     <!-- 👉 Search  -->
                     <VCol>
                         <VTextField v-model="searchQuery" placeholder="Filter by Query" density="comfortable" clearable
-                            label="Filter by Query" class="me-4" />
+                            label="Filter by Query" />
                     </VCol>
                 </VRow>
             </VCardText>
