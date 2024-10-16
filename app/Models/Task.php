@@ -2,16 +2,15 @@
 
 namespace App\Models;
 
-use App\Notifications\Tasks\Created;
+use App\Notifications\Task\Created;
 use Illuminate\Database\Eloquent\BroadcastsEventsAfterCommit;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Notifications\Notifiable;
 
 class Task extends Model
 {
-    use HasFactory, SoftDeletes, Notifiable, BroadcastsEventsAfterCommit;
+    use HasFactory, SoftDeletes;
 
     protected $guarded = [];
 
@@ -37,7 +36,6 @@ class Task extends Model
 
     protected static function booted()
     {
-        static::created(fn(self $task) => $task->assignee->notifyNow(new Created($task->load(['creator']))));
-        // static::created(fn(self $task) => $task->notifyNow(new Created($task->load(['creator']))));
+        static::created(fn(self $task) => $task->assignee->notify(new Created($task->load(['creator']))));
     }
 }

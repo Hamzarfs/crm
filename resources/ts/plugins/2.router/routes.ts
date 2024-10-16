@@ -1,5 +1,5 @@
+import { useAuthStore } from '@/@core/stores/auth'
 import type { RouteRecordRaw } from 'vue-router/auto'
-
 
 const DashboardComponent = () => import('@/pages/dashboard.vue')
 const EmployeesComponent = () => import('@/pages/employees/list.vue')
@@ -13,6 +13,10 @@ const CustomersComponent = () => import('@/pages/customers/list.vue')
 const LeadsComponent = () => import('@/pages/leads/list.vue')
 
 
+
+
+
+
 // 👉 Redirects
 export const redirects: RouteRecordRaw[] = [
     // ℹ️ We are redirecting to different pages based on role.
@@ -21,8 +25,17 @@ export const redirects: RouteRecordRaw[] = [
         path: '/',
         name: 'index',
         redirect: to => {
-            const userData = useCookie<Record<string, unknown> | null | undefined>('userData').value
-            const token = useCookie('accessToken').value
+            const authStore = useAuthStore()
+            console.log('calling for routes ');
+            console.log(authStore.$state);
+
+            // const userData = 'authStore.user'
+            // const token = 'authStore.token'
+            const userData = authStore.user
+            const token = authStore.token
+
+            // const userData = useCookie<Record<string, unknown> | null | undefined>('userData').value
+            // const token = useCookie('accessToken').value
 
             if (userData && token)
                 return { name: 'dashboard' }

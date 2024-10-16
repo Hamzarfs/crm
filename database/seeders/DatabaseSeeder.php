@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
             BrandSeeder::class,
             CustomerSeeder::class,
             LeadStatusSeeder::class,
-            // // LeadSeeder::class,
+            // LeadSeeder::class,
 
             CampaignSeeder::class,
 

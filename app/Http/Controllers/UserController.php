@@ -34,7 +34,7 @@ class UserController extends Controller
         $departments = $request->input('departments');
         $roles = $request->input('roles');
 
-        $users = User::where([
+        $users = User::with('department:id,name')->where([
             ['status', EmployeeStatusesEnum::ACTIVE],
             ['id', '!=', $request->user()->id]
         ])->when(
@@ -46,7 +46,7 @@ class UserController extends Controller
         )->get();
 
         return response()->json([
-            'users' => $users,
+            'users' => new UserResourceCollection($users),
         ]);
     }
 
@@ -127,7 +127,6 @@ class UserController extends Controller
             'status' => $data['status'],
             'department_id' => $data['department']
         ]);
-
 
         $user->assignRole($data['role']);
 
