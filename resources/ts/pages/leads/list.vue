@@ -1,5 +1,7 @@
 <script setup lang="ts">
 
+const $toast = useToast();
+
 // Get currently logged in user data
 const userData = useCookie('userData').value
 
@@ -55,8 +57,8 @@ const headers = [
     { title: 'Lead closed amount', key: 'lead_closed_amount' },
     { title: 'Created at', key: 'created_at' },
     { title: 'Updated at', key: 'updated_at' },
-    { title: 'Created at (by Country)', key: 'created_at_country' },
-    { title: 'Updated at (by Country)', key: 'updated_at_country' },
+    { title: 'Created at (by Country)', key: 'created_at_country', sortable: false },
+    { title: 'Updated at (by Country)', key: 'updated_at_country', sortable: false },
     { title: 'Actions', key: 'actions', sortable: false },
 ]
 
@@ -128,11 +130,9 @@ const resolveLeadStatusVariant = (status: string) => {
 
 const isAddNewLeadDrawerVisible = ref(false)
 const isEditLeadDrawerVisible = ref(false)
-const isSnackBarVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
 const isLeadAssigningDialogVisible = ref(false)
 const isLeadPickingDialogVisible = ref(false)
-const leadResponsemessage = ref('')
 
 // 👉 Add new lead
 const addNewLead = async (leadData: any) => {
@@ -145,11 +145,12 @@ const addNewLead = async (leadData: any) => {
     })
 
     if (success) {
-        isSnackBarVisible.value = true
-        leadResponsemessage.value = message
+        $toast.success(message)
         addNewLeadDrawerRef.value.closeNavigationDrawer()
         fetchLeads()
         fetchLeadsCount()
+    } else {
+        $toast.error(message)
     }
 }
 
@@ -164,11 +165,12 @@ const editLead = async (leadData: any) => {
     })
 
     if (success) {
-        isSnackBarVisible.value = true
-        leadResponsemessage.value = message
+        $toast.success(message)
         editLeadDrawerRef.value.closeNavigationDrawer()
         fetchLeads()
         fetchLeadsCount()
+    } else {
+        $toast.error(message)
     }
 }
 
@@ -185,11 +187,12 @@ const deleteLead = async () => {
 
     isDeleteDialogVisible.value = false
 
-    isSnackBarVisible.value = true
-    leadResponsemessage.value = message
     if (success) {
+        $toast.success(message)
         fetchLeads()
         fetchLeadsCount()
+    } else {
+        $toast.error(message)
     }
 }
 
@@ -210,7 +213,10 @@ const leadsCountData = ref({
     totalLeads: 0,
     leadsThisMonth: 0,
     closedLeads: 0,
-    totalAmount: 0,
+    totalAmount: {
+        usd: '',
+        gbp: '',
+    },
 })
 
 // 👉 Get leads count for top cards
@@ -219,7 +225,11 @@ const { execute: fetchLeadsCount, isFetching: isLeadsCountFetching } = await use
         leadsCountData.value.totalLeads = ctx.data.totalLeads
         leadsCountData.value.leadsThisMonth = ctx.data.leadsThisMonth
         leadsCountData.value.closedLeads = ctx.data.closedLeads
-        leadsCountData.value.totalAmount = ctx.data.totalAmount
+
+        leadsCountData.value.totalAmount = {
+            usd: currencyFormatter(ctx.data.totalAmount?.usd || 0, 'usd'),
+            gbp: currencyFormatter(ctx.data.totalAmount?.gbp || 0, 'gbp'),
+        }
 
         return ctx
     },
@@ -229,7 +239,12 @@ const widgetData = computed(() => ([
     { title: 'Total Leads', value: leadsCountData.value.totalLeads, icon: 'ri-group-line', iconColor: 'primary' },
     { title: 'Leads this month', value: leadsCountData.value.leadsThisMonth, icon: 'ri-user-follow-line', iconColor: 'success' },
     { title: 'Closed leads', value: leadsCountData.value.closedLeads, icon: 'ri-user-add-line', iconColor: 'error' },
-    { title: 'Total amount', value: currencyFormatter(leadsCountData.value.totalAmount as number), icon: 'ri-user-search-line', iconColor: 'warning' },
+    {
+        title: 'Total amount',
+        value: leadsCountData.value.totalAmount,
+        icon: 'ri-user-search-line',
+        iconColor: 'warning'
+    },
 ]))
 
 watch(isEditLeadDrawerVisible, editDrawer => {
@@ -237,9 +252,32 @@ watch(isEditLeadDrawerVisible, editDrawer => {
         selectedLead.value = {}
 })
 
-const canEditOrDeleteLeads =
-    (id: any) => (userData.department.value === 'lead_generation' && userData.id == id) ||
-        (['sales', 'admin'].includes(userData.department.value))
+
+const canEditLeads =
+    (lead: any) =>
+        (userData.department.value === 'admin' && userData.role.value === 'admin') ||
+        (userData.department.value === 'lead_generation' && userData.id == lead.created_by.id) ||
+        (userData.department.value === 'sales' && userData.role.value === 'sales_agent' && lead.assigned_to?.id == userData.id) ||
+        (userData.department.value === 'sales' && userData.role.value === 'team_lead')
+
+const canDeleteLeads =
+    (lead: any) => (isNullOrUndefined(lead.assigned_to)) &&
+        (userData.department.value === 'admin' && userData.role.value === 'admin') ||
+        (userData.department.value === 'lead_generation' && userData.id == lead.created_by.id) ||
+        (userData.department.value === 'sales' && userData.role.value === 'sales_agent' && lead.assigned_to?.id == userData.id) ||
+        (userData.department.value === 'sales' && userData.role.value === 'team_lead')
+
+const canAssignLeads =
+    (lead: any) => (isNullOrUndefined(lead.assigned_to)) &&
+        (userData.department.value === 'admin' && userData.role.value === 'admin') ||
+        (userData.department.value === 'sales' && userData.role.value === 'team_lead')
+
+const canPickLeads =
+    (lead: any) => (isNullOrUndefined(lead.assigned_to)) &&
+        (lead.lead_source?.type === 'unpaid') &&
+        (userData.department.value === 'sales' && userData.role.value === 'sales_agent')
+
+
 
 const assignLead = async (assignedTo: number) => {
     if (!assignedTo) {
@@ -251,14 +289,14 @@ const assignLead = async (assignedTo: number) => {
         method: 'PATCH'
     })
 
-    isSnackBarVisible.value = true
-    leadResponsemessage.value = message
-
     if (success) {
+        $toast.success(message)
         isLeadAssigningDialogVisible.value = false
         selectedLead.value = {}
         assignedUser.value = undefined
         fetchLeads()
+    } else {
+        $toast.error(message)
     }
 }
 
@@ -267,13 +305,13 @@ const pickLead = async () => {
         method: 'PATCH'
     })
 
-    isSnackBarVisible.value = true
-    leadResponsemessage.value = message
-
     if (success) {
+        $toast.success(message)
         isLeadPickingDialogVisible.value = false
         selectedLead.value = {}
         fetchLeads()
+    } else {
+        $toast.error(message)
     }
 }
 
@@ -295,9 +333,19 @@ watch(assignedUser, () => {
                                 <div class="d-flex justify-space-between align-center">
                                     <div class="d-flex flex-column gap-y-1">
                                         <span class="text-base text-high-emphasis">{{ data.title }}</span>
-                                        <h4 class="text-h4 d-flex align-center gap-2 font-weight-bold">
-                                            {{ data.value }}
-                                        </h4>
+                                        <template v-if="typeof data.value === 'number'">
+                                            <h4 class="text-h4 d-flex align-center gap-2 font-weight-bold">
+                                                {{ data.value }}
+                                            </h4>
+                                        </template>
+
+                                        <template v-else>
+                                            <template v-for="(amount, id) in data.value" :key="id">
+                                                <h4 class="text-h4 d-flex align-center gap-2 font-weight-bold">
+                                                    {{ amount }} - {{ id.toUpperCase() }}
+                                                </h4>
+                                            </template>
+                                        </template>
                                     </div>
                                     <VAvatar :color="data.iconColor" variant="tonal" rounded size="42">
                                         <VIcon :icon="data.icon" size="26" />
@@ -390,10 +438,12 @@ watch(assignedUser, () => {
                 <VBtn color="secondary" prepend-icon="ri-download-2-line">
                     Export
                 </VBtn> -->
-                <VSpacer />
-                <VBtn @click="isAddNewLeadDrawerVisible = true" prepend-icon="ri-user-add-fill">
-                    Add New Lead
-                </VBtn>
+                <template v-if="userData.role.value !== 'sales_agent'">
+                    <VSpacer />
+                    <VBtn @click="isAddNewLeadDrawerVisible = true" prepend-icon="ri-user-add-fill">
+                        Add New Lead
+                    </VBtn>
+                </template>
             </VCardText>
 
             <!-- SECTION datatable -->
@@ -480,7 +530,7 @@ watch(assignedUser, () => {
                 <!-- Lead closed amount -->
                 <template #item.lead_closed_amount="{ item }: { item: any }">
                     <span v-if="item.lead_closed_date">
-                        {{ currencyFormatter(item.lead_closed_amount) }}
+                        {{ currencyFormatter(item.lead_closed_amount, item.brand.currency.name) }}
                     </span>
                     <span v-else class="text-error font-weight-bold">
                         Not closed
@@ -501,21 +551,20 @@ watch(assignedUser, () => {
                         </VTooltip>
                     </IconBtn> -->
 
-                    <template
-                        v-if="['sales', 'admin'].includes(userData.department.value) && isNullOrUndefined(item.assigned_to)">
+                    <template v-if="canPickLeads(item) || canAssignLeads(item)">
 
-                        <IconBtn v-if="['team_lead', 'admin'].includes(userData.role.value)" size="small"
+                        <IconBtn v-if="canAssignLeads(item)" size="small"
                             @click="isLeadAssigningDialogVisible = true; selectedLead = item" color="success"
-                            :disabled="tableLoading || !canEditOrDeleteLeads(item.created_by.id)">
+                            :disabled="tableLoading">
                             <VIcon icon="ri-user-shared-line" />
                             <VTooltip activator="parent" location="top">
                                 Assign lead
                             </VTooltip>
                         </IconBtn>
 
-                        <IconBtn size="small" @click="isLeadPickingDialogVisible = true; selectedLead = item;"
-                            v-else-if="userData.role.value === 'sales_agent' && item.lead_source.type === 'unpaid'"
-                            :disabled="tableLoading || !canEditOrDeleteLeads(item.created_by.id)" color="success">
+                        <IconBtn v-else-if="canPickLeads(item)" size="small"
+                            @click="isLeadPickingDialogVisible = true; selectedLead = item;" :disabled="tableLoading"
+                            color="success">
                             <VIcon icon="ri-user-received-line" />
                             <VTooltip activator="parent" location="top">
                                 Pick lead
@@ -526,7 +575,7 @@ watch(assignedUser, () => {
 
 
                     <IconBtn size="small" @click="openEditLeadForm(item)"
-                        :disabled="tableLoading || !canEditOrDeleteLeads(item.created_by.id)" color="primary">
+                        :disabled="tableLoading || !canEditLeads(item)" color="primary">
                         <VIcon icon="ri-edit-box-line" />
                         <VTooltip activator="parent" location="top">
                             Edit
@@ -534,7 +583,7 @@ watch(assignedUser, () => {
                     </IconBtn>
 
                     <IconBtn size="small" @click="isDeleteDialogVisible = true; leadToDelete = item.id" color="error"
-                        :disabled="tableLoading || !canEditOrDeleteLeads(item.created_by.id)">
+                        :disabled="tableLoading || !canDeleteLeads(item)">
                         <VIcon icon="ri-delete-bin-7-line" />
                         <VTooltip activator="parent" location="top">
                             Delete
@@ -580,15 +629,6 @@ watch(assignedUser, () => {
         <EditLeadDrawer ref="editLeadDrawerRef" v-model:isDrawerOpen="isEditLeadDrawerVisible" @lead-data="editLead"
             :statuses :brands="_brands" :customers="_customers" :lead-sources="leadSources" :services="_services"
             :lead="selectedLead" :errors="errors" :userData :campaigns />
-
-        <VSnackbar v-model="isSnackBarVisible">
-            {{ leadResponsemessage }}
-            <template #actions>
-                <VBtn color="error" @click="isSnackBarVisible = false">
-                    Close
-                </VBtn>
-            </template>
-        </VSnackbar>
 
         <!-- Lead assigning dialog -->
         <VDialog v-model="isLeadAssigningDialogVisible" width="600">

@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class LeadController extends Controller
 {
@@ -46,14 +45,17 @@ class LeadController extends Controller
         $orderByColumn = $request->input('sortBy');
         $orderByDir = $request->input('orderBy');
 
-        $leads = Lead::with(['servicesSold', 'upsells.serviceSold', 'customer', 'leadSource', 'brand', 'createdBy', 'assignedTo', 'assignedBy', 'campaign'])->withCount(['servicesSold', 'upsells']);
+        $leads = Lead::with(['servicesSold', 'upsells.serviceSold', 'customer', 'leadSource', 'brand.currency', 'createdBy', 'assignedTo', 'assignedBy', 'campaign'])->withCount(['servicesSold', 'upsells']);
 
         if ($request->user()->hasDepartment(DepartmentsEnum::SALES->value) && $request->user()->hasRole(RolesEnum::SALES_AGENT)) {
             $leads->where(function (Builder $leadsQuery) use ($request) {
-                $leadsQuery->where('assigned_to', $request->user()->id)
-                    ->orWhere('created_by', $request->user()->id)
-                    ->orWhereHas('leadSource', fn(Builder $leadSourceQuery) => $leadSourceQuery->where('type', 'unpaid'));
+                $leadsQuery->whereHas('leadSource', fn(Builder $leadSourceQuery) => $leadSourceQuery->where('type', 'unpaid'))
+                    ->orWhere('assigned_to', $request->user()->id);
             });
+        }
+
+        if ($request->user()->hasDepartment(DepartmentsEnum::LEAD_GENERATION->value)) {
+            $leads->whereHas('leadSource', fn(Builder $leadSourceQuery) => $leadSourceQuery->where('type', 'unpaid'));
         }
 
         // Applying DT filters
@@ -182,7 +184,7 @@ class LeadController extends Controller
         if ($lead->assignedTo()->exists())
             return response()->json([
                 'success' => false,
-                'message' => "Lead is already assigned to sales agent!! Can't be deleted."
+                'message' => "Lead is already assigned to someone!! Can't be deleted."
             ]);
 
         $lead->servicesSold()->detach();
@@ -210,13 +212,29 @@ class LeadController extends Controller
 
         $closedLeads = Lead::whereNotNull('lead_closed_date')->count();
 
-        $totalAmount = Lead::select('lead_closed_amount')->withSum('upsells', 'amount')->get()->sum(fn(Lead $lead) => $lead->lead_closed_amount + $lead->upsells_sum_amount);
+        $totalAmount = Lead::with('brand.currency')
+            ->select('id', 'lead_closed_amount', 'brand_id')
+            ->withSum('upsells', 'amount')
+            ->get();
+
+        $totalAmountUSD = $totalAmount->sum(function (Lead $lead) {
+            if ($lead->brand->currency->name === 'usd')
+                return $lead->lead_closed_amount + $lead->upsells_sum_amount;
+        });
+
+        $totalAmountGBP = $totalAmount->sum(function (Lead $lead) {
+            if ($lead->brand->currency->name === 'gbp')
+                return $lead->lead_closed_amount + $lead->upsells_sum_amount;
+        });
 
         return response()->json([
             'totalLeads' => $totalLeads,
             'leadsThisMonth' => $leadsThisMonth,
             'closedLeads' => $closedLeads,
-            'totalAmount' => $totalAmount,
+            'totalAmount' => [
+                'usd' => $totalAmountUSD,
+                'gbp' => $totalAmountGBP,
+            ],
         ]);
     }
 

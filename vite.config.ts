@@ -68,7 +68,15 @@ export default defineConfig({
             ],
         }), // Docs: https://github.com/antfu/unplugin-auto-import#unplugin-auto-import
         AutoImport({
-            imports: ['vue', VueRouterAutoImports, '@vueuse/core', '@vueuse/math', 'vue-i18n', 'pinia'],
+            imports: ['vue',
+                VueRouterAutoImports,
+                '@vueuse/core',
+                '@vueuse/math',
+                'pinia',
+                {
+                    'vue-toastification': ['useToast'],
+                },
+            ],
             dirs: [
                 './resources/ts/@core/utils',
                 './resources/ts/@core/composable/',
@@ -81,13 +89,6 @@ export default defineConfig({
             // ℹ️ Disabled to avoid confusion & accidental usage
             ignore: ['useCookies', 'useStorage'],
         }), // Docs: https://github.com/intlify/bundle-tools/tree/main/packages/unplugin-vue-i18n#intlifyunplugin-vue-i18n
-        // VueI18nPlugin({
-        //     runtimeOnly: true,
-        //     compositionOnly: true,
-        //     include: [
-        //         fileURLToPath(new URL('./resources/ts/plugins/i18n/locales/**', import.meta.url)),
-        //     ],
-        // }),
         svgLoader(),
     ],
     define: { 'process.env': {} },
@@ -101,8 +102,6 @@ export default defineConfig({
             '@images': fileURLToPath(new URL('./resources/images/', import.meta.url)),
             '@styles': fileURLToPath(new URL('./resources/styles/', import.meta.url)),
             '@configured-variables': fileURLToPath(new URL('./resources/styles/variables/_template.scss', import.meta.url)),
-            // '@db': fileURLToPath(new URL('./resources/ts/plugins/fake-api/handlers/', import.meta.url)),
-            // '@api-utils': fileURLToPath(new URL('./resources/ts/plugins/fake-api/utils/', import.meta.url)),
         },
     },
     build: {

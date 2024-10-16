@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Sales;
 
 use App\Http\Resources\UserResource;
+use App\Models\Brand;
 use App\Models\Service;
 use App\Models\Upsell;
 use Illuminate\Http\Request;
@@ -39,12 +40,12 @@ class LeadResource extends JsonResource
                 $this->upsells->map(function (Upsell $upsell) {
                     return [
                         'id' => $upsell->id,
-                        'service' => $this->when($upsell->serviceSold()->exists(), [
-                            'id' => $upsell->serviceSold?->id,
-                            'name' => $upsell->serviceSold?->name,
+                        'service' => $this->when($upsell->relationLoaded('serviceSold'), [
+                            'id' => $this->upsell->serviceSold?->id,
+                            'name' => $this->upsell->serviceSold?->name,
                         ], []),
                         'remarks' => $upsell->remarks,
-                        'amount' => number_format($upsell->amount, 2),
+                        'amount' => $upsell->amount,
                         'created_at' => $upsell->created_at->format('d M Y, g:i A'),
                     ];
                 }),
@@ -65,10 +66,14 @@ class LeadResource extends JsonResource
                 'name' => $this->leadSource->name,
                 'type' => $this->leadSource->type,
             ]),
-            'brand' => $this->whenLoaded('brand', [
-                'id' => $this->brand->id,
-                'name' => $this->brand->name,
-                'country' => $this->brand->country,
+            'brand' => $this->whenLoaded('brand', fn(Brand $brand) => [
+                'id' => $brand->id,
+                'name' => $brand->name,
+                'country' => $brand->country,
+                'currency' => $this->when($brand->relationLoaded('currency'), [
+                    'id' => $this->brand->currency->id,
+                    'name' => $this->brand->currency->name,
+                ], []),
             ]),
             'campaign' => $this->whenLoaded('campaign', [
                 'id' => $this->campaign?->id,

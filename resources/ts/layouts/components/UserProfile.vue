@@ -71,17 +71,17 @@ const userProfileList = [
             {{ getInitials(userData.name) }}
 
             <!-- SECTION Menu -->
-            <VMenu activator="parent" min-width="230" max-width="265" location="bottom end" offset="15px">
+            <VMenu activator="parent" min-width="230" max-width="275" location="bottom end" offset="15px">
                 <VList>
                     <VListItem>
-                        <div class="d-flex gap-2 align-center">
-                            <VListItemAction>
+                        <div class="d-flex gap-2">
+                            <div>
                                 <VBadge dot location="bottom right" offset-x="3" offset-y="3" color="success">
                                     <VAvatar :color="!(userData && userData.avatar) ? 'primary' : undefined">
                                         {{ getInitials(userData.name) }}
                                     </VAvatar>
                                 </VBadge>
-                            </VListItemAction>
+                            </div>
 
                             <div>
                                 <h6 class="text-h6 font-weight-medium">
