@@ -38,5 +38,5 @@ export const getInitials = (name?: string) => {
     const nameParts = name.split(' ')
     const firstNameInitial = nameParts[0]?.[0] ?? ''
     const lastNameInitial = nameParts[1]?.[0] ?? ''
-    return `${firstNameInitial}${lastNameInitial}`
+    return firstNameInitial + lastNameInitial
 }

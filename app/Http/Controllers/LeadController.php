@@ -45,7 +45,7 @@ class LeadController extends Controller
         $orderByColumn = $request->input('sortBy');
         $orderByDir = $request->input('orderBy');
 
-        $leads = Lead::with(['servicesSold', 'upsells.serviceSold', 'customer', 'leadSource', 'brand.currency', 'createdBy', 'assignedTo', 'assignedBy', 'campaign'])->withCount(['servicesSold', 'upsells']);
+        $leads = Lead::with(['servicesSold', 'upsells.serviceSold', 'customer', 'leadSource', 'brand.currency', 'createdBy', 'assignedTo', 'assignedBy', 'campaign', 'details.agent'])->withCount(['servicesSold', 'upsells']);
 
         if ($request->user()->hasDepartment(DepartmentsEnum::SALES->value) && $request->user()->hasRole(RolesEnum::SALES_AGENT)) {
             $leads->where(function (Builder $leadsQuery) use ($request) {
@@ -189,6 +189,7 @@ class LeadController extends Controller
 
         $lead->servicesSold()->detach();
         $lead->upsells()->delete();
+        $lead->details()->delete();
         $lead->delete();
 
         return response()->json([
@@ -281,6 +282,37 @@ class LeadController extends Controller
         return response()->json([
             'success' => true,
             'message' => "Lead successfully assigned to {$user->name}!"
+        ]);
+    }
+
+    /**
+     * Add lead details - can only be done by sales agent
+     */
+    public function addDetails(Lead $lead, Request $request)
+    {
+        /**
+         * @TODO add validation via form request (MUST)
+         */
+        $data = (object) $request->all();
+
+        $lead->details()->create([
+            'agent_id' => $request->user()->id,
+            'contact_status' => $data->contact_status,
+            'notes' => $data->notes,
+            'follow_up' => $data->follow_up,
+            'final_status' => $data->final_status,
+            'final_status_date' => $data->final_status ? now() : null,
+            'call_status' => $data->call_status,
+            'call_date' => $data->call_date,
+            'email_status' => $data->email_status,
+            'email_date' => $data->email_date,
+            'sms_status' => $data->sms_status,
+            'sms_date' => $data->sms_date,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Lead details added successfully!'
         ]);
     }
 }

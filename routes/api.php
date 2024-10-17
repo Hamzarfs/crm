@@ -133,6 +133,11 @@ Route::middleware('auth:sanctum')->group(function () {
                     Route::patch('{lead}/pick', 'pickLead')->middleware('role:sales_agent');
                     Route::patch('{lead}/assign', 'assignLead')->middleware('role:admin|team_lead');
                 });
+
+            Route::middleware(['role:sales_agent', 'department:sales'])
+                ->group(function () {
+                    Route::post('{lead}/details', 'addDetails');
+                });
         });
 
     Route::prefix('campaigns')

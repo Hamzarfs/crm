@@ -26,12 +26,12 @@ const itemsPerPage = ref(20)
 const page = ref(1)
 const sortBy = ref('id')
 const orderBy = ref<boolean | 'asc' | 'desc'>('desc')
-const selectedRows = ref([])
 const tableLoading = ref(false)
 
-// Add a ref for the AddNewLeadDrawer & editLeadDrawerRef component
+// Child component refs
 const addNewLeadDrawerRef = ref()
 const editLeadDrawerRef = ref()
+const addLeadDetailsDrawerRef = ref()
 
 // Update data table options
 const updateOptions = (options: any) => {
@@ -41,6 +41,7 @@ const updateOptions = (options: any) => {
 
 // Headers
 const headers = [
+    { title: '', key: 'data-table-expand' },
     { title: 'ID', key: 'id' },
     { title: 'Created By', key: 'created_by' },
     { title: 'Assigned By', key: 'assigned_by' },
@@ -61,6 +62,38 @@ const headers = [
     { title: 'Updated at (by Country)', key: 'updated_at_country', sortable: false },
     { title: 'Actions', key: 'actions', sortable: false },
 ]
+const expandedRowDTHeader = [
+    { title: '#', key: 'sr' },
+    { title: 'Sales Agent', key: 'agent' },
+    { title: 'Contact Status', key: 'contact_status' },
+    { title: 'Notes', key: 'notes' },
+    { title: 'Follow-up', key: 'follow_up' },
+    { title: 'Final Status', key: 'final_status' },
+    { title: 'Final Status Date/Time', key: 'final_status_date' },
+    { title: 'Call Status', key: 'call_status' },
+    { title: 'Call Status Date/Time', key: 'call_date' },
+    { title: 'Email Status', key: 'email_status' },
+    { title: 'Email Status Date/Time', key: 'email_date' },
+    { title: 'SMS Status', key: 'sms_status' },
+    { title: 'SMS Status Date/Time', key: 'sms_date' },
+    { title: 'Created at', key: 'created_at' },
+]
+
+// Expanded rows
+const expandedRows = ref([])
+
+const toggleExpand = (item: any) => {
+    const index = expandedRows.value.indexOf(item.id as never);
+    if (index !== -1) {
+        expandedRows.value.splice(index, 1); // Collapse the row
+    } else {
+        expandedRows.value.push(item.id as never); // Expand the row
+    }
+}
+
+const isRowExpanded = (item: any) => {
+    return expandedRows.value.includes(item.id as never);
+}
 
 // 👉 Fetching leads
 const { data: leadsData, execute: fetchLeads, isFetching } = await useApi<any>(createUrl('leads', {
@@ -128,15 +161,20 @@ const resolveLeadStatusVariant = (status: string) => {
         return 'primary'
 }
 
+// Drawers
 const isAddNewLeadDrawerVisible = ref(false)
 const isEditLeadDrawerVisible = ref(false)
+const isAddLeadDetailsDrawerVisible = ref(false)
+const isViewLeadDetailsDrawerVisible = ref(false)
+
+// Dialogs
 const isDeleteDialogVisible = ref(false)
 const isLeadAssigningDialogVisible = ref(false)
 const isLeadPickingDialogVisible = ref(false)
 
 // 👉 Add new lead
 const addNewLead = async (leadData: any) => {
-    const { success, message } = await $api('/leads', {
+    const { success, message } = await $api('leads', {
         method: 'POST',
         body: leadData,
         onResponseError({ response }) {
@@ -149,6 +187,25 @@ const addNewLead = async (leadData: any) => {
         addNewLeadDrawerRef.value.closeNavigationDrawer()
         fetchLeads()
         fetchLeadsCount()
+    } else {
+        $toast.error(message)
+    }
+}
+
+// 👉 Add lead details
+const addLeadDetails = async (leadDetails: any) => {
+    const { success, message } = await $api(`leads/${selectedLead.value.id}/details`, {
+        method: 'POST',
+        body: leadDetails,
+        onResponseError({ response }) {
+            $toast.error('Something went wrong! Please try again or report to the developers.')
+        },
+    })
+
+    if (success) {
+        $toast.success(message)
+        addLeadDetailsDrawerRef.value.closeNavigationDrawer()
+        fetchLeads()
     } else {
         $toast.error(message)
     }
@@ -257,14 +314,12 @@ const canEditLeads =
     (lead: any) =>
         (userData.department.value === 'admin' && userData.role.value === 'admin') ||
         (userData.department.value === 'lead_generation' && userData.id == lead.created_by.id) ||
-        (userData.department.value === 'sales' && userData.role.value === 'sales_agent' && lead.assigned_to?.id == userData.id) ||
         (userData.department.value === 'sales' && userData.role.value === 'team_lead')
 
 const canDeleteLeads =
     (lead: any) => (isNullOrUndefined(lead.assigned_to)) &&
         (userData.department.value === 'admin' && userData.role.value === 'admin') ||
         (userData.department.value === 'lead_generation' && userData.id == lead.created_by.id) ||
-        (userData.department.value === 'sales' && userData.role.value === 'sales_agent' && lead.assigned_to?.id == userData.id) ||
         (userData.department.value === 'sales' && userData.role.value === 'team_lead')
 
 const canAssignLeads =
@@ -277,6 +332,19 @@ const canPickLeads =
         (lead.lead_source?.type === 'unpaid') &&
         (userData.department.value === 'sales' && userData.role.value === 'sales_agent')
 
+const canAddLeadDetails =
+    (lead: any) => (
+        (userData.department.value === 'sales' && userData.role.value === 'sales_agent') &&
+        (userData.id == lead.assigned_to?.id)
+    )
+
+const canViewLeadDetails =
+    (lead: any) =>
+        (userData.department.value === 'admin' && userData.role.value === 'admin') ||
+        (userData.department.value === 'sales' && userData.role.value === 'team_lead') ||
+        (userData.department.value === 'sales' && userData.role.value === 'sales_agent' && !isEmptyArray(lead.details))
+
+const isCurrentUserSalesAgent = computed(() => (userData.department.value === 'sales' && userData.role.value === 'sales_agent'))
 
 
 const assignLead = async (assignedTo: number) => {
@@ -447,11 +515,36 @@ watch(assignedUser, () => {
             </VCardText>
 
             <!-- SECTION datatable -->
-            <VDataTableServer v-model:items-per-page="itemsPerPage" v-model:model-value="selectedRows" hover show-select
+            <VDataTableServer v-model:items-per-page="itemsPerPage" hover :expanded="expandedRows" show-expand
                 :sort-by="[{ key: sortBy, order: orderBy }]" :loading="tableLoading" loading-text="Loading Leads..."
                 :disable-sort="tableLoading" fixed-header style="max-height: 500px;" v-model:page="page" :items="leads"
                 item-value="id" :items-length="totalLeads" :headers="headers" class="text-no-wrap rounded-0"
                 @update:options="updateOptions" density="default">
+                <!-- :row-props="(data) => (!isEmptyArray(data.item.details) ? { onClick: () => toggleExpand(data.item) } : {})"> -->
+
+                <!-- Expanded Icon -->
+                <template #item.data-table-expand="{ item }: { item: any }">
+                    <VIcon v-if="!isEmptyArray(item.details)"
+                        :icon="isRowExpanded(item) ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"
+                        @click="toggleExpand(item)" />
+                </template>
+
+                <!-- Expanded row -->
+                <template #expanded-row="{ columns, item }: { columns: any[], item: any }">
+                    <tr>
+                        <td :colspan="columns.length" class="pa-0">
+                            <VDataTable :headers="expandedRowDTHeader" :items="item.details" hide-default-footer hover>
+                                <template #item.sr="{ index }">
+                                    {{ index + 1 }}
+                                </template>
+
+                                <template #item.agent="{ item }: { item: any }">
+                                    {{ item.agent.name }}
+                                </template>
+                            </VDataTable>
+                        </td>
+                    </tr>
+                </template>
 
                 <!-- Create BY -->
                 <template #item.created_by="{ item }: { item: any }">
@@ -544,46 +637,53 @@ watch(assignedUser, () => {
 
                 <!-- Actions -->
                 <template #item.actions="{ item }: { item: any }">
-                    <!-- <IconBtn size="small" :disabled="tableLoading" color="info">
+
+                    <!-- <IconBtn v-if="canViewLeadDetails(item)" size="small" :disabled="tableLoading" color="info"
+                        @click="isViewLeadDetailsDrawerVisible = true; selectedLead = item">
                         <VIcon icon="ri-eye-line" />
                         <VTooltip activator="parent" location="top">
                             View
                         </VTooltip>
                     </IconBtn> -->
 
-                    <template v-if="canPickLeads(item) || canAssignLeads(item)">
+                    <IconBtn v-if="canAssignLeads(item)" size="small"
+                        @click="isLeadAssigningDialogVisible = true; selectedLead = item" color="success"
+                        :disabled="tableLoading">
+                        <VIcon icon="ri-user-shared-line" />
+                        <VTooltip activator="parent" location="top">
+                            Assign lead
+                        </VTooltip>
+                    </IconBtn>
 
-                        <IconBtn v-if="canAssignLeads(item)" size="small"
-                            @click="isLeadAssigningDialogVisible = true; selectedLead = item" color="success"
-                            :disabled="tableLoading">
-                            <VIcon icon="ri-user-shared-line" />
-                            <VTooltip activator="parent" location="top">
-                                Assign lead
-                            </VTooltip>
-                        </IconBtn>
+                    <IconBtn v-else-if="canPickLeads(item)" size="small"
+                        @click="isLeadPickingDialogVisible = true; selectedLead = item;" :disabled="tableLoading"
+                        color="success">
+                        <VIcon icon="ri-user-received-line" />
+                        <VTooltip activator="parent" location="top">
+                            Pick lead
+                        </VTooltip>
+                    </IconBtn>
 
-                        <IconBtn v-else-if="canPickLeads(item)" size="small"
-                            @click="isLeadPickingDialogVisible = true; selectedLead = item;" :disabled="tableLoading"
-                            color="success">
-                            <VIcon icon="ri-user-received-line" />
-                            <VTooltip activator="parent" location="top">
-                                Pick lead
-                            </VTooltip>
-                        </IconBtn>
-
-                    </template>
+                    <IconBtn v-if="canAddLeadDetails(item)" size="small" color="accent"
+                        @click="isAddLeadDetailsDrawerVisible = true; selectedLead = item">
+                        <VIcon icon="ri-add-circle-line" />
+                        <VTooltip activator="parent" location="top">
+                            Add details
+                        </VTooltip>
+                    </IconBtn>
 
 
-                    <IconBtn size="small" @click="openEditLeadForm(item)"
-                        :disabled="tableLoading || !canEditLeads(item)" color="primary">
+                    <IconBtn v-if="canEditLeads(item)" size="small" @click="openEditLeadForm(item)"
+                        :disabled="tableLoading" color="primary">
                         <VIcon icon="ri-edit-box-line" />
                         <VTooltip activator="parent" location="top">
                             Edit
                         </VTooltip>
                     </IconBtn>
 
-                    <IconBtn size="small" @click="isDeleteDialogVisible = true; leadToDelete = item.id" color="error"
-                        :disabled="tableLoading || !canDeleteLeads(item)">
+                    <IconBtn v-if="canDeleteLeads(item)" size="small"
+                        @click="isDeleteDialogVisible = true; leadToDelete = item.id" color="error"
+                        :disabled="tableLoading">
                         <VIcon icon="ri-delete-bin-7-line" />
                         <VTooltip activator="parent" location="top">
                             Delete
@@ -629,6 +729,13 @@ watch(assignedUser, () => {
         <EditLeadDrawer ref="editLeadDrawerRef" v-model:isDrawerOpen="isEditLeadDrawerVisible" @lead-data="editLead"
             :statuses :brands="_brands" :customers="_customers" :lead-sources="leadSources" :services="_services"
             :lead="selectedLead" :errors="errors" :userData :campaigns />
+
+        <!-- 👉 Add Lead Details -->
+        <AddLeadDetailsDrawer ref="addLeadDetailsDrawerRef" v-if="isCurrentUserSalesAgent"
+            v-model:isDrawerOpen="isAddLeadDetailsDrawerVisible" :statuses @add-lead-details="addLeadDetails" />
+
+        <!-- 👉 View Lead Details -->
+        <!-- <ViewLeadDetailsDrawer v-model:isDrawerOpen="isViewLeadDetailsDrawerVisible" :lead="selectedLead" /> -->
 
         <!-- Lead assigning dialog -->
         <VDialog v-model="isLeadAssigningDialogVisible" width="600">

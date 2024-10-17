@@ -4,6 +4,7 @@ namespace App\Http\Resources\Sales;
 
 use App\Http\Resources\UserResource;
 use App\Models\Brand;
+use App\Models\LeadDetail;
 use App\Models\Service;
 use App\Models\Upsell;
 use Illuminate\Http\Request;
@@ -89,6 +90,26 @@ class LeadResource extends JsonResource
             'updated_at' => $this->updated_at->format('d M Y, g:i A'),
             'created_at_country' => $this->created_at->timezone($this->brand->country === 'UK' ? 'Europe/London' : 'America/Chicago')->format('d M Y, g:i A') . " ({$this->brand->country})",
             'updated_at_country' => $this->updated_at->timezone($this->brand->country === 'UK' ? 'Europe/London' : 'America/Chicago')->format('d M Y, g:i A') . " ({$this->brand->country})",
+            'details' => $this->whenLoaded('details', $this->details->map(function (LeadDetail $leadDetail) {
+                return [
+                    'id' => $leadDetail->id,
+                    'lead_id' => $leadDetail->lead_id,
+                    'agent' => $this->when($leadDetail->relationLoaded('agent'), new UserResource($leadDetail->agent), []),
+                    'contact_status' => $leadDetail->contact_status,
+                    'notes' => $leadDetail->notes,
+                    'follow_up' => $leadDetail->follow_up,
+                    'final_status' => $leadDetail->final_status,
+                    'final_status_date' => $leadDetail->final_status_date,
+                    'call_status' => $leadDetail->call_status,
+                    'call_date' => $leadDetail->call_date,
+                    'email_status' => $leadDetail->email_status,
+                    'email_date' => $leadDetail->email_date,
+                    'sms_status' => $leadDetail->sms_status,
+                    'sms_date' => $leadDetail->sms_date,
+                    'created_at' => $leadDetail->created_at->format('d M Y, g:i A'),
+                    'updated_at' => $leadDetail->updated_at->format('d M Y, g:i A'),
+                ];
+            }), []),
         ];
     }
 }
