@@ -131,7 +131,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::middleware(['department:admin,sales'])
                 ->group(function () {
                     Route::patch('{lead}/pick', 'pickLead')->middleware('role:sales_agent');
-                    Route::patch('{lead}/assign', 'assignLead')->middleware('role:admin|team_lead');
+                    Route::patch('{lead}/assign', 'assignLead')->middleware('role:admin|team_lead|sales_agent');
                 });
 
             Route::middleware(['role:sales_agent', 'department:sales'])

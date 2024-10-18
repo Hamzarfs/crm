@@ -141,7 +141,6 @@ const salesAgentUsers = await $api('users', {
 }).then(({ users }) => users.map((u: any) => ({ title: u.name, value: u.id })))
 const { campaigns } = await $api('campaigns')
 
-
 const _services = services.map((s: any) => ({ title: s.name, value: s.id }))
 const _brands = brands.map((b: any) => ({ title: b.name, value: b.id }))
 const _customers = customers.map((c: any) => ({ title: c.full_name, value: c.id }))
@@ -165,7 +164,6 @@ const resolveLeadStatusVariant = (status: string) => {
 const isAddNewLeadDrawerVisible = ref(false)
 const isEditLeadDrawerVisible = ref(false)
 const isAddLeadDetailsDrawerVisible = ref(false)
-const isViewLeadDetailsDrawerVisible = ref(false)
 
 // Dialogs
 const isDeleteDialogVisible = ref(false)
@@ -318,14 +316,16 @@ const canEditLeads =
 
 const canDeleteLeads =
     (lead: any) => (isNullOrUndefined(lead.assigned_to)) &&
-        (userData.department.value === 'admin' && userData.role.value === 'admin') ||
-        (userData.department.value === 'lead_generation' && userData.id == lead.created_by.id) ||
-        (userData.department.value === 'sales' && userData.role.value === 'team_lead')
+        ((userData.department.value === 'admin' && userData.role.value === 'admin') ||
+            (userData.department.value === 'lead_generation' && userData.id == lead.created_by.id) ||
+            (userData.department.value === 'sales' && userData.role.value === 'team_lead'))
 
 const canAssignLeads =
-    (lead: any) => (isNullOrUndefined(lead.assigned_to)) &&
-        (userData.department.value === 'admin' && userData.role.value === 'admin') ||
-        (userData.department.value === 'sales' && userData.role.value === 'team_lead')
+    (lead: any) => (
+        (isNullOrUndefined(lead.assigned_to)) &&
+        ((userData.department.value === 'admin' && userData.role.value === 'admin') ||
+            (userData.department.value === 'sales' && userData.role.value === 'team_lead'))
+    ) || (isCurrentUserSalesAgent && lead.lead_source?.type === 'unpaid' && lead.assigned_to.id == userData.id)
 
 const canPickLeads =
     (lead: any) => (isNullOrUndefined(lead.assigned_to)) &&
@@ -337,12 +337,6 @@ const canAddLeadDetails =
         (userData.department.value === 'sales' && userData.role.value === 'sales_agent') &&
         (userData.id == lead.assigned_to?.id)
     )
-
-const canViewLeadDetails =
-    (lead: any) =>
-        (userData.department.value === 'admin' && userData.role.value === 'admin') ||
-        (userData.department.value === 'sales' && userData.role.value === 'team_lead') ||
-        (userData.department.value === 'sales' && userData.role.value === 'sales_agent' && !isEmptyArray(lead.details))
 
 const isCurrentUserSalesAgent = computed(() => (userData.department.value === 'sales' && userData.role.value === 'sales_agent'))
 
@@ -517,16 +511,15 @@ watch(assignedUser, () => {
             <!-- SECTION datatable -->
             <VDataTableServer v-model:items-per-page="itemsPerPage" hover :expanded="expandedRows" show-expand
                 :sort-by="[{ key: sortBy, order: orderBy }]" :loading="tableLoading" loading-text="Loading Leads..."
-                :disable-sort="tableLoading" fixed-header style="max-height: 500px;" v-model:page="page" :items="leads"
+                :disable-sort="tableLoading" fixed-header style="max-height: 700px;" v-model:page="page" :items="leads"
                 item-value="id" :items-length="totalLeads" :headers="headers" class="text-no-wrap rounded-0"
-                @update:options="updateOptions" density="default">
-                <!-- :row-props="(data) => (!isEmptyArray(data.item.details) ? { onClick: () => toggleExpand(data.item) } : {})"> -->
+                @update:options="updateOptions" density="default"
+                :row-props="(data) => (!isEmptyArray(data.item?.details) ? { onClick: () => toggleExpand(data.item) } : {})">
 
                 <!-- Expanded Icon -->
                 <template #item.data-table-expand="{ item }: { item: any }">
                     <VIcon v-if="!isEmptyArray(item.details)"
-                        :icon="isRowExpanded(item) ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"
-                        @click="toggleExpand(item)" />
+                        :icon="isRowExpanded(item) ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'" />
                 </template>
 
                 <!-- Expanded row -->
