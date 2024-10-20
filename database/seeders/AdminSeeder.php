@@ -16,8 +16,10 @@ class AdminSeeder extends Seeder
     public function run(): void
     {
         User::create([
-            'name' => 'Suraqa Jafrani',
-            'email' => 'suraqa@rftech.com',
+            'name' => 'Admin User',
+            'email' => 'admin@rftech.com',
+            // 'name' => 'Suraqa Jafrani',
+            // 'email' => 'suraqa@rftech.com',
             'password' => bcrypt('abcd1234'),
             'department_id' => Department::where('name', DepartmentsEnum::ADMIN->value)->value('id'),
         ])->assignRole(RolesEnum::ADMIN);

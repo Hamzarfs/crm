@@ -14,7 +14,7 @@ class Assign extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->hasRole([RolesEnum::ADMIN, RolesEnum::TEAM_LEAD]) && $this->user()->hasDepartment(DepartmentsEnum::ADMIN->value, DepartmentsEnum::SALES->value);
+        return $this->user()->hasRole([RolesEnum::ADMIN, RolesEnum::TEAM_LEAD, RolesEnum::SALES_AGENT]) && $this->user()->hasDepartment(DepartmentsEnum::ADMIN->value, DepartmentsEnum::SALES->value);
     }
 
     /**

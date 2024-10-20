@@ -78,7 +78,6 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
 </script>
 
 <template>
-
     <VNavigationDrawer temporary :width="600" location="end" class="scrollable-content"
         :model-value="props.isDrawerOpen" @update:model-value="handleDrawerModelValueUpdate">
 

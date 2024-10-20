@@ -59,11 +59,16 @@ class Lead extends Model
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
-    public function leadClosedDate(): Attribute
+    protected function leadClosedDate(): Attribute
     {
         return new Attribute(
             get: fn($value) => $value ? Carbon::parse($value)->format('d M Y') : null,
             set: fn($value) => $value ? Carbon::createFromFormat('d-m-Y', $value)->format('Y-m-d') : null
         );
+    }
+
+    public function details()
+    {
+        return $this->hasMany(LeadDetail::class);
     }
 }

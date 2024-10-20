@@ -11,6 +11,7 @@ declare module 'vue' {
     AddEditAddressDialog: typeof import('./resources/ts/components/dialogs/AddEditAddressDialog.vue')['default']
     AddEditPermissionDialog: typeof import('./resources/ts/components/dialogs/AddEditPermissionDialog.vue')['default']
     AddEditRoleDialog: typeof import('./resources/ts/components/dialogs/AddEditRoleDialog.vue')['default']
+    AddLeadDetailsDrawer: typeof import('./resources/ts/components/leads/AddLeadDetailsDrawer.vue')['default']
     AddNewBrandDrawer: typeof import('./resources/ts/components/brands/AddNewBrandDrawer.vue')['default']
     AddNewCustomerDrawer: typeof import('./resources/ts/components/customers/AddNewCustomerDrawer.vue')['default']
     AddNewDepartmentDrawer: typeof import('./resources/ts/components/departments/AddNewDepartmentDrawer.vue')['default']
@@ -77,6 +78,7 @@ declare module 'vue' {
     TwoFactorAuthDialog: typeof import('./resources/ts/components/dialogs/TwoFactorAuthDialog.vue')['default']
     UserInfoEditDialog: typeof import('./resources/ts/components/dialogs/UserInfoEditDialog.vue')['default']
     UserUpgradePlanDialog: typeof import('./resources/ts/components/dialogs/UserUpgradePlanDialog.vue')['default']
+    ViewLeadDetailsDrawer: typeof import('./resources/ts/components/leads/ViewLeadDetailsDrawer.vue')['default']
     ViewTaskDrawer: typeof import('./resources/ts/components/tasks/ViewTaskDrawer.vue')['default']
     VueApexCharts: typeof import('vue3-apexcharts')['default']
   }
