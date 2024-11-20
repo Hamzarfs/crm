@@ -103,6 +103,7 @@ declare module 'vue-router/auto-routes' {
     'front-pages-landing-page': RouteRecordInfo<'front-pages-landing-page', '/front-pages/landing-page', Record<never, never>, Record<never, never>>,
     'front-pages-payment': RouteRecordInfo<'front-pages-payment', '/front-pages/payment', Record<never, never>, Record<never, never>>,
     'front-pages-pricing': RouteRecordInfo<'front-pages-pricing', '/front-pages/pricing', Record<never, never>, Record<never, never>>,
+    'leads-kanban': RouteRecordInfo<'leads-kanban', '/leads/kanban', Record<never, never>, Record<never, never>>,
     'leads-list': RouteRecordInfo<'leads-list', '/leads/list', Record<never, never>, Record<never, never>>,
     'leadsources-list': RouteRecordInfo<'leadsources-list', '/leadsources/list', Record<never, never>, Record<never, never>>,
     'login': RouteRecordInfo<'login', '/login', Record<never, never>, Record<never, never>>,

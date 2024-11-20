@@ -40,3 +40,15 @@ export const getInitials = (name?: string) => {
     const lastNameInitial = nameParts[1]?.[0] ?? ''
     return firstNameInitial + lastNameInitial
 }
+
+export const resolveLeadStatusVariant = (status: string) => {
+    const successStatuses = ['Sale closed']
+    const errorStatuses = ['No answer', 'Hung up', 'Wrong number', 'Voice mail', 'Found someone', 'Not interested', 'Blocked', 'Cant connect', 'Not in service', 'Invalid lead', 'No number', 'Not interested', 'Garbage', 'Lost (Projects with others)']
+
+    if (successStatuses.includes(status))
+        return 'success'
+    else if (errorStatuses.includes(status))
+        return 'error'
+    else
+        return 'primary'
+}

@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\{AuthController, DepartmentController, BrandController, CampaignController, CurrencyController, CustomerController, LeadController, LeadSourceController, NotificationController, RoleController, ServiceController, TaskController, UserController};
+use App\Http\Controllers\{AuthController, DepartmentController, BrandController, CampaignController, CurrencyController, CustomerController, LeadController, LeadPipelineStageController, LeadSourceController, NotificationController, RoleController, ServiceController, TaskController, UserController};
 use Illuminate\Support\Facades\Route;
 
 
@@ -132,11 +132,28 @@ Route::middleware('auth:sanctum')->group(function () {
                 ->group(function () {
                     Route::patch('{lead}/pick', 'pickLead')->middleware('role:sales_agent');
                     Route::patch('{lead}/assign', 'assignLead')->middleware('role:admin|team_lead|sales_agent');
+
+                    Route::patch('{lead}/update-pipeline-stage', 'updatePipelineStage');
+                    Route::get('without-pipeline-stage', 'withoutPipelineStage');
                 });
 
             Route::middleware(['role:sales_agent', 'department:sales'])
                 ->group(function () {
                     Route::post('{lead}/details', 'addDetails');
+                });
+        });
+
+    Route::prefix('lead-stages')
+        ->controller(LeadPipelineStageController::class)
+        ->middleware(['department:admin,sales'])
+        ->group(function () {
+            Route::get('', 'list')->middleware(['role:admin|team_lead|sales_agent']);
+            Route::middleware(['role:admin|team_lead'])
+                ->group(function () {
+                    Route::post('', 'store');
+                    Route::put('{stage}', 'update');
+                    Route::delete('{stage}', 'delete');
+                    // Route::post('sort', 'sort');
                 });
         });
 

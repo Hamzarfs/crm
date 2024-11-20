@@ -148,18 +148,6 @@ const leadSources = leadsources.map((ls: any) => ({ title: ls.name, value: ls.id
 const createdByUsers = users.map((u: any) => ({ title: u.name, value: u.id }))
 createdByUsers.unshift({ title: 'Me', value: userData.id })
 
-const resolveLeadStatusVariant = (status: string) => {
-    const successStatuses = ['Sale closed']
-    const errorStatuses = ['No answer', 'Hung up', 'Wrong number', 'Voice mail', 'Found someone', 'Not interested', 'Blocked', 'Cant connect', 'Not in service', 'Invalid lead', 'No number', 'Not interested', 'Garbage', 'Lost (Projects with others)',]
-
-    if (successStatuses.includes(status))
-        return 'success'
-    else if (errorStatuses.includes(status))
-        return 'error'
-    else
-        return 'primary'
-}
-
 // Drawers
 const isAddNewLeadDrawerVisible = ref(false)
 const isEditLeadDrawerVisible = ref(false)
@@ -325,7 +313,7 @@ const canAssignLeads =
         (isNullOrUndefined(lead.assigned_to)) &&
         ((userData.department.value === 'admin' && userData.role.value === 'admin') ||
             (userData.department.value === 'sales' && userData.role.value === 'team_lead'))
-    ) || (isCurrentUserSalesAgent && lead.lead_source?.type === 'unpaid' && lead.assigned_to.id == userData.id)
+    ) || (isCurrentUserSalesAgent && lead.lead_source?.type === 'unpaid' && lead.assigned_to?.id == userData.id)
 
 const canPickLeads =
     (lead: any) => (isNullOrUndefined(lead.assigned_to)) &&
@@ -385,6 +373,7 @@ watch(assignedUser, () => {
 
 <template>
     <section>
+        <VBtn prepend-icon="ri-kanban-view" class="mb-3" :to="{ name: 'leads-kanban' }">Kanban View</VBtn>
         <!-- 👉 Widgets -->
         <div class="d-flex mb-6">
             <VRow>
@@ -514,7 +503,7 @@ watch(assignedUser, () => {
                 :disable-sort="tableLoading" fixed-header style="max-height: 700px;" v-model:page="page" :items="leads"
                 item-value="id" :items-length="totalLeads" :headers="headers" class="text-no-wrap rounded-0"
                 @update:options="updateOptions" density="default"
-                :row-props="(data) => (!isEmptyArray(data.item?.details) ? { onClick: () => toggleExpand(data.item) } : {})">
+                :cell-props="data => (!isEmptyArray(data.item?.details) && data.column.key !== 'actions' ? { onClick: () => toggleExpand(data.item), style: { cursor: 'pointer' } } : {})">
 
                 <!-- Expanded Icon -->
                 <template #item.data-table-expand="{ item }: { item: any }">
@@ -597,9 +586,9 @@ watch(assignedUser, () => {
 
                 <!-- Remarks -->
                 <template #item.remarks="{ item }: { item: any }">
-                    <span v-if="item.remarks">
+                    <div v-if="item.remarks" style="white-space: pre-wrap; width: 300px; padding: 10px 0;">
                         {{ item.remarks }}
-                    </span>
+                    </div>
                     <span v-else class="text-error font-weight-bold">None</span>
                 </template>
 
