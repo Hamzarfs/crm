@@ -88,5 +88,6 @@ declare module 'vue' {
     UserUpgradePlanDialog: typeof import('./resources/ts/components/dialogs/UserUpgradePlanDialog.vue')['default']
     ViewLeadDetailsDrawer: typeof import('./resources/ts/components/leads/kanban/ViewLeadDetailsDrawer.vue')['default']
     ViewTaskDrawer: typeof import('./resources/ts/components/tasks/ViewTaskDrawer.vue')['default']
+    VueApexCharts: typeof import('vue3-apexcharts')['default']
   }
 }

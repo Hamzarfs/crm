@@ -132,9 +132,55 @@ const boardActions = [
         </div>
 
         <!-- 👉 draggable task start here -->
-        <!-- <VueDraggable v-model="props.kanbanItems">
+        <VueDraggable v-model="props.kanbanItems" group="status" item-key="id">
+            <template #item="{ element, index }">
 
-        </VueDraggable> -->
+            </template>
+        </VueDraggable>
+
+        <!-- <div ref="refKanbanBoard" class="kanban-board-drop-zone rounded d-flex flex-column gap-4"
+            :id="(props.boardId as string)" :class="tasks.length ? 'mb-4' : ''">
+            <template v-for="task in tasks" :key="task.id">
+                <TaskKanbanCard :task="task" :board-id="(props.boardId as string)" :board-name="props.boardName" />
+                @delete-kanban-item="deleteItem"
+                    @click="selectedLead = lead; isViewLeadDetailsDrawerVisible = true"
+            </template>
+
+            👉 Add new Form
+            <div class="add-new-form">
+                <h6 class="text-base font-weight-regular cursor-pointer ms-4"
+                    @click="isAddNewFormVisible = !isAddNewFormVisible">
+                    <VIcon size="15" icon="ri-add-line" /> Add New Lead
+                </h6>
+
+                <VForm v-if="isAddNewFormVisible" ref="refForm" class="mt-4" validate-on="submit"
+                    @submit.prevent="addNewItem">
+                    <div class="mb-4">
+                        <VAutocomplete v-model="newLeadToAssign" :items="props.unassignedLeads" clearable
+                            :menu-props="{ attach: refKanbanBoard }" density="compact" :rules="[requiredValidator]"
+                            :placeholder="`Add lead to ${props.boardName}`" autofocus
+                            @keydown.enter="handleEnterKeydown" @keydown.esc="hideAddNewForm">
+                            <template #item="{ item, props }">
+                                <VListItem v-bind="props" :title="item.value.customer.name"
+                                    :subtitle="`ID: ${item.value.id}`" />
+                            </template>
+
+                            <template #selection="{ item }">
+                                {{ item.value.customer.name }}
+                            </template>
+                        </VAutocomplete>
+                    </div>
+                    <div class="d-flex gap-4 flex-wrap">
+                        <VBtn size="small" type="submit">
+                            Add
+                        </VBtn>
+                        <VBtn size="small" variant="outlined" color="secondary" @click="hideAddNewForm">
+                            Cancel
+                        </VBtn>
+                    </div>
+                </VForm>
+            </div>
+        </div> -->
 
     </div>
 
