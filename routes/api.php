@@ -56,6 +56,7 @@ Route::middleware('auth:sanctum')->group(function () {
         ->controller(TaskController::class)
         ->group(function () {
             Route::get('', 'list');
+            Route::get('kanban', 'kanbanList');
             Route::middleware('role:admin|team_lead')->group(function () {
                 Route::post('', 'store');
                 Route::put('{task}', 'update');
