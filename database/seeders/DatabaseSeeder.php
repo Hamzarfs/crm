@@ -22,9 +22,9 @@ class DatabaseSeeder extends Seeder
             BrandSeeder::class,
             CustomerSeeder::class,
             LeadStatusSeeder::class,
+            CampaignSeeder::class,
             // LeadSeeder::class,
 
-            CampaignSeeder::class,
 
 
         ]);

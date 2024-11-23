@@ -1,11 +1,15 @@
 <script lang="ts" setup>
+    import { useAuthStore } from '@/@core/stores/auth';
     import type { Notification } from '@layouts/types';
 
     // const { notifications: n } = await $api('notfications/all')
 
     const notifications = ref<Notification[]>([])
 
-    const userData = useCookie('userData').value
+    const authStore = useAuthStore()
+
+    const userData = authStore.user
+    // const userData = useCookie('userData').value
 
     window.Echo.private(`Task.Assigned.${userData.id}`)
         .notification((notification: any) => {

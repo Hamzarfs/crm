@@ -1,9 +1,12 @@
+import { useAuthStore } from '@core/stores/auth';
 import { _RouterTyped, RouteNamedMap } from "unplugin-vue-router";
 
 export const setupRoleDepartmentGuard = (router: _RouterTyped<RouteNamedMap & { [key: string]: any }>) => {
     router.beforeEach(async (to, from, next) => {
+        const authStore = useAuthStore()
         // Example: Fetch the user's role and department (e.g., from cookies, Pinia, Vuex, or API)
-        const userData = useCookie('userData').value; // Assuming 'userRole' is stored in a cookie
+        const userData = authStore.user; // Assuming 'userRole' is stored in a cookie
+        // const userData = useCookie('userData').value; // Assuming 'userRole' is stored in a cookie
 
         // Check if the route has role and department restrictions
         const requiredRoles = to.meta?.roles;

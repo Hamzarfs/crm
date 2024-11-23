@@ -9,6 +9,10 @@
 
     const authStore = useAuthStore()
     const userData = authStore.user
+    authStore.emptyState()
+    console.log(authStore);
+    console.log(userData);
+
 
     const logout = async () => {
         try {

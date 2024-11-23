@@ -70,7 +70,7 @@ class AuthController extends Controller
             'success' => true,
             'accessToken' => "Bearer $token",
             'userData' => new UserResource($user),
-            'notifications' => $user->notifications()->unread(),
+            'notifications' => $user->notifications(),
         ]);
     }
 

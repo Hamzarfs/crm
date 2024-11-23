@@ -1,4 +1,4 @@
-import { useAuthStore } from '@/@core/stores/auth'
+import { useAuthStore } from '@core/stores/auth'
 import type { RouteRecordRaw } from 'vue-router/auto'
 
 const DashboardComponent = () => import('@/pages/dashboard.vue')
@@ -26,13 +26,17 @@ export const redirects: RouteRecordRaw[] = [
         name: 'index',
         redirect: to => {
             const authStore = useAuthStore()
-            console.log('calling for routes ');
-            console.log(authStore.$state);
+            // console.log('calling for routes ');
+            // console.log(authStore.$state);
 
             // const userData = 'authStore.user'
             // const token = 'authStore.token'
             const userData = authStore.user
             const token = authStore.token
+
+            // console.log(userData);
+            // console.log(token);
+
 
             // const userData = useCookie<Record<string, unknown> | null | undefined>('userData').value
             // const token = useCookie('accessToken').value
