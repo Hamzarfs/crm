@@ -3,35 +3,45 @@
 
 const props = defineProps<{
     task: Record<any, any>
-    boardId: string
-    boardName: string
 }>()
 
-const emit = defineEmits<{
-    (e: 'deleteKanbanItem', value: number): void
-}>()
+const openEditTaskDrawer = inject<any>('openEditTaskDrawer')
+const openDeleteTaskDialog = inject<any>('openDeleteTaskDialog')
+
+const moreOptions = [
+    {
+        title: 'Edit',
+        onClick: () => {
+            openEditTaskDrawer(props.task)
+        },
+    },
+    {
+        title: 'Delete',
+        onClick: () => {
+            openDeleteTaskDialog(props.task.id)
+        },
+    },
+]
 
 </script>
 
 <template>
-    <VCard v-if="props.task" :ripple="false" :link="false" class="kanban-card position-relative">
+    <VCard v-if="props.task" :ripple="false" :link="false" class="kanban-card position-relative mb-3"
+        :id="props.task.id" :data-status="props.task.status">
         <VCardText class="d-flex flex-column gap-2">
-            <div class="d-flex align-start gap-2">
-                <!-- @TODO -->
-                <!-- <div class="d-flex flex-wrap gap-2">
-                    <VChip size="small" color="primary">
-                        New
-                    </VChip>
-                    <VChip size="small" color="secondary">
-                        New
-                    </VChip>
-                </div> -->
-            </div>
+            <div class="d-flex justify-space-between align-centera">
+                <p class="text-h5 text-high-emphasis mb-0">
+                    {{ props.task.title }}
+                </p>
 
-            <!-- Lead title -->
-            <p class="text-h5 text-high-emphasis mb-0">
-                {{ props.task.title }}
-            </p>
+                <VMenu>
+                    <template #activator="{ props: p, isActive }">
+                        <VIcon v-bind="p" icon="ri-more-2-line" class="more-options"
+                            :style="isActive ? 'opacity: 1' : ''" size="20" @click.stop />
+                    </template>
+                    <VList :items="moreOptions" item-props />
+                </VMenu>
+            </div>
 
             <!-- footer  -->
             <div class="">

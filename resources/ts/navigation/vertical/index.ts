@@ -58,11 +58,6 @@ export default [
         to: { name: 'tasks' },
     },
     {
-        title: 'Tasks Kanban',
-        icon: { icon: 'ri-kanban-view' },
-        to: { name: 'tasks-kanban' },
-    },
-    {
         heading: 'Sales Management',
         department: ['sales', 'admin', 'lead_generation'],
     },

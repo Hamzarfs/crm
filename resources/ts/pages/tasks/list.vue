@@ -2,8 +2,11 @@
 
 import { mergeProps } from 'vue';
 
+
 // Get currently logged in user data
 const userData = useCookie('userData').value
+
+const $toast = useToast()
 
 // Filter values
 const searchQuery = ref('')
@@ -135,9 +138,7 @@ const resolveTaskStatusColor = (status: string): string => {
 const isAddNewTaskDrawerVisible = ref(false)
 const isEditTaskDrawerVisible = ref(false)
 const isViewTaskDrawerVisible = ref(false)
-const isSnackBarVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
-const taskResponsemessage = ref('')
 
 // 👉 Add new task
 const addNewTask = async (taskData: FormData) => {
@@ -149,12 +150,12 @@ const addNewTask = async (taskData: FormData) => {
         },
     })
 
-    isSnackBarVisible.value = true
-    taskResponsemessage.value = message
     addNewTaskDrawerRef.value.closeNavigationDrawer()
     if (success) {
+        $toast.success(message)
         fetchTasks()
-    }
+    } else
+        $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
 }
 
 // 👉 Edit task
@@ -167,12 +168,12 @@ const editTask = async (taskData: any) => {
         },
     })
 
-    isSnackBarVisible.value = true
-    taskResponsemessage.value = message
     editTaskDrawerRef.value.closeNavigationDrawer()
     if (success) {
+        $toast.success(message)
         fetchTasks()
-    }
+    } else
+        $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
 }
 
 // 👉 View task
@@ -189,11 +190,11 @@ const deleteTask = async () => {
 
     isDeleteDialogVisible.value = false
 
-    isSnackBarVisible.value = true
-    taskResponsemessage.value = message
     if (success) {
+        $toast.success(message)
         fetchTasks()
-    }
+    } else
+        $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
 }
 
 // 👉 Add comment
@@ -203,12 +204,12 @@ const addComment = async (commentData: FormData) => {
         body: commentData,
     })
 
-    isSnackBarVisible.value = true
-    taskResponsemessage.value = message
     if (success) {
+        $toast.success(message)
         selectedTask.value.comments.push(comment)
         viewTaskDrawerRef.value.commentForm.reset()
-    }
+    } else
+        $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
 }
 
 const openEditTaskForm = (task: any) => {
@@ -226,25 +227,24 @@ const errors = ref({
     comment: undefined,
 })
 
-const handleStatusUpdate = async ({ id, status }: { id: number, status: string }) => {
-    const task = tasks.value.find((t: any) => t.id === id)
+const handleStatusUpdate = async ({ id, status, newStatus }: { id: number, status: string, newStatus: string }) => {
 
-    if (task.status !== status) {
+    if (newStatus !== status) {
         const { success, message } = await $api(`tasks/${id}/status`, {
             method: 'PATCH',
-            body: { status },
+            body: { status: newStatus },
             onResponseError({ response }) {
+                $toast.error('Something went wrong. Plz try again or contact support.')
                 console.error(response._data.message)
-                isSnackBarVisible.value = true
-                taskResponsemessage.value = "Something went wrong! Please try again."
             },
         })
 
-        isSnackBarVisible.value = true
-        taskResponsemessage.value = message
         if (success) {
-            task.status = status
-        }
+            $toast.success(message)
+            const task = tasks.value.find((t: any) => t.id === id)
+            task.status = newStatus
+        } else
+            $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
     }
 }
 
@@ -256,17 +256,16 @@ const deleteComment = async (commentIndex: number) => {
     const { success, message } = await $api(`tasks/comments/${comment.id}`, {
         method: 'DELETE',
         onResponseError({ response }) {
+            $toast.error('Something went wrong. Plz try again or contact support.')
             console.error(response._data.message)
-            isSnackBarVisible.value = true
-            taskResponsemessage.value = "Something went wrong! Please try again."
         },
     })
 
-    isSnackBarVisible.value = true
-    taskResponsemessage.value = message
     if (success) {
+        $toast.success(message)
         selectedTask.value.comments.splice(commentIndex, 1)
-    }
+    } else
+        $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
 }
 
 watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDrawer]) => {
@@ -279,9 +278,13 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
 <template>
     <section>
         <VCard class="mb-6">
-            <VCardTitle class="text-h4 py-5">
-                {{ ['admin', 'team_lead'].includes(userData.role.value) ? 'Filters' : 'Tasks' }}
-            </VCardTitle>
+            <div class="d-flex align-center justify-space-between">
+                <VCardTitle class="text-h4 py-5">
+                    {{ ['admin', 'team_lead'].includes(userData.role.value) ? 'Filters' : 'Tasks' }}
+                </VCardTitle>
+
+                <VBtn prepend-icon="ri-kanban-view" class="mb-3 me-2" :to="{ name: 'tasks-kanban' }">Kanban View</VBtn>
+            </div>
 
             <VCardText v-if="['admin', 'team_lead'].includes(userData.role.value)">
                 <VRow align="center">
@@ -364,7 +367,7 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
 
                         <VList>
                             <VListItem v-for="status in statuses" :key="status.value" :value="status.value"
-                                @click="handleStatusUpdate({ id: item.id, status: status.value })">
+                                @click="handleStatusUpdate({ id: item.id, status: item.status, newStatus: status.value })">
                                 {{ status.title }}
                             </VListItem>
                         </VList>
@@ -373,7 +376,6 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
                     <VChip v-else :color="resolveTaskStatusColor(item.status)" size="small" class="text-uppercase"
                         elevation="5">
                         {{ statuses.find((status: any) => status.value === item.status)?.title }}
-                        <!-- {{ slugToTitleCase(item.status) }} -->
                     </VChip>
                 </template>
 
@@ -486,15 +488,6 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
         <ViewTaskDrawer v-model:isDrawerOpen="isViewTaskDrawerVisible" :task="selectedTask" :statuses="statuses"
             :resolveTaskStatusColor="resolveTaskStatusColor" :errors="errors" ref="viewTaskDrawerRef"
             @comment-data="addComment" @status-update="handleStatusUpdate" @delete-comment="deleteComment" />
-
-        <VSnackbar v-model="isSnackBarVisible">
-            {{ taskResponsemessage }}
-            <template #actions>
-                <VBtn color="error" @click="isSnackBarVisible = false">
-                    Close
-                </VBtn>
-            </template>
-        </VSnackbar>
 
         <VDialog v-model="isDeleteDialogVisible" width="400">
             <!-- Dialog Content -->

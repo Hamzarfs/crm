@@ -17,7 +17,7 @@ interface Props {
 interface Emit {
     (e: 'update:isDrawerOpen', value: boolean): void
     (e: 'commentData', value: FormData): void
-    (e: 'statusUpdate', value: { id: number, status: string }): void
+    (e: 'statusUpdate', value: { id: number, status: string, newStatus: string }): void
     (e: 'deleteComment', value: number): void
 }
 
@@ -131,7 +131,7 @@ defineExpose({
 
                                     <VList>
                                         <VListItem v-for="status in statuses" :key="status.value" :value="status.value"
-                                            @click="emit('statusUpdate', { id: props.task.id, status: status.value })">
+                                            @click="emit('statusUpdate', { id: props.task.id, status: props.task.status, newStatus: status.value })">
                                             {{ status.title }}
                                         </VListItem>
                                     </VList>
