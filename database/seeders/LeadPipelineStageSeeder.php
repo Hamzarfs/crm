@@ -19,7 +19,6 @@ class LeadPipelineStageSeeder extends Seeder
         foreach (range(1, 5) as $i) {
             $stages[] = LeadPipelineStage::create([
                 'name' => "Stage $i",
-                'order' => $i,
             ]);
         }
 

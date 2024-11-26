@@ -37,11 +37,13 @@ const closeNavigationDrawer = () => {
 }
 
 watch(() => props.task, newVal => {
-    title.value = newVal.title
-    description.value = newVal.description
-    deadline.value = parseDate(newVal.deadline)
-    assigned_to.value = newVal.assigned_to?.id
-    status.value = newVal.status
+    if (newVal) {
+        title.value = newVal.title
+        description.value = newVal.description
+        deadline.value = parseDate(newVal.deadline)
+        assigned_to.value = newVal.assigned_to?.id
+        status.value = newVal.status
+    }
 }, {
     immediate: true,
     deep: true

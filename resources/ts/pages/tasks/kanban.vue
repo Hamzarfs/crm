@@ -171,7 +171,8 @@ const updateTaskStatus = async ({ id, status, newStatus }: { id: number, status:
                     selectedTask.value = task
                     return { tasksByStatus }
                 })
-        }
+        } else
+            $toast.error(message ?? "Something went wrong! Please try again or contact support.")
     }
 }
 
