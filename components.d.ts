@@ -38,7 +38,6 @@ declare module 'vue' {
     CardStatisticsWithIcon: typeof import('./resources/ts/@core/components/cards/CardStatisticsWithIcon.vue')['default']
     CardStatisticsWithImages: typeof import('./resources/ts/@core/components/cards/CardStatisticsWithImages.vue')['default']
     ConfirmDialog: typeof import('./resources/ts/components/dialogs/ConfirmDialog.vue')['default']
-    copy: typeof import('./resources/ts/components/tasks/kanban/TaskKanbanItem copy.vue')['default']
     CreateAppDialog: typeof import('./resources/ts/components/dialogs/CreateAppDialog.vue')['default']
     CustomCheckboxes: typeof import('./resources/ts/@core/components/app-form-elements/CustomCheckboxes.vue')['default']
     CustomCheckboxesWithIcon: typeof import('./resources/ts/@core/components/app-form-elements/CustomCheckboxesWithIcon.vue')['default']
