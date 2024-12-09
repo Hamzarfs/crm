@@ -68,7 +68,8 @@ export default defineConfig({
             ],
         }), // Docs: https://github.com/antfu/unplugin-auto-import#unplugin-auto-import
         AutoImport({
-            imports: ['vue',
+            imports: [
+                'vue',
                 VueRouterAutoImports,
                 '@vueuse/core',
                 '@vueuse/math',

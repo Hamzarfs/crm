@@ -9,6 +9,7 @@ use App\Http\Requests\Sales\Lead\Store;
 use App\Http\Requests\Sales\Lead\Update;
 use App\Http\Resources\Collections\Sales\LeadResourceCollection;
 use App\Models\Lead;
+use App\Models\LeadPipelineStage;
 use App\Models\LeadStatus;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -45,7 +46,7 @@ class LeadController extends Controller
         $orderByColumn = $request->input('sortBy');
         $orderByDir = $request->input('orderBy');
 
-        $leads = Lead::with(['servicesSold', 'upsells.serviceSold', 'customer', 'leadSource', 'brand.currency', 'createdBy', 'assignedTo', 'assignedBy', 'campaign', 'details.agent'])->withCount(['servicesSold', 'upsells']);
+        $leads = Lead::with(['servicesSold', 'upsells.serviceSold', 'customer', 'leadSource', 'brand.currency', 'createdBy', 'assignedTo', 'assignedBy', 'campaign', 'details.agent', 'pipelineStage'])->withCount(['servicesSold', 'upsells']);
 
         if ($request->user()->hasDepartment(DepartmentsEnum::SALES->value) && $request->user()->hasRole(RolesEnum::SALES_AGENT)) {
             $leads->where(function (Builder $leadsQuery) use ($request) {
@@ -240,7 +241,7 @@ class LeadController extends Controller
     }
 
     /**
-     * Get Leads widgets count
+     * Get Leads statuses
      */
     public function getLeadStatuses()
     {
@@ -313,6 +314,32 @@ class LeadController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Lead details added successfully!'
+        ]);
+    }
+
+    public function updatePipelineStage(Lead $lead, Request $request)
+    {
+        $newPipelineStage = $request->input('stage');
+
+        $newPipelineStage = LeadPipelineStage::find($newPipelineStage);
+
+        $lead->pipelineStage()->associate($newPipelineStage)->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Lead moved to '{$newPipelineStage->name}' pipeline stage successfully."
+        ]);
+    }
+
+    public function withoutPipelineStage()
+    {
+        $leads = Lead::whereDoesntHave('pipelineStage')
+            ->with(['servicesSold', 'upsells.serviceSold', 'customer', 'leadSource', 'brand.currency', 'createdBy', 'assignedTo', 'assignedBy', 'campaign', 'details.agent'])
+            ->withCount(['servicesSold', 'upsells'])
+            ->get();
+
+        return response()->json([
+            'leads' => new LeadResourceCollection($leads),
         ]);
     }
 }

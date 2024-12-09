@@ -8,9 +8,11 @@ const DepartmentsComponent = () => import('@/pages/departments/list.vue')
 const BrandsComponent = () => import('@/pages/brands/list.vue')
 const LeadSourcesComponent = () => import('@/pages/leadsources/list.vue')
 const TasksComponent = () => import('@/pages/tasks/list.vue')
+const TasksKanbanComponent = () => import('@/pages/tasks/kanban.vue')
 const ServicesComponent = () => import('@/pages/services/list.vue')
 const CustomersComponent = () => import('@/pages/customers/list.vue')
 const LeadsComponent = () => import('@/pages/leads/list.vue')
+const LeadsKanbanComponent = () => import('@/pages/leads/kanban.vue')
 
 
 
@@ -103,6 +105,15 @@ export const routes: RouteRecordRaw[] = [
             authenticatedOnly: true,
         },
     },
+    {
+        path: '/tasks-kanban',
+        name: 'tasks-kanban',
+        component: TasksKanbanComponent,
+        meta: {
+            navActiveLink: 'tasks-kanban',
+            authenticatedOnly: true,
+        },
+    },
     // /SAlES ROUTES
     {
         path: '/sales',
@@ -154,6 +165,14 @@ export const routes: RouteRecordRaw[] = [
                 path: 'leads',
                 name: 'leads',
                 component: LeadsComponent,
+                meta: {
+                    navActiveLink: 'leads',
+                },
+            },
+            {
+                path: 'leads-kanban',
+                name: 'leads-kanban',
+                component: LeadsKanbanComponent,
                 meta: {
                     navActiveLink: 'leads',
                 },

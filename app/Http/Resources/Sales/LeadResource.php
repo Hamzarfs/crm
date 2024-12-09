@@ -21,6 +21,12 @@ class LeadResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'pipeline_stage' => $this->whenLoaded('pipelineStage', [
+                'id' => $this->pipelineStage?->id,
+                'name' => $this->pipelineStage?->name,
+                'created_at' => $this->pipelineStage?->created_at->format('d M Y, g:i A'),
+                'updated_at' => $this->pipelineStage?->updated_at->format('d M Y, g:i A'),
+            ]),
             'created_by' => $this->whenLoaded('createdBy', new UserResource($this->createdBy)),
             'assigned_by' => $this->whenLoaded('assignedBy', new UserResource($this->assignedBy)),
             'assigned_to' => $this->whenLoaded('assignedTo', new UserResource($this->assignedTo)),

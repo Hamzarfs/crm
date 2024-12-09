@@ -65,3 +65,5 @@ public/mockServiceWorker.js
 *.zip
 Hamza
 themeConfig.ts
+
+keys.js

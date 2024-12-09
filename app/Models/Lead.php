@@ -71,4 +71,9 @@ class Lead extends Model
     {
         return $this->hasMany(LeadDetail::class);
     }
+
+    public function pipelineStage()
+    {
+        return $this->belongsTo(LeadPipelineStage::class, 'lead_pipeline_stage_id');
+    }
 }

@@ -27,6 +27,9 @@ class DatabaseSeeder extends Seeder
 
 
 
+            LeadPipelineStageSeeder::class,
+
+
         ]);
     }
 }
