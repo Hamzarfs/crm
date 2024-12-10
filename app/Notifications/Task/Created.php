@@ -32,7 +32,7 @@ class Created extends Notification implements ShouldQueueAfterCommit, ShouldBroa
     public function via(): array
     {
         // return ['database'];
-        return ['broadcast', 'database'];
+        return [/*'broadcast', */'database'];
     }
 
     /**
