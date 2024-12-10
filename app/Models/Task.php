@@ -36,6 +36,6 @@ class Task extends Model
 
     protected static function booted()
     {
-        static::created(fn(self $task) => $task->assignee->notify(new Created($task->load(['creator']))));
+        static::created(fn(self $task) => $task->assignee->notifyNow(new Created($task->load(['creator']))));
     }
 }

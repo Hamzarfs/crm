@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Enums\EmployeeStatusesEnum;
 use BackedEnum;
-use Illuminate\Database\Eloquent\BroadcastsEventsAfterCommit;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;

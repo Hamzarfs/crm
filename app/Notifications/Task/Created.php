@@ -5,18 +5,12 @@ namespace App\Notifications\Task;
 use App\Http\Resources\Notifications\Task\TaskCreatedResource;
 use App\Models\Task;
 use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
-use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
-use Illuminate\Database\Eloquent\BroadcastsEventsAfterCommit;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
 
-class Created extends Notification implements ShouldQueueAfterCommit, ShouldBroadcast
+class Created extends Notification
 {
-    use InteractsWithSockets, BroadcastsEventsAfterCommit;
     /**
      * Create a new notification instance.
      */
