@@ -1,9 +1,13 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/@core/stores/auth';
+
 
 const $toast = useToast();
 
+const authStore = useAuthStore()
+
 // Get currently logged in user data
-const userData = useCookie('userData').value
+const userData = authStore.user
 
 // 👉 Filters
 const selectedUser = ref([])
@@ -146,7 +150,7 @@ const _brands = brands.map((b: any) => ({ title: b.name, value: b.id }))
 const _customers = customers.map((c: any) => ({ title: c.full_name, value: c.id }))
 const leadSources = leadsources.map((ls: any) => ({ title: ls.name, value: ls.id }))
 const createdByUsers = users.map((u: any) => ({ title: u.name, value: u.id }))
-createdByUsers.unshift({ title: 'Me', value: userData.id })
+createdByUsers.unshift({ title: 'Me', value: userData?.id })
 
 // Drawers
 const isAddNewLeadDrawerVisible = ref(false)
@@ -298,35 +302,35 @@ watch(isEditLeadDrawerVisible, editDrawer => {
 
 const canEditLeads =
     (lead: any) =>
-        (userData.department.value === 'admin' && userData.role.value === 'admin') ||
-        (userData.department.value === 'lead_generation' && userData.id == lead.created_by.id) ||
-        (userData.department.value === 'sales' && userData.role.value === 'team_lead')
+        (userData?.department.value === 'admin' && userData.role.value === 'admin') ||
+        (userData?.department.value === 'lead_generation' && userData.id == lead.created_by.id) ||
+        (userData?.department.value === 'sales' && userData.role.value === 'team_lead')
 
 const canDeleteLeads =
     (lead: any) => (isNullOrUndefined(lead.assigned_to)) &&
-        ((userData.department.value === 'admin' && userData.role.value === 'admin') ||
-            (userData.department.value === 'lead_generation' && userData.id == lead.created_by.id) ||
-            (userData.department.value === 'sales' && userData.role.value === 'team_lead'))
+        ((userData?.department.value === 'admin' && userData.role.value === 'admin') ||
+            (userData?.department.value === 'lead_generation' && userData.id == lead.created_by.id) ||
+            (userData?.department.value === 'sales' && userData.role.value === 'team_lead'))
 
 const canAssignLeads =
     (lead: any) => (
         (isNullOrUndefined(lead.assigned_to)) &&
-        ((userData.department.value === 'admin' && userData.role.value === 'admin') ||
-            (userData.department.value === 'sales' && userData.role.value === 'team_lead'))
-    ) || (isCurrentUserSalesAgent && lead.lead_source?.type === 'unpaid' && lead.assigned_to?.id == userData.id)
+        ((userData?.department.value === 'admin' && userData.role.value === 'admin') ||
+            (userData?.department.value === 'sales' && userData.role.value === 'team_lead'))
+    ) || (isCurrentUserSalesAgent && lead.lead_source?.type === 'unpaid' && lead.assigned_to?.id == userData?.id)
 
 const canPickLeads =
     (lead: any) => (isNullOrUndefined(lead.assigned_to)) &&
         (lead.lead_source?.type === 'unpaid') &&
-        (userData.department.value === 'sales' && userData.role.value === 'sales_agent')
+        (userData?.department.value === 'sales' && userData.role.value === 'sales_agent')
 
 const canAddLeadDetails =
     (lead: any) => (
-        (userData.department.value === 'sales' && userData.role.value === 'sales_agent') &&
+        (userData?.department.value === 'sales' && userData.role.value === 'sales_agent') &&
         (userData.id == lead.assigned_to?.id)
     )
 
-const isCurrentUserSalesAgent = computed(() => (userData.department.value === 'sales' && userData.role.value === 'sales_agent'))
+const isCurrentUserSalesAgent = computed(() => (userData?.department.value === 'sales' && userData.role.value === 'sales_agent'))
 
 
 const assignLead = async (assignedTo: number) => {
@@ -489,7 +493,7 @@ watch(assignedUser, () => {
                 <VBtn color="secondary" prepend-icon="ri-download-2-line">
                     Export
                 </VBtn> -->
-                <template v-if="userData.role.value !== 'sales_agent'">
+                <template v-if="userData?.role.value !== 'sales_agent'">
                     <VSpacer />
                     <VBtn @click="isAddNewLeadDrawerVisible = true" prepend-icon="ri-user-add-fill">
                         Add New Lead
@@ -705,19 +709,16 @@ watch(assignedUser, () => {
         <!-- 👉 Add New Lead -->
         <AddNewLeadDrawer ref="addNewLeadDrawerRef" v-model:isDrawerOpen="isAddNewLeadDrawerVisible"
             @lead-data="addNewLead" :statuses :brands="_brands" :customers="_customers" :lead-sources="leadSources"
-            :services="_services" :errors="errors" :userData :campaigns />
+            :services="_services" :errors="errors" :userData="(userData as Record<string, any>)" :campaigns />
 
         <!-- 👉 Edit Lead -->
         <EditLeadDrawer ref="editLeadDrawerRef" v-model:isDrawerOpen="isEditLeadDrawerVisible" @lead-data="editLead"
             :statuses :brands="_brands" :customers="_customers" :lead-sources="leadSources" :services="_services"
-            :lead="selectedLead" :errors="errors" :userData :campaigns />
+            :lead="selectedLead" :errors="errors" :userData="(userData as Record<string, any>)" :campaigns />
 
         <!-- 👉 Add Lead Details -->
         <AddLeadDetailsDrawer ref="addLeadDetailsDrawerRef" v-if="isCurrentUserSalesAgent"
             v-model:isDrawerOpen="isAddLeadDetailsDrawerVisible" :statuses @add-lead-details="addLeadDetails" />
-
-        <!-- 👉 View Lead Details -->
-        <!-- <ViewLeadDetailsDrawer v-model:isDrawerOpen="isViewLeadDetailsDrawerVisible" :lead="selectedLead" /> -->
 
         <!-- Lead assigning dialog -->
         <VDialog v-model="isLeadAssigningDialogVisible" width="600">

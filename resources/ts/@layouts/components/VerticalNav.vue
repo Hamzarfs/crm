@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useAuthStore } from '@/@core/stores/auth'
 import { layoutConfig } from '@layouts'
 import { VerticalNavGroup, VerticalNavLink, VerticalNavSectionTitle } from '@layouts/components'
 import { useLayoutConfigStore } from '@layouts/stores/config'
@@ -27,9 +28,11 @@ provide(injectionKeyIsVerticalNavHovered, isHovered)
 
 const configStore = useLayoutConfigStore()
 
+const authStore = useAuthStore()
+
 const resolveNavItemComponent = (item: NavLink | NavSectionTitle | NavGroup): unknown => {
-    const role = useCookie('userData').value?.role?.value
-    const department = useCookie('userData').value?.department?.value
+    const role = authStore.user?.role?.value
+    const department = authStore.user?.department?.value
 
     if (item.department) {
         if (item.department.includes(department)) {

@@ -1,56 +1,54 @@
 <script lang="ts" setup>
-    import { useAuthStore } from '@/@core/stores/auth';
-    import type { Notification } from '@layouts/types';
+import { useAuthStore } from '@/@core/stores/auth';
+import type { Notification } from '@layouts/types';
 
-    // const { notifications: n } = await $api('notfications/all')
 
-    const notifications = ref<Notification[]>([])
 
-    const authStore = useAuthStore()
+const authStore = useAuthStore()
 
-    const userData = authStore.user
-    // const userData = useCookie('userData').value
+const notifications = ref<Notification[]>(authStore.notifications as Notification[])
 
-    window.Echo.private(`Task.Assigned.${userData.id}`)
-        .notification((notification: any) => {
-            console.log(notification);
 
+// window.Echo.private(`Task.Assigned.${userData.id}`)
+//     .notification((notification: any) => {
+//         console.log(notification);
+
+//     })
+// window.Echo.private(`App.Models.Task.${userData.id}`)
+//     .notification((notification: any) => {
+//         console.log(notification);
+
+//     })
+
+const removeNotification = (notificationId: number) => {
+    notifications.value.forEach((item, index) => {
+        if (notificationId === item.id)
+            notifications.value.splice(index, 1)
+    })
+}
+
+const markRead = (notificationId: number[]) => {
+    notifications.value.forEach(item => {
+        notificationId.forEach(id => {
+            if (id === item.id)
+                item.isSeen = true
         })
-    // window.Echo.private(`App.Models.Task.${userData.id}`)
-    //     .notification((notification: any) => {
-    //         console.log(notification);
+    })
+}
 
-    //     })
-
-    const removeNotification = (notificationId: number) => {
-        notifications.value.forEach((item, index) => {
-            if (notificationId === item.id)
-                notifications.value.splice(index, 1)
+const markUnRead = (notificationId: number[]) => {
+    notifications.value.forEach(item => {
+        notificationId.forEach(id => {
+            if (id === item.id)
+                item.isSeen = false
         })
-    }
+    })
+}
 
-    const markRead = (notificationId: number[]) => {
-        notifications.value.forEach(item => {
-            notificationId.forEach(id => {
-                if (id === item.id)
-                    item.isSeen = true
-            })
-        })
-    }
-
-    const markUnRead = (notificationId: number[]) => {
-        notifications.value.forEach(item => {
-            notificationId.forEach(id => {
-                if (id === item.id)
-                    item.isSeen = false
-            })
-        })
-    }
-
-    const handleNotificationClick = (notification: Notification) => {
-        if (!notification.isSeen)
-            markRead([notification.id])
-    }
+const handleNotificationClick = (notification: Notification) => {
+    if (!notification.isSeen)
+        markRead([notification.id])
+}
 </script>
 
 <template>

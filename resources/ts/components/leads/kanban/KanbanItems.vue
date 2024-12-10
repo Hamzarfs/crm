@@ -32,10 +32,10 @@ const [refKanbanBoard, leads] = useDragAndDrop(props.kanbanItems, {
     sortable: false,
     group: 'pipelines',
     handleEnd: async (data) => {
-        const { success, message } = await $api(`leads/${data.targetData.node.data.value.id}/update-pipeline-stage`, {
+        const { success, message } = await $api(`leads/${data.draggedNode.el.id}/update-pipeline-stage`, {
             method: 'PATCH',
             body: {
-                stage: data.targetData.parent.el.id
+                stage: data.currentParent.el.id
             },
         })
 
@@ -168,7 +168,7 @@ const handleEnterKeydown = (event: { key: string; shiftKey: any }) => {
             :id="(props.boardId as string)" :class="leads.length ? 'mb-4' : ''">
             <template v-for="lead in leads" :key="lead.id">
                 <KanbanCard :item="lead" :board-id="(props.boardId as number)" :board-name="props.boardName"
-                    @delete-kanban-item="deleteItem"
+                    :id="lead.id" @delete-kanban-item="deleteItem"
                     @click="selectedLead = lead; isViewLeadDetailsDrawerVisible = true" />
             </template>
 

@@ -1,8 +1,12 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/@core/stores/auth';
+
 
 const $toast = useToast()
 
-const userData = useCookie('userData').value
+const authStore = useAuthStore()
+
+const userData = authStore.user
 
 const toggleAssignedToMe = ref(true)
 const assignedToMe = ref('yes')
@@ -20,15 +24,10 @@ const addNewTaskDrawerRef = ref()
 const editTaskDrawerRef = ref()
 const viewTaskDrawerRef = ref()
 
-const query = computed(() => userData.role.value === 'team_lead' ? { assignedToMe } : {})
+const query = computed(() => userData?.role.value === 'team_lead' ? { assignedToMe } : {})
 
 // 👉 Fetching tasks
 const { data: tasksByStatusData, execute: fetchTasksByStatus, isFetching } = await useApi<any>(createUrl('tasks/kanban', { query }))
-
-// Watch isFetching from the useApi to toggle tableLoading
-// watch(() => isFetching.value, (newValue) => {   @TODO use isFetching instead to show loading state
-//     tableLoading.value = newValue
-// }, { immediate: true })
 
 const tasksByStatus = ref(tasksByStatusData.value.tasksByStatus)
 
@@ -54,12 +53,12 @@ const statuses = [
 const users = ref([])
 const departments = ref([])
 
-if (userData.role.value === 'admin' && userData.department.value === 'admin') {
+if (userData?.role.value === 'admin' && userData.department.value === 'admin') {
     users.value = await $api('users')
         .then(({ users }) => users.map((u: any) => ({ title: u.name, value: u.id })))
     departments.value = await $api('departments')
         .then(({ departments }) => departments.map((d: any) => ({ title: d.title, value: d.id })))
-} else if (userData.role.value === 'team_lead') {
+} else if (userData?.role.value === 'team_lead') {
     users.value = await $api('users', {
         query: {
             'departments[]': [userData.department.value],
@@ -229,11 +228,11 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
 
 
 <template>
-    <template v-if="['admin', 'team_lead'].includes(userData.role.value)">
+    <template v-if="['admin', 'team_lead'].includes(userData?.role.value)">
         <VRow align="center" justify="space-between" class="mb-1">
             <!-- 👉 Toggle Assigned to me or assigned by me (only for team_lead role) -->
             <VCol cols="2">
-                <VSwitch v-if="userData.role.value === 'team_lead'" v-model="toggleAssignedToMe" :inset="false"
+                <VSwitch v-if="userData?.role.value === 'team_lead'" v-model="toggleAssignedToMe" :inset="false"
                     :label="toggleAssignedToMe ? 'Assigned to me' : 'Assigned by me'" />
             </VCol>
 
@@ -255,13 +254,12 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
                     :board-id="status" :kanban-items="(tasks as Record<string, any>[])" class="me-4"
                     @update-task-status="updateTaskStatus"
                     @select-task-to-view="(task) => { selectedTask = task; isViewTaskDrawerVisible = true }" />
-                <!-- @rename-board="renameBoard" @delete-item="deleteKanbanItemFn" -->
             </template>
         </div>
     </div>
 
     <!-- 👉 Add New Task -->
-    <AddNewTaskDrawer v-if="['admin', 'team_lead'].includes(userData.role.value)"
+    <AddNewTaskDrawer v-if="['admin', 'team_lead'].includes(userData?.role.value)"
         v-model:isDrawerOpen="isAddNewTaskDrawerVisible" @task-data="addNewTask" :users="users" :statuses="statuses"
         ref="addNewTaskDrawerRef" :errors="errors" />
 
@@ -271,7 +269,7 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
         @comment-data="addComment" @status-update="updateTaskStatus" @delete-comment="deleteComment" />
 
     <!-- 👉 Edit Task -->
-    <EditTaskDrawer v-if="['admin', 'team_lead'].includes(userData.role.value)"
+    <EditTaskDrawer v-if="['admin', 'team_lead'].includes(userData?.role.value)"
         v-model:isDrawerOpen="isEditTaskDrawerVisible" @task-data="editTask" :users="users" :statuses="statuses"
         :task="selectedTask" ref="editTaskDrawerRef" :errors="errors" />
 

@@ -1,78 +1,66 @@
 <script setup lang="ts">
-    import { useAuthStore } from '@/@core/stores/auth';
-    import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
+import { useAuthStore } from '@/@core/stores/auth';
+import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
 
-    const router = useRouter()
+const router = useRouter()
 
-    // TODO: Get type from backend
-    // const userData = useCookie<any>('userData')
-
-    const authStore = useAuthStore()
-    const userData = authStore.user
-    authStore.emptyState()
-    console.log(authStore);
-    console.log(userData);
+const authStore = useAuthStore()
+const userData = authStore.user
 
 
-    const logout = async () => {
-        try {
-            const res = await $api('/auth/logout', {
-                method: 'POST'
-            })
+const logout = async () => {
+    try {
+        await $api('/auth/logout', {
+            method: 'POST'
+        })
 
-            // Remove "accessToken" from cookie
-            // useCookie('accessToken').value = null
+        authStore.$reset()
 
-            // Remove "userData" from cookie
-            // userData.value = null
-
-            authStore.emptyState()
-
-            // Redirect to login page
-            router.push({ name: 'login' })
-        }
-        catch (err) {
-            console.log(err)
-        }
+        // Redirect to login page
+        router.push({ name: 'login' })
     }
+    catch (err) {
+        console.log(err)
+    }
+}
 
-    const userProfileList = [
-        { type: 'divider' },
-        {
-            type: 'navItem',
-            icon: 'ri-user-line',
-            title: 'Profile',
-            to: { name: 'apps-user-view-id', params: { id: 21 } },
-        },
-        {
-            type: 'navItem',
-            icon: 'ri-settings-4-line',
-            title: 'Settings',
-            to: { name: 'pages-account-settings-tab', params: { tab: 'account' } },
-        },
-        {
-            type: 'navItem',
-            icon: 'ri-file-text-line',
-            title: 'Billing Plan',
-            to: { name: 'pages-account-settings-tab', params: { tab: 'billing-plans' } },
-            badgeProps: { color: 'error', content: '4' },
-        },
-        { type: 'divider' },
-        {
-            type: 'navItem',
-            icon: 'ri-money-dollar-circle-line',
-            title: 'Pricing',
-            to: { name: 'pages-pricing' },
-        },
-        {
-            type: 'navItem',
-            icon: 'ri-question-line',
-            title: 'FAQ',
-            to: { name: 'pages-faq' },
-        },
-        { type: 'divider' },
+const userProfileList = [
+    { type: 'divider' },
+    {
+        type: 'navItem',
+        icon: 'ri-user-line',
+        title: 'Profile',
+        to: { name: 'apps-user-view-id', params: { id: 21 } },
+    },
+    {
+        type: 'navItem',
+        icon: 'ri-settings-4-line',
+        title: 'Settings',
+        to: { name: 'pages-account-settings-tab', params: { tab: 'account' } },
+    },
+    {
+        type: 'navItem',
+        icon: 'ri-file-text-line',
+        title: 'Billing Plan',
+        to: { name: 'pages-account-settings-tab', params: { tab: 'billing-plans' } },
+        badgeProps: { color: 'error', content: '4' },
+    },
+    { type: 'divider' },
+    {
+        type: 'navItem',
+        icon: 'ri-money-dollar-circle-line',
+        title: 'Pricing',
+        to: { name: 'pages-pricing' },
+    },
+    {
+        type: 'navItem',
+        icon: 'ri-question-line',
+        title: 'FAQ',
+        to: { name: 'pages-faq' },
+    },
+    { type: 'divider' },
 
-    ]
+]
 </script>
 
 <template>

@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/@core/stores/auth';
 import { mergeProps } from 'vue';
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
 import type { VForm } from 'vuetify/components/VForm';
 
+const authStore = useAuthStore()
+
 // Get currently logged in user data
-const userData = useCookie('userData').value
+const userData = authStore.user
 
 interface Props {
     isDrawerOpen: boolean
@@ -217,7 +220,7 @@ defineExpose({
 
                                         <div>
                                             <VBtn
-                                                v-if="userData.role.value === 'admin' || comment.created_by.id === userData.id"
+                                                v-if="userData.role.value === 'admin' || comment.created_by.id === userData?.id"
                                                 size="small" variant="tonal" color="error" icon="ri-delete-bin-6-line"
                                                 @click="isDeleteDialogVisible = true; commentIndexToDelete = i" />
                                         </div>

@@ -4,7 +4,7 @@ import App from '@/App.vue'
 import { registerPlugins } from '@core/utils/plugins'
 
 // Echo
-import './echo'
+// import './echo'
 
 // Styles
 import '@core-scss/template/index.scss'

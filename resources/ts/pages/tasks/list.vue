@@ -1,10 +1,13 @@
 <script setup lang="ts">
 
+import { useAuthStore } from '@/@core/stores/auth';
 import { mergeProps } from 'vue';
 
 
+const authStore = useAuthStore()
+
 // Get currently logged in user data
-const userData = useCookie('userData').value
+const userData = authStore.user
 
 const $toast = useToast()
 
@@ -58,7 +61,7 @@ const headers = [
     { title: 'Actions', key: 'actions', sortable: false },
 ]
 
-const _headers = computed(() => headers.filter(h => h.showToOnly ? (h.showToOnly.includes(userData.role.value)) : h))
+const _headers = computed(() => headers.filter(h => h.showToOnly ? (h.showToOnly.includes(userData?.role.value)) : h))
 
 const query = computed(() => {
     const query: any = {
@@ -72,7 +75,7 @@ const query = computed(() => {
         sortBy,
         orderBy,
     }
-    if (userData.role.value === 'team_lead')
+    if (userData?.role.value === 'team_lead')
         query.assignedToMe = assignedToMe
 
     return query
@@ -111,12 +114,12 @@ const statuses = [
 const users = ref([])
 const departments = ref([])
 
-if (userData.role.value === 'admin' && userData.department.value === 'admin') {
+if (userData?.role.value === 'admin' && userData.department.value === 'admin') {
     users.value = await $api('users')
         .then(({ users }) => users.map((u: any) => ({ title: u.name, value: u.id })))
     departments.value = await $api('departments')
         .then(({ departments }) => departments.map((d: any) => ({ title: d.title, value: d.id })))
-} else if (userData.role.value === 'team_lead') {
+} else if (userData?.role.value === 'team_lead') {
     users.value = await $api('users', {
         query: {
             'departments[]': [userData.department.value],
@@ -248,7 +251,7 @@ const handleStatusUpdate = async ({ id, status, newStatus }: { id: number, statu
     }
 }
 
-const isTasksActionBtnsDisable = (taskCreatorId: number): boolean => (tableLoading.value || !(userData.role.value === 'admin' || taskCreatorId === userData.id))
+const isTasksActionBtnsDisable = (taskCreatorId: number): boolean => (tableLoading.value || !(userData?.role.value === 'admin' || taskCreatorId === userData?.id))
 
 const deleteComment = async (commentIndex: number) => {
     const comment = selectedTask.value.comments[commentIndex]
@@ -280,28 +283,28 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
         <VCard class="mb-6">
             <div class="d-flex align-center justify-space-between">
                 <VCardTitle class="text-h4 py-5">
-                    {{ ['admin', 'team_lead'].includes(userData.role.value) ? 'Filters' : 'Tasks' }}
+                    {{ ['admin', 'team_lead'].includes(userData?.role.value) ? 'Filters' : 'Tasks' }}
                 </VCardTitle>
 
                 <VBtn prepend-icon="ri-kanban-view" class="mb-3 me-2" :to="{ name: 'tasks-kanban' }">Kanban View</VBtn>
             </div>
 
-            <VCardText v-if="['admin', 'team_lead'].includes(userData.role.value)">
+            <VCardText v-if="['admin', 'team_lead'].includes(userData?.role.value)">
                 <VRow align="center">
                     <!-- 👉 Toggle Assigned to me or assigned by me (only for team_lead role) -->
-                    <VCol cols="2" v-if="userData.role.value === 'team_lead'">
+                    <VCol cols="2" v-if="userData?.role.value === 'team_lead'">
                         <VSwitch v-model="toggleAssignedToMe" :inset="false"
                             :label="toggleAssignedToMe ? 'Assigned to me' : 'Assigned by me'" />
                     </VCol>
 
                     <!-- 👉 Select Department -->
-                    <VCol v-if="userData.role.value === 'admin'">
+                    <VCol v-if="userData?.role.value === 'admin'">
                         <VSelect v-model="selectedDepartment" label="Filter by Department"
                             placeholder="Filter by Department" :items="departments" clearable chips />
                     </VCol>
 
                     <!-- 👉 Select User -->
-                    <VCol v-if="['admin', 'team_lead'].includes(userData.role.value)">
+                    <VCol v-if="['admin', 'team_lead'].includes(userData?.role.value)">
                         <VAutocomplete v-model="selectedUser" label="Filter by User" placeholder="Filter by User"
                             :items="users" auto-select-first clearable chips />
                     </VCol>
@@ -313,7 +316,7 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
                     </VCol>
 
                     <!-- 👉 Select Status -->
-                    <VCol v-if="['admin', 'team_lead'].includes(userData.role.value)">
+                    <VCol v-if="['admin', 'team_lead'].includes(userData?.role.value)">
                         <VSelect v-model="selectedStatus" label="Filter by Status" placeholder="Filter by Status"
                             :items="statuses" clearable chips />
                     </VCol>
@@ -328,7 +331,7 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
 
             <VDivider />
 
-            <VCardText v-if="['admin', 'team_lead'].includes(userData.role.value)" class="d-flex flex-wrap gap-4">
+            <VCardText v-if="['admin', 'team_lead'].includes(userData?.role.value)" class="d-flex flex-wrap gap-4">
                 <!-- 👉 Export & import buttons -->
                 <!-- <VBtn color="success" prepend-icon="ri-upload-2-line">
                     Import
@@ -351,7 +354,7 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
 
                 <!-- Status -->
                 <template #item.status="{ item }: { item: any }">
-                    <VMenu v-if="userData.id === item.assigned_to.id" transition="slide-y-transition">
+                    <VMenu v-if="userData?.id === item.assigned_to.id" transition="slide-y-transition">
                         <template #activator="{ props: menuProps }">
                             <VTooltip location="top">
                                 <template #activator="{ props: tooltipProps }">
@@ -475,12 +478,12 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
         </VCard>
 
         <!-- 👉 Add New Task -->
-        <AddNewTaskDrawer v-if="['admin', 'team_lead'].includes(userData.role.value)"
+        <AddNewTaskDrawer v-if="['admin', 'team_lead'].includes(userData?.role.value)"
             v-model:isDrawerOpen="isAddNewTaskDrawerVisible" @task-data="addNewTask" :users="users" :statuses="statuses"
             ref="addNewTaskDrawerRef" :errors="errors" />
 
         <!-- 👉 Edit Task -->
-        <EditTaskDrawer v-if="['admin', 'team_lead'].includes(userData.role.value)"
+        <EditTaskDrawer v-if="['admin', 'team_lead'].includes(userData?.role.value)"
             v-model:isDrawerOpen="isEditTaskDrawerVisible" @task-data="editTask" :users="users" :statuses="statuses"
             :task="selectedTask" ref="editTaskDrawerRef" :errors="errors" />
 

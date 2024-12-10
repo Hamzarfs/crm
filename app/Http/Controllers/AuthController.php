@@ -8,7 +8,6 @@ use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 
 class AuthController extends Controller
 {
@@ -62,7 +61,7 @@ class AuthController extends Controller
          * @var User
          */
         $user = Auth::user();
-        $user->load(['roles', 'department']);
+        $user->load(['roles', 'department', 'unreadNotifications']);
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->plainTextToken;
 
@@ -70,7 +69,7 @@ class AuthController extends Controller
             'success' => true,
             'accessToken' => "Bearer $token",
             'userData' => new UserResource($user),
-            'notifications' => $user->notifications(),
+            'notifications' => $user->unreadNotifications,
         ]);
     }
 

@@ -1,53 +1,21 @@
-
-
-
 export const useAuthStore = defineStore('auth', () => {
-    const user = ref<Record<string, any>>({})
-    const token = ref('')
-    const notifications = ref([])
+    const user = ref<Record<string, any> | undefined>(undefined)
+    const token = ref<string | undefined>(undefined)
+    const notifications = ref<[] | undefined>(undefined)
 
-    const emptyState = () => {
-        user.value = {}
-        token.value = ''
-        notifications.value = []
+    const $reset = () => {
+        user.value = undefined
+        token.value = undefined
+        notifications.value = undefined
     }
 
     return {
-        user, token, notifications,
-        emptyState,
+        user, token, notifications, $reset,
     }
+}, {
+    persist: true
 })
 
-
-
-// {
-//     state: () => ({
-//         authToken: '',
-//         user: {},
-//         notifications: <any>[],
-//     }),
-//     // getters: {
-//     //     geAuthToken: (state) => state.authToken,
-//     //     getAuthenticatedUser: (state): any => state.user,
-//     //     getAllNotifications: state => state.notifications,
-//     // },
-//     actions: {
-//         // setAuthToken(token: string) {
-//         //     this.authToken = token
-//         // },
-//         // setAuthenticatedUser(user: any) {
-//         //     this.user = user
-//         // },
-//         // setAllNotifications(notifications: any[]) {
-//         //     this.notifications = notifications
-//         // },
-//         // emptyState() {
-//         //     this.authToken = ''
-//         //     this.user = []
-//         //     this.notifications = []
-//         // },
-//     },
-// }
-
-
-
+if (import.meta.hot) {
+    import.meta.hot.accept(acceptHMRUpdate(useAuthStore, import.meta.hot))
+}

@@ -14,10 +14,7 @@ const CustomersComponent = () => import('@/pages/customers/list.vue')
 const LeadsComponent = () => import('@/pages/leads/list.vue')
 const LeadsKanbanComponent = () => import('@/pages/leads/kanban.vue')
 
-
-
-
-
+const authStore = useAuthStore()
 
 // 👉 Redirects
 export const redirects: RouteRecordRaw[] = [
@@ -27,21 +24,8 @@ export const redirects: RouteRecordRaw[] = [
         path: '/',
         name: 'index',
         redirect: to => {
-            const authStore = useAuthStore()
-            // console.log('calling for routes ');
-            // console.log(authStore.$state);
-
-            // const userData = 'authStore.user'
-            // const token = 'authStore.token'
             const userData = authStore.user
             const token = authStore.token
-
-            // console.log(userData);
-            // console.log(token);
-
-
-            // const userData = useCookie<Record<string, unknown> | null | undefined>('userData').value
-            // const token = useCookie('accessToken').value
 
             if (userData && token)
                 return { name: 'dashboard' }
