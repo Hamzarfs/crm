@@ -3,8 +3,6 @@
 import VueDraggable from 'vuedraggable';
 
 
-const $toast = useToast()
-
 
 const props = defineProps<{
     boardName: string

@@ -261,6 +261,7 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
                     @select-task-to-view="(task) => { selectedTask = task; isViewTaskDrawerVisible = true }" />
             </template>
         </div>
+
     </div>
 
     <!-- 👉 Add New Task -->
