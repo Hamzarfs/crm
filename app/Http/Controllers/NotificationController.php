@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\Notifications\Tasks\Assigned;
 use App\Models\Task;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -33,6 +34,26 @@ class NotificationController extends Controller
         ]);
     }
 
-    public function markNotifcationsAsRead(Request $request) {}
-    public function markNotifcationsAsUnread(Request $request) {}
+    public function markNotifcationsAsRead(Request $request)
+    {
+        $ids = $request->post('ids');
+
+        DatabaseNotification::whereIn('id', $ids)->get()->markAsRead();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notification(s) marked as read'
+        ]);
+    }
+    public function markNotifcationsAsUnread(Request $request)
+    {
+        $ids = $request->post('ids');
+
+        DatabaseNotification::whereIn('id', $ids)->get()->markAsUnread();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notification(s) marked as unread'
+        ]);
+    }
 }

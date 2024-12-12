@@ -4,7 +4,7 @@ export const useNotificationStore = defineStore('notifications', () => {
     const notifications = ref<Notification[]>([])
 
     const fetchNotifications = async () => {
-        const { notifications: _notifications } = await $api('notfications/all')
+        const { notifications: _notifications } = await $api('notifications/all')
 
         notifications.value = _notifications
     }
