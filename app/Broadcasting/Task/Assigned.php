@@ -4,7 +4,7 @@ namespace App\Broadcasting\Task;
 
 use App\Models\User;
 
-class Created
+class Assigned
 {
     /**
      * Create a new channel instance.
@@ -19,6 +19,6 @@ class Created
      */
     public function join(User $user, User $assignedTo): array|bool
     {
-        return true; //$user->is($assignedTo);
+        return $user->is($assignedTo);
     }
 }

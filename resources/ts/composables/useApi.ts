@@ -19,7 +19,7 @@ export const useApi = createFetch({
             if (accessToken) {
                 options.headers = {
                     ...options.headers,
-                    Authorization: accessToken,
+                    Authorization: `Bearer ${accessToken}`,
                 }
             }
             return { options }

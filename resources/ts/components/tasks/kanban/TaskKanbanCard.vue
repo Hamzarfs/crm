@@ -45,24 +45,24 @@ const moreOptions = [
 
             <!-- footer  -->
             <div class="">
-                <div v-if="props.task.created_by" class="d-flex align-center justify-space-between">
+                <div v-if="props.task.creator" class="d-flex align-center justify-space-between">
                     <div>Created by:</div>
 
                     <VAvatar size="30" color="primary" style="font-size: 10px;">
-                        {{ getInitials(props.task.created_by.name) }}
+                        {{ getInitials(props.task.creator.name) }}
                         <VTooltip activator="parent">
-                            {{ props.task.created_by.name }}
+                            {{ props.task.creator.name }}
                         </VTooltip>
                     </VAvatar>
                 </div>
 
-                <div v-if="props.task.assigned_to" class="d-flex align-center justify-space-between mt-1">
+                <div v-if="props.task.assignee" class="d-flex align-center justify-space-between mt-1">
                     <div>Assigned to:</div>
 
                     <VAvatar size="30" color="primary" style="font-size: 10px;">
-                        {{ getInitials(props.task.assigned_to.name) }}
+                        {{ getInitials(props.task.assignee.name) }}
                         <VTooltip activator="parent">
-                            {{ props.task.assigned_to.name }}
+                            {{ props.task.assignee.name }}
                         </VTooltip>
                     </VAvatar>
                 </div>

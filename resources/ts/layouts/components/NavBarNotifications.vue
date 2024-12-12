@@ -1,24 +1,27 @@
 <script lang="ts" setup>
 import { useAuthStore } from '@/@core/stores/auth';
+import { useNotificationStore } from '@/@core/stores/notification';
 import type { Notification } from '@layouts/types';
 
 
 
+const notificationStore = useNotificationStore()
 const authStore = useAuthStore()
 
-const notifications = ref<Notification[]>(authStore.notifications as Notification[])
+const userData = authStore.user
 
+const notifications = ref<Notification[]>([])
 
-// window.Echo.private(`Task.Assigned.${userData.id}`)
-//     .notification((notification: any) => {
-//         console.log(notification);
+notificationStore.fetchNotifications()
+    .then(() => {
+        notifications.value = notificationStore.notifications
+    })
 
-//     })
-// window.Echo.private(`App.Models.Task.${userData.id}`)
-//     .notification((notification: any) => {
-//         console.log(notification);
+window.Echo.private(`Task.Assigned.${userData?.id}`)
+    .notification((notification: any) => {
+        notifications.value.unshift(notification)
+    })
 
-//     })
 
 const removeNotification = (notificationId: number) => {
     notifications.value.forEach((item, index) => {

@@ -92,12 +92,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(TaskComment::class, 'created_by');
     }
-
-    /**
-     * The channels the user receives notification broadcasts on.
-     */
-    public function receivesBroadcastNotificationsOn(): string
-    {
-        return "Task.Assigned.{$this->assigned_to}";
-    }
 }

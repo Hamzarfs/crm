@@ -2,14 +2,13 @@
 
 namespace App\Notifications\Task;
 
-use App\Http\Resources\Notifications\Task\TaskCreatedResource;
+use App\Http\Resources\Notifications\Tasks\Assigned as TaskAssigned;
 use App\Models\Task;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
 
-class Created extends Notification
+class Assigned extends Notification
 {
     /**
      * Create a new notification instance.
@@ -25,8 +24,7 @@ class Created extends Notification
      */
     public function via(): array
     {
-        // return ['database'];
-        return [/*'broadcast', */'database'];
+        return ['broadcast', 'database'];
     }
 
     /**
@@ -37,7 +35,7 @@ class Created extends Notification
     public function toDatabase(): array
     {
         return [
-            'task' => new TaskCreatedResource($this->task),
+            'task_id' => $this->task->id,
         ];
     }
 
@@ -57,14 +55,16 @@ class Created extends Notification
     public function toBroadcast(): BroadcastMessage
     {
         return new BroadcastMessage([
-            'task' => new TaskCreatedResource($this->task),
+            'task' => new TaskAssigned($this->task),
+            'isSeen' => false,
+            'created_at' => $this->task->created_at, // as task & notification are created at almost the same time
         ]);
     }
 
     /**
      * Get the channel the event should broadcast on.
      */
-    public function broadcastOn(): Channel
+    public function broadcastOn(): PrivateChannel
     {
         return new PrivateChannel("Task.Assigned.{$this->task->assigned_to}");
     }

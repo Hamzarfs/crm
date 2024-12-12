@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Task\{Store, Update, Comment\Store as CommentStore};
-use App\Http\Resources\{TaskCommentResource, Collections\TaskResourceCollection};
+use App\Http\Resources\{Tasks\TaskCommentResource, Collections\Tasks\TaskResourceCollection};
 use App\Models\{Task, TaskComment, TaskFile};
+use App\Notifications\Task\Assigned as TaskAssigned;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
 class TaskController extends Controller
@@ -164,6 +165,9 @@ class TaskController extends Controller
                 ]);
             }
         }
+
+        $task->load(['files', 'creator', 'assignee.department', 'comments.files']);
+        Notification::send($task->assignee, new TaskAssigned($task));
 
         return response()->json([
             'success' => true,

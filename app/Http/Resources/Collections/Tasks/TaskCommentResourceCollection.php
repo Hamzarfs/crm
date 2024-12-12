@@ -1,20 +1,19 @@
 <?php
 
-namespace App\Http\Resources\Collections;
+namespace App\Http\Resources\Collections\Tasks;
 
-use App\Http\Resources\TaskFileResource;
+use App\Http\Resources\Tasks\TaskCommentResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class TaskFileResourceCollection extends ResourceCollection
+class TaskCommentResourceCollection extends ResourceCollection
 {
     /**
      * The resource that this resource collects.
      *
      * @var string
      */
-    public $collects = TaskFileResource::class;
-
+    public $collects = TaskCommentResource::class;
 
     /**
      * Transform the resource collection into an array.
@@ -24,7 +23,7 @@ class TaskFileResourceCollection extends ResourceCollection
     public function toArray(Request $request): array
     {
         return [
-            ...$this->collection->map(fn(TaskFileResource $fileResource) => $fileResource->toArray($request)),
+            ...$this->collection->map(fn(TaskCommentResource $commentResource) => $commentResource->toArray($request)),
         ];
     }
 }

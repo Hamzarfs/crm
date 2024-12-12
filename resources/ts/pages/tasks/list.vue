@@ -92,6 +92,11 @@ watch(() => isFetching.value, (newValue) => {
 const tasks = ref(tasksData.value.tasks)
 const totalTasks = computed(() => tasksData.value.totalTasks)
 
+window.Echo.private(`Task.Assigned.${userData?.id}`)
+    .notification((notification: any) => {
+        tasks.value.unshift(notification.task)
+    })
+
 watch(tasksData, (newVal) => {
     tasks.value = newVal.tasks
 })
@@ -354,7 +359,7 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
 
                 <!-- Status -->
                 <template #item.status="{ item }: { item: any }">
-                    <VMenu v-if="userData?.id === item.assigned_to.id" transition="slide-y-transition">
+                    <VMenu v-if="userData?.id === item.assignee.id" transition="slide-y-transition">
                         <template #activator="{ props: menuProps }">
                             <VTooltip location="top">
                                 <template #activator="{ props: tooltipProps }">
@@ -384,12 +389,12 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
 
                 <!-- Department -->
                 <template #item.department="{ item }: { item: any }">
-                    {{ item.assigned_to.department?.title ?? 'Not assigned' }}
+                    {{ item.assignee.department?.title ?? 'Not assigned' }}
                 </template>
 
                 <!-- Assigned To -->
                 <template #item.assigned_to="{ item }: { item: any }">
-                    {{ item.assigned_to.name }}
+                    {{ item.assignee.name }}
                 </template>
 
                 <!-- Deadline -->
@@ -403,7 +408,7 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
 
                 <!-- Created By -->
                 <template #item.created_by="{ item }: { item: any }">
-                    {{ item.created_by.name }}
+                    {{ item.creator.name }}
                 </template>
 
                 <!-- Created at -->
@@ -426,9 +431,9 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
                     </IconBtn>
 
                     <IconBtn size="small" @click="openEditTaskForm(item)" color="primary"
-                        :variant="isTasksActionBtnsDisable(item.created_by.id) ? 'text' : 'flat'" class="mx-2"
-                        :disabled="isTasksActionBtnsDisable(item.created_by.id)">
-                        <VIcon :icon="isTasksActionBtnsDisable(item.created_by.id) ?
+                        :variant="isTasksActionBtnsDisable(item.creator.id) ? 'text' : 'flat'" class="mx-2"
+                        :disabled="isTasksActionBtnsDisable(item.creator.id)">
+                        <VIcon :icon="isTasksActionBtnsDisable(item.creator.id) ?
                             'ri-edit-box-line' :
                             'ri-edit-box-fill'" />
                         <VTooltip activator="parent" location="top">
@@ -437,9 +442,9 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
                     </IconBtn>
 
                     <IconBtn @click="isDeleteDialogVisible = true; taskToDelete = item.id" color="error" size="small"
-                        :variant="isTasksActionBtnsDisable(item.created_by.id) ? 'text' : 'flat'"
-                        :disabled="isTasksActionBtnsDisable(item.created_by.id)">
-                        <VIcon :icon="isTasksActionBtnsDisable(item.created_by.id) ?
+                        :variant="isTasksActionBtnsDisable(item.creator.id) ? 'text' : 'flat'"
+                        :disabled="isTasksActionBtnsDisable(item.creator.id)">
+                        <VIcon :icon="isTasksActionBtnsDisable(item.creator.id) ?
                             'ri-delete-bin-line' :
                             'ri-delete-bin-fill'" />
                         <VTooltip activator="parent" location="top">

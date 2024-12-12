@@ -27,9 +27,14 @@ const viewTaskDrawerRef = ref()
 const query = computed(() => userData?.role.value === 'team_lead' ? { assignedToMe } : {})
 
 // 👉 Fetching tasks
-const { data: tasksByStatusData, execute: fetchTasksByStatus, isFetching } = await useApi<any>(createUrl('tasks/kanban', { query }))
+const { data: tasksByStatusData, execute: fetchTasksByStatus } = await useApi<any>(createUrl('tasks/kanban', { query }))
 
 const tasksByStatus = ref(tasksByStatusData.value.tasksByStatus)
+
+window.Echo.private(`Task.Assigned.${userData?.id}`)
+    .notification((notification: any) => {
+        tasksByStatus.value[notification.task.status].unshift(notification.task)
+    })
 
 watch(tasksByStatusData, (newVal) => {
     tasksByStatus.value = newVal.tasksByStatus

@@ -68,7 +68,11 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('comments/{taskComment}', 'deleteComment');
         });
 
-    Route::get('notfications/all', [NotificationController::class, 'all']);
+    Route::prefix('notfications')->controller(NotificationController::class)->group(function () {
+        Route::get('all', 'all');
+        Route::post('read', 'markNotifcationsAsRead');
+        Route::post('unread', 'markNotifcationsAsUnread');
+    });
 
     Route::prefix('services')
         ->controller(ServiceController::class)

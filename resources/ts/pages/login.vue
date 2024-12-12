@@ -61,12 +61,11 @@ const login = async () => {
             },
         })
 
-        const { success, accessToken, userData, notifications } = res
+        const { success, accessToken, userData } = res
 
         if (success) {
             authStore.user = userData
             authStore.token = accessToken
-            authStore.notifications = notifications
 
             // Redirect to `to` query if exist or redirect to index route
             // ❗ nextTick is required to wait for DOM updates and later redirect

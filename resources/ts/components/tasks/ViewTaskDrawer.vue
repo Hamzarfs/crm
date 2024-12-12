@@ -108,10 +108,10 @@ defineExpose({
                                 <VSpacer />
                                 <div class="d-flex align-center">
                                     <VAvatar size="small" color="primary" variant="tonal" class="me-2">
-                                        {{ getInitials(task.assigned_to?.name) }}
+                                        {{ getInitials(task.assignee?.name) }}
                                     </VAvatar>
                                     <span class="text-body-1 font-weight-medium">
-                                        {{ task.assigned_to?.name }}
+                                        {{ task.assignee?.name }}
                                     </span>
                                 </div>
                             </div>
@@ -124,7 +124,7 @@ defineExpose({
                             <div class="d-flex align-center">
                                 <h3 class="text-h6">Status</h3>
                                 <VSpacer />
-                                <VMenu v-if="userData.id === task.assigned_to?.id" transition="slide-y-transition">
+                                <VMenu v-if="userData.id === task.assignee?.id" transition="slide-y-transition">
                                     <template #activator="{ props: menuProps }">
                                         <VTooltip location="top">
                                             <template #activator="{ props: tooltipProps }">
@@ -207,11 +207,11 @@ defineExpose({
                                         <div>
                                             <div class="d-flex gap-3 align-center">
                                                 <VAvatar color="primary" variant="tonal">
-                                                    {{ getInitials(comment.created_by.name) }}
+                                                    {{ getInitials(comment.creator.name) }}
                                                 </VAvatar>
                                                 <div>
                                                     <div class="text-body-1 font-weight-medium">
-                                                        {{ comment.created_by.name }}
+                                                        {{ comment.creator.name }}
                                                     </div>
                                                     <div class="text-caption">{{ comment.created_at }}</div>
                                                 </div>
@@ -220,7 +220,7 @@ defineExpose({
 
                                         <div>
                                             <VBtn
-                                                v-if="userData.role.value === 'admin' || comment.created_by.id === userData?.id"
+                                                v-if="userData.role.value === 'admin' || comment.creator.id === userData?.id"
                                                 size="small" variant="tonal" color="error" icon="ri-delete-bin-6-line"
                                                 @click="isDeleteDialogVisible = true; commentIndexToDelete = i" />
                                         </div>

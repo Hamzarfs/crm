@@ -1,13 +1,10 @@
 <?php
 
-use App\Broadcasting\Task\Created;
-use App\Models\User;
+use App\Broadcasting\Task\Assigned as TaskAssigned;
 use Illuminate\Support\Facades\Broadcast;
 
-// Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
-//     return (int) $user->id === (int) $id;
-// });
 
-// Broadcast::channel('Example-channel', fn() => true);
 
-Broadcast::channel('Task.Assigned.{assignedTo}', Created::class);
+Broadcast::routes(['middleware' => ['auth:sanctum']]);
+
+Broadcast::channel('Task.Assigned.{assignedTo}', TaskAssigned::class);

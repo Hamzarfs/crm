@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4dd72fc56376d6f74ad629516c5698de",
+    "content-hash": "65c45b74d7d7ebc9d8bf70c945af361b",
     "packages": [
         {
             "name": "brick/math",
@@ -1639,16 +1639,16 @@
         },
         {
             "name": "laravel/reverb",
-            "version": "v1.4.0",
+            "version": "v1.4.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/reverb.git",
-                "reference": "6cc4f390909943a155a59360052a98bd3d47acb9"
+                "reference": "22eab51c56c9a06e26a892b57e9b9d392e4e1da0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/reverb/zipball/6cc4f390909943a155a59360052a98bd3d47acb9",
-                "reference": "6cc4f390909943a155a59360052a98bd3d47acb9",
+                "url": "https://api.github.com/repos/laravel/reverb/zipball/22eab51c56c9a06e26a892b57e9b9d392e4e1da0",
+                "reference": "22eab51c56c9a06e26a892b57e9b9d392e4e1da0",
                 "shasum": ""
             },
             "require": {
@@ -1678,13 +1678,13 @@
             "type": "library",
             "extra": {
                 "laravel": {
+                    "aliases": {
+                        "Output": "Laravel\\Reverb\\Output"
+                    },
                     "providers": [
                         "Laravel\\Reverb\\ApplicationManagerServiceProvider",
                         "Laravel\\Reverb\\ReverbServiceProvider"
-                    ],
-                    "aliases": {
-                        "Output": "Laravel\\Reverb\\Output"
-                    }
+                    ]
                 }
             },
             "autoload": {
@@ -1715,9 +1715,9 @@
             ],
             "support": {
                 "issues": "https://github.com/laravel/reverb/issues",
-                "source": "https://github.com/laravel/reverb/tree/v1.4.0"
+                "source": "https://github.com/laravel/reverb/tree/v1.4.4"
             },
-            "time": "2024-10-01T14:07:58+00:00"
+            "time": "2024-12-06T18:56:46+00:00"
         },
         {
             "name": "laravel/sanctum",

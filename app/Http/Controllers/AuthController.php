@@ -61,15 +61,14 @@ class AuthController extends Controller
          * @var User
          */
         $user = Auth::user();
-        $user->load(['roles', 'department', 'unreadNotifications']);
+        $user->load(['roles', 'department']);
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->plainTextToken;
 
         return response()->json([
             'success' => true,
-            'accessToken' => "Bearer $token",
+            'accessToken' => $token,
             'userData' => new UserResource($user),
-            'notifications' => $user->unreadNotifications,
         ]);
     }
 

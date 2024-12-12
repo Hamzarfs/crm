@@ -1,61 +1,27 @@
+import { useAuthStore } from '@/@core/stores/auth';
 import Echo from 'laravel-echo';
-import io from 'socket.io-client';
+import Pusher from 'pusher-js';
 
 declare global {
     interface Window {
-        io: typeof io
-        Echo: Echo
+        Pusher: typeof Pusher
+        Echo: Echo<any>
     }
 }
 
-window.io = io
-window.Echo = new Echo({
-    broadcaster: 'socket.io',
-    host: 'http://localhost:3000',  // Your Socket.IO server URL
-});
+window.Pusher = Pusher;
 
-// Listen for events on the 'example-channel'
-// window.Echo.channel('Example-channel')
-//     .listen('.example-event', (data: any) => {
-//         console.log(data);
-//     });
+export const initializeEcho = () => {
+    const authStore = useAuthStore()
 
-//     window.Echo.private
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import Echo from 'laravel-echo';
-// import io from 'socket.io-client';
-
-// declare global {
-//     interface Window {
-//         io: typeof io
-//         Echo: Echo
-//     }
-// }
-
-// window.io = io;
-
-// window.Echo = new Echo({
-//     broadcaster: 'socket.io',
-//     host: 'http://localhost:3000',  // Your Socket.IO server URL
-// });
-
-// // Listen for events
-// window.Echo.channel('example-channel')
-//     .listen('ExampleEvent', (data: any) => {
-//         console.log(data);
-//     });
-
-// // Emit an event to the server
-// window.Echo.connector.socket.emit('example-event', { example: 'data' });
+    window.Echo = new Echo({
+        broadcaster: 'reverb',
+        key: import.meta.env.VITE_REVERB_APP_KEY,
+        wsHost: import.meta.env.VITE_REVERB_HOST,
+        wsPort: import.meta.env.VITE_REVERB_PORT,
+        wssPort: import.meta.env.VITE_REVERB_PORT,
+        forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
+        enabledTransports: ['ws', 'wss'],
+        bearerToken: authStore.token,
+    });
+}

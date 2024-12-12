@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Tasks;
 
-use App\Http\Resources\Collections\TaskCommentResourceCollection;
-use App\Http\Resources\Collections\TaskFileResourceCollection;
+use App\Http\Resources\Collections\Tasks\{TaskCommentResourceCollection, TaskFileResourceCollection};
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -22,8 +22,8 @@ class TaskResource extends JsonResource
             'description' => $this->description,
             'deadline' => $this->deadline,
             'status' => $this->status,
-            'assigned_to' => $this->whenLoaded('assignee', new UserResource($this->assignee)),
-            'created_by' => $this->whenLoaded('creator', new UserResource($this->creator)),
+            'assignee' => $this->whenLoaded('assignee', new UserResource($this->assignee)),
+            'creator' => $this->whenLoaded('creator', new UserResource($this->creator)),
             'files' => $this->whenLoaded('files', new TaskFileResourceCollection($this->files)),
             'comments' => $this->whenLoaded('comments', new TaskCommentResourceCollection($this->comments)),
             'created_at' => $this->created_at->format('d M Y, g:i A'),

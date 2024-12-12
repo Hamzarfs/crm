@@ -12,7 +12,7 @@ export const $api = ofetch.create({
         if (accessToken) {
             options.headers = {
                 ...options.headers,
-                Authorization: accessToken,
+                Authorization: `Bearer ${accessToken}`,
                 Accept: 'application/json'
             }
         }

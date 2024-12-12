@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Resources\Collections;
+namespace App\Http\Resources\Collections\Tasks;
 
-use App\Http\Resources\TaskResource;
+use App\Http\Resources\Tasks\TaskResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
