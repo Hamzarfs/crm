@@ -23,7 +23,7 @@ const refForm = ref<VForm>()
 const title = ref(props.task.title)
 const description = ref(props.task.description)
 const deadline = ref(parseDate(props.task.deadline))
-const assigned_to = ref(props.task.assigned_to?.id)
+const assigned_to = ref(props.task.assignee?.id)
 const status = ref(props.task.status)
 
 
@@ -37,11 +37,13 @@ const closeNavigationDrawer = () => {
 }
 
 watch(() => props.task, newVal => {
-    title.value = newVal.title
-    description.value = newVal.description
-    deadline.value = parseDate(newVal.deadline)
-    assigned_to.value = newVal.assigned_to?.id
-    status.value = newVal.status
+    if (newVal) {
+        title.value = newVal.title
+        description.value = newVal.description
+        deadline.value = parseDate(newVal.deadline)
+        assigned_to.value = newVal.assignee?.id
+        status.value = newVal.status
+    }
 }, {
     immediate: true,
     deep: true

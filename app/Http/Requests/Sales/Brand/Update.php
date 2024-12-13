@@ -12,7 +12,7 @@ class Update extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->hasRole([RolesEnum::ADMIN, RolesEnum::TEAM_LEAD]) && $this->user()->hasDepartment('admin', 'sales');
+        return $this->user()->hasDepartment('admin', 'sales') && $this->user()->hasRole([RolesEnum::ADMIN, RolesEnum::TEAM_LEAD]);
     }
 
     /**
@@ -24,6 +24,14 @@ class Update extends FormRequest
     {
         return [
             'name' => "required|string|unique:brands,name,{$this->route('brand')->id},id",
+            'url' => 'required|url',
+            'fb_url' => 'url|nullable',
+            'ig_url' => 'url|nullable',
+            'phone' => 'required|numeric',
+            'whatsapp' => 'numeric|nullable',
+            'chat_support' => 'string|nullable',
+            'country' => 'required|in:USA,UK',
+            'currency' => 'required|exists:currencies,id',
         ];
     }
 
@@ -36,6 +44,8 @@ class Update extends FormRequest
     {
         return [
             'name' => 'Brand name',
+            'fb_url' => 'Facebook URL',
+            'ig_url' => 'Instagram URL',
         ];
     }
 }

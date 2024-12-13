@@ -1,15 +1,9 @@
 <script setup lang="ts">
 
-import AddNewBrandDrawer from '@/components/brands/AddNewBrandDrawer.vue';
-import EditBrandDrawer from '@/components/brands/EditBrandDrawer.vue';
 
-
-const selectedBrand = ref({
-    name: '',
-})
+const selectedBrand = ref<Record<string, any>>({})
 let brandToDelete: number
 let brandToUpdateIndex: number
-
 
 // Add a ref for the AddNewBrandDrawer & editBrandDrawerRef component
 const addNewBrandDrawerRef = ref()
@@ -21,6 +15,16 @@ const dataTableRef = ref()
 const headers = [
     { title: 'ID', key: 'id' },
     { title: 'Name', key: 'name' },
+    { title: 'URL', key: 'url' },
+    { title: 'FB URL', key: 'fb_url' },
+    { title: 'IG URL', key: 'ig_url' },
+    { title: 'Phone', key: 'phone' },
+    { title: 'Whatsapp', key: 'whatsapp' },
+    { title: 'Chat Support', key: 'chat_support' },
+    { title: 'Country', key: 'country' },
+    { title: 'Currency', key: 'currency' },
+    { title: 'Created at', key: 'created_at' },
+    { title: 'Updated at', key: 'updated_at' },
     { title: 'Actions', key: 'actions', sortable: false },
 ]
 
@@ -28,12 +32,14 @@ const isAddNewBrandDrawerVisible = ref(false)
 const isEditBrandDrawerVisible = ref(false)
 const isSnackBarVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
-let brandResponsemessage: string
+const brandResponsemessage = ref('')
 
 // 👉 Fetching brands
 const { brands } = await $api('brands')
 const brandsData = ref(brands)
 
+const { currencies } = await $api('currencies')
+const _currencies = currencies.map((c: any) => ({ title: c.name.toUpperCase(), value: c.id }))
 // 👉 Add new brand
 const addNewbrand = async (brandData: any) => {
     const { success, message, brand } = await $api('/brands', {
@@ -44,11 +50,11 @@ const addNewbrand = async (brandData: any) => {
         },
     })
 
+    isSnackBarVisible.value = true
+    brandResponsemessage.value = message
+    addNewBrandDrawerRef.value.closeNavigationDrawer()
     if (success) {
-        isSnackBarVisible.value = true
         brandsData.value = [...brandsData.value, brand]
-        brandResponsemessage = message
-        addNewBrandDrawerRef.value.closeNavigationDrawer()
         nextTick(() => {
             dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollTop = dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollHeight
         })
@@ -57,7 +63,7 @@ const addNewbrand = async (brandData: any) => {
 
 // 👉 Edit brand
 const editbrand = async (brandData: any) => {
-    const { success, message, brand } = await $api(`brands/${brandData.id}`, {
+    const { success, message, brand } = await $api(`brands/${selectedBrand.value.id}`, {
         method: 'PUT',
         body: brandData,
         onResponseError({ response }) {
@@ -67,7 +73,7 @@ const editbrand = async (brandData: any) => {
     if (success) {
         isSnackBarVisible.value = true
         brandsData.value[brandToUpdateIndex] = brand
-        brandResponsemessage = message
+        brandResponsemessage.value = message
         editBrandDrawerRef.value.closeNavigationDrawer()
     }
 }
@@ -78,8 +84,7 @@ const openeditbrandForm = (brand: any) => {
     isEditBrandDrawerVisible.value = true
 }
 
-
-// 👉 Delete role
+// 👉 Delete brand
 const deleteBrand = async () => {
     const { success, message } = await $api(`brands/${brandToDelete}`, {
         method: 'DELETE',
@@ -87,15 +92,31 @@ const deleteBrand = async () => {
 
     isDeleteDialogVisible.value = false
 
+    isSnackBarVisible.value = true
+    brandResponsemessage.value = message
+
     if (success) {
-        isSnackBarVisible.value = true
-        brandResponsemessage = message
         brandsData.value = brandsData.value.filter((brand: any) => brand.id !== brandToDelete)
     }
 }
 
 const errors = ref({
-    name: undefined
+    name: undefined,
+    url: undefined,
+    fb_url: undefined,
+    ig_url: undefined,
+    phone: undefined,
+    whatsapp: undefined,
+    chat_support: undefined,
+    country: undefined,
+    currency: undefined,
+})
+
+const countries = ['USA', 'UK']
+
+watch(isEditBrandDrawerVisible, newValue => {
+    if (!newValue)
+        selectedBrand.value = {}
 })
 
 </script>
@@ -116,6 +137,26 @@ const errors = ref({
             <!-- SECTION datatable -->
             <VDataTable hover fixed-header style="max-height: 600px;" :items="brandsData" item-value="id"
                 ref="dataTableRef" :headers="headers" class="text-no-wrap rounded-0" density="default">
+
+                <!-- URL -->
+                <template #item.url="{ item: { url } }: { item: any }">
+                    <a :href="url" target="_blank">{{ url }}</a>
+                </template>
+
+                <!-- FB URL -->
+                <template #item.fb_url="{ item: { fb_url } }: { item: any }">
+                    <a :href="fb_url" target="_blank">{{ fb_url }}</a>
+                </template>
+
+                <!-- IG URL -->
+                <template #item.ig_url="{ item: { ig_url } }: { item: any }">
+                    <a :href="ig_url" target="_blank">{{ ig_url }}</a>
+                </template>
+
+                <!-- Currency -->
+                <template #item.currency="{ item: { currency } }: { item: any }">
+                    {{ currency?.toUpperCase() }}
+                </template>
 
                 <!-- Actions -->
                 <template #item.actions="{ item }: { item: any }">
@@ -139,12 +180,12 @@ const errors = ref({
         </VCard>
 
         <!-- 👉 Add New Role -->
-        <AddNewBrandDrawer v-model:isDrawerOpen="isAddNewBrandDrawerVisible" @brand-data="addNewbrand"
-            ref="addNewBrandDrawerRef" :errors="errors" />
+        <AddNewBrandDrawer v-model:isDrawerOpen="isAddNewBrandDrawerVisible" @brand-data="addNewbrand" :countries
+            :currencies="_currencies" ref="addNewBrandDrawerRef" :errors="errors" />
 
         <!-- 👉 Edit User -->
-        <editBrandDrawer v-model:isDrawerOpen="isEditBrandDrawerVisible" @brand-data="editbrand" :brand="selectedBrand"
-            ref="editBrandDrawerRef" :errors="errors" />
+        <EditBrandDrawer v-model:isDrawerOpen="isEditBrandDrawerVisible" @brand-data="editbrand" :brand="selectedBrand"
+            :countries :currencies="_currencies" ref="editBrandDrawerRef" :errors="errors" />
 
         <VSnackbar v-model="isSnackBarVisible">
             {{ brandResponsemessage }}

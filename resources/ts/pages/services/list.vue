@@ -25,7 +25,7 @@ const isAddNewServiceDrawerVisible = ref(false)
 const isEditServiceDrawerVisible = ref(false)
 const isSnackBarVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
-let serviceResponsemessage: string
+const serviceResponsemessage = ref('')
 
 // 👉 Add new service
 const addNewService = async (serviceData: any) => {
@@ -40,7 +40,7 @@ const addNewService = async (serviceData: any) => {
     if (success) {
         isSnackBarVisible.value = true
         servicesData.value = [...servicesData.value, service]
-        serviceResponsemessage = message
+        serviceResponsemessage.value = message
         addNewServiceDrawerRef.value.closeNavigationDrawer()
         nextTick(() => {
             dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollTop = dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollHeight
@@ -60,7 +60,7 @@ const editService = async (serviceData: any) => {
     if (success) {
         isSnackBarVisible.value = true
         servicesData.value[serviceToUpdateIndex] = service
-        serviceResponsemessage = message
+        serviceResponsemessage.value = message
         editServiceDrawerRef.value.closeNavigationDrawer()
     }
 }
@@ -79,9 +79,9 @@ const deleteService = async () => {
 
     isDeleteDialogVisible.value = false
 
+    isSnackBarVisible.value = true
+    serviceResponsemessage.value = message
     if (success) {
-        isSnackBarVisible.value = true
-        serviceResponsemessage = message
         servicesData.value = servicesData.value.filter((service: any) => service.id !== serviceToDelete)
     }
 }

@@ -59,31 +59,34 @@ export default [
     },
     {
         heading: 'Sales Management',
-        department: ['sales', 'admin'],
+        department: ['sales', 'admin', 'lead_generation'],
     },
     {
         title: 'Sales',
         icon: { icon: 'ri-money-dollar-circle-line' },
-        department: ['sales', 'admin'],
+        department: ['sales', 'admin', 'lead_generation'],
         children: [
             {
                 title: 'Brands',
-                role: ['admin', 'team_lead'],
                 to: { name: 'brands' },
+                role: ['admin', 'team_lead'],
+                department: ['admin', 'sales'],
             },
             {
                 title: 'Services',
-                role: ['admin', 'team_lead'],
                 to: { name: 'services' },
+                role: ['admin', 'team_lead'],
+                department: ['admin', 'sales'],
+
             },
             {
                 title: 'Lead Sources',
+                to: { name: 'lead-sources' },
                 role: ['admin', 'team_lead'],
-                // to: { name: 'lead-sources' },
+                department: ['admin', 'sales'],
             },
             {
                 title: 'Customers',
-                role: ['admin', 'team_lead'],
                 to: { name: 'customers' },
             },
             {

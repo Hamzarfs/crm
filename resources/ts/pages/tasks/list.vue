@@ -1,12 +1,15 @@
 <script setup lang="ts">
 
-import AddNewTaskDrawer from '@/components/tasks/AddNewTaskDrawer.vue';
-import EditTaskDrawer from '@/components/tasks/EditTaskDrawer.vue';
-import ViewTaskDrawer from '@/components/tasks/ViewTaskDrawer.vue';
+import { useAuthStore } from '@/@core/stores/auth';
 import { mergeProps } from 'vue';
 
+
+const authStore = useAuthStore()
+
 // Get currently logged in user data
-const userData = useCookie('userData').value
+const userData = authStore.user
+
+const $toast = useToast()
 
 // Filter values
 const searchQuery = ref('')
@@ -14,8 +17,8 @@ const selectedUser = ref()
 const selectedDepartment = ref()
 const selectedDate = ref()
 const selectedStatus = ref()
-const toggleAssignedToMe = ref(false)
-const assignedToMe = ref('no')
+const toggleAssignedToMe = ref(true)
+const assignedToMe = ref('yes')
 
 watch(toggleAssignedToMe, newValue => {
     assignedToMe.value = newValue ? 'yes' : 'no'
@@ -58,7 +61,7 @@ const headers = [
     { title: 'Actions', key: 'actions', sortable: false },
 ]
 
-const _headers = computed(() => headers.filter(h => h.showToOnly ? (h.showToOnly.includes(userData.role.value)) : h))
+const _headers = computed(() => headers.filter(h => h.showToOnly ? (h.showToOnly.includes(userData?.role.value)) : h))
 
 const query = computed(() => {
     const query: any = {
@@ -72,7 +75,7 @@ const query = computed(() => {
         sortBy,
         orderBy,
     }
-    if (userData.role.value === 'team_lead')
+    if (userData?.role.value === 'team_lead')
         query.assignedToMe = assignedToMe
 
     return query
@@ -98,6 +101,11 @@ watch(() => isFetching.value, (newValue) => {
 const tasks = ref(tasksData.value.tasks)
 const totalTasks = computed(() => tasksData.value.totalTasks)
 
+window.Echo.private(`Task.Assigned.${userData?.id}`)
+    .notification((notification: any) => {
+        tasks.value.unshift(notification.task)
+    })
+
 watch(tasksData, (newVal) => {
     tasks.value = newVal.tasks
 })
@@ -119,20 +127,18 @@ const statuses = [
 
 const users = ref([])
 const departments = ref([])
-if (['admin', 'team_lead'].includes(userData.role.value)) {
-    const { users: fetchedUsers } = await $api('users', { query: usersQuery.value })
-    users.value = fetchedUsers.map((u: any) => ({
-        value: u.id,
-        title: u.name,
-    }))
 
-    if (userData.role.value === 'admin') {
-        const { departments: fetchedDepartments } = await $api('departments')
-        departments.value = fetchedDepartments.map((d: any) => ({
-            title: d.title,
-            value: d.id,
-        }))
-    }
+if (userData?.role.value === 'admin' && userData.department.value === 'admin') {
+    users.value = await $api('users')
+        .then(({ users }) => users.map((u: any) => ({ title: u.name, value: u.id })))
+    departments.value = await $api('departments')
+        .then(({ departments }) => departments.map((d: any) => ({ title: d.title, value: d.id })))
+} else if (userData?.role.value === 'team_lead') {
+    users.value = await $api('users', {
+        query: {
+            'departments[]': [userData.department.value],
+        }
+    }).then(({ users }) => users.map((u: any) => ({ title: u.name, value: u.id })))
 }
 
 const resolveTaskStatusColor = (status: string): string => {
@@ -149,9 +155,7 @@ const resolveTaskStatusColor = (status: string): string => {
 const isAddNewTaskDrawerVisible = ref(false)
 const isEditTaskDrawerVisible = ref(false)
 const isViewTaskDrawerVisible = ref(false)
-const isSnackBarVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
-let taskResponsemessage: string
 
 // 👉 Add new task
 const addNewTask = async (taskData: FormData) => {
@@ -163,12 +167,12 @@ const addNewTask = async (taskData: FormData) => {
         },
     })
 
+    addNewTaskDrawerRef.value.closeNavigationDrawer()
     if (success) {
-        isSnackBarVisible.value = true
-        taskResponsemessage = message
-        addNewTaskDrawerRef.value.closeNavigationDrawer()
+        $toast.success(message)
         fetchTasks()
-    }
+    } else
+        $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
 }
 
 // 👉 Edit task
@@ -181,12 +185,12 @@ const editTask = async (taskData: any) => {
         },
     })
 
+    editTaskDrawerRef.value.closeNavigationDrawer()
     if (success) {
-        isSnackBarVisible.value = true
-        taskResponsemessage = message
-        editTaskDrawerRef.value.closeNavigationDrawer()
+        $toast.success(message)
         fetchTasks()
-    }
+    } else
+        $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
 }
 
 // 👉 View task
@@ -204,10 +208,10 @@ const deleteTask = async () => {
     isDeleteDialogVisible.value = false
 
     if (success) {
-        isSnackBarVisible.value = true
-        taskResponsemessage = message
+        $toast.success(message)
         fetchTasks()
-    }
+    } else
+        $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
 }
 
 // 👉 Add comment
@@ -218,11 +222,11 @@ const addComment = async (commentData: FormData) => {
     })
 
     if (success) {
-        isSnackBarVisible.value = true
-        taskResponsemessage = message
+        $toast.success(message)
         selectedTask.value.comments.push(comment)
         viewTaskDrawerRef.value.commentForm.reset()
-    }
+    } else
+        $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
 }
 
 const openEditTaskForm = (task: any) => {
@@ -240,29 +244,28 @@ const errors = ref({
     comment: undefined,
 })
 
-const handleStatusUpdate = async ({ id, status }: { id: number, status: string }) => {
-    const task = tasks.value.find((t: any) => t.id === id)
+const handleStatusUpdate = async ({ id, status, newStatus }: { id: number, status: string, newStatus: string }) => {
 
-    if (task.status !== status) {
+    if (newStatus !== status) {
         const { success, message } = await $api(`tasks/${id}/status`, {
             method: 'PATCH',
-            body: { status },
+            body: { status: newStatus },
             onResponseError({ response }) {
+                $toast.error('Something went wrong. Plz try again or contact support.')
                 console.error(response._data.message)
-                isSnackBarVisible.value = true
-                taskResponsemessage = "Something went wrong! Please try again."
             },
         })
 
         if (success) {
-            task.status = status
-            isSnackBarVisible.value = true
-            taskResponsemessage = message
-        }
+            $toast.success(message)
+            const task = tasks.value.find((t: any) => t.id === id)
+            task.status = newStatus
+        } else
+            $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
     }
 }
 
-const isTasksActionBtnsDisable = (taskCreatorId: number): boolean => (tableLoading.value || !(userData.role.value === 'admin' || taskCreatorId === userData.id))
+const isTasksActionBtnsDisable = (taskCreatorId: number): boolean => (tableLoading.value || !(userData?.role.value === 'admin' || taskCreatorId === userData?.id))
 
 const deleteComment = async (commentIndex: number) => {
     const comment = selectedTask.value.comments[commentIndex]
@@ -270,17 +273,16 @@ const deleteComment = async (commentIndex: number) => {
     const { success, message } = await $api(`tasks/comments/${comment.id}`, {
         method: 'DELETE',
         onResponseError({ response }) {
+            $toast.error('Something went wrong. Plz try again or contact support.')
             console.error(response._data.message)
-            isSnackBarVisible.value = true
-            taskResponsemessage = "Something went wrong! Please try again."
         },
     })
 
     if (success) {
+        $toast.success(message)
         selectedTask.value.comments.splice(commentIndex, 1)
-        isSnackBarVisible.value = true
-        taskResponsemessage = message
-    }
+    } else
+        $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
 }
 
 watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDrawer]) => {
@@ -293,26 +295,30 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
 <template>
     <section>
         <VCard class="mb-6">
-            <VCardTitle class="text-h4 py-5">
-                {{ ['admin', 'team_lead'].includes(userData.role.value) ? 'Filters' : 'Tasks' }}
-            </VCardTitle>
+            <div class="d-flex align-center justify-space-between">
+                <VCardTitle class="text-h4 py-5">
+                    {{ ['admin', 'team_lead'].includes(userData?.role.value) ? 'Filters' : 'Tasks' }}
+                </VCardTitle>
 
-            <VCardText v-if="['admin', 'team_lead'].includes(userData.role.value)">
+                <VBtn prepend-icon="ri-kanban-view" class="mb-3 me-2" :to="{ name: 'tasks-kanban' }">Kanban View</VBtn>
+            </div>
+
+            <VCardText v-if="['admin', 'team_lead'].includes(userData?.role.value)">
                 <VRow align="center">
                     <!-- 👉 Toggle Assigned to me or assigned by me (only for team_lead role) -->
-                    <VCol cols="2" v-if="userData.role.value === 'team_lead'">
+                    <VCol cols="2" v-if="userData?.role.value === 'team_lead'">
                         <VSwitch v-model="toggleAssignedToMe" :inset="false"
                             :label="toggleAssignedToMe ? 'Assigned to me' : 'Assigned by me'" />
                     </VCol>
 
                     <!-- 👉 Select Department -->
-                    <VCol v-if="userData.role.value === 'admin'">
+                    <VCol v-if="userData?.role.value === 'admin'">
                         <VSelect v-model="selectedDepartment" label="Filter by Department"
                             placeholder="Filter by Department" :items="departments" clearable chips />
                     </VCol>
 
                     <!-- 👉 Select User -->
-                    <VCol v-if="['admin', 'team_lead'].includes(userData.role.value)">
+                    <VCol v-if="['admin', 'team_lead'].includes(userData?.role.value)">
                         <VAutocomplete v-model="selectedUser" label="Filter by User" placeholder="Filter by User"
                             :items="users" auto-select-first clearable chips />
                     </VCol>
@@ -324,7 +330,7 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
                     </VCol>
 
                     <!-- 👉 Select Status -->
-                    <VCol v-if="['admin', 'team_lead'].includes(userData.role.value)">
+                    <VCol v-if="['admin', 'team_lead'].includes(userData?.role.value)">
                         <VSelect v-model="selectedStatus" label="Filter by Status" placeholder="Filter by Status"
                             :items="statuses" clearable chips />
                     </VCol>
@@ -332,21 +338,21 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
                     <!-- 👉 Search  -->
                     <VCol>
                         <VTextField v-model="searchQuery" placeholder="Filter by Query" density="comfortable" clearable
-                            label="Filter by Query" class="me-4" />
+                            label="Filter by Query" />
                     </VCol>
                 </VRow>
             </VCardText>
 
             <VDivider />
 
-            <VCardText v-if="['admin', 'team_lead'].includes(userData.role.value)" class="d-flex flex-wrap gap-4">
+            <VCardText v-if="['admin', 'team_lead'].includes(userData?.role.value)" class="d-flex flex-wrap gap-4">
                 <!-- 👉 Export & import buttons -->
-                <VBtn color="success" prepend-icon="ri-upload-2-line">
+                <!-- <VBtn color="success" prepend-icon="ri-upload-2-line">
                     Import
                 </VBtn>
                 <VBtn color="secondary" prepend-icon="ri-download-2-line">
                     Export
-                </VBtn>
+                </VBtn> -->
                 <VSpacer />
                 <VBtn @click="isAddNewTaskDrawerVisible = true" prepend-icon="ri-task-fill">
                     Add New Task
@@ -362,7 +368,7 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
 
                 <!-- Status -->
                 <template #item.status="{ item }: { item: any }">
-                    <VMenu v-if="userData.id === item.assigned_to.id" transition="slide-y-transition">
+                    <VMenu v-if="userData?.id === item.assignee.id" transition="slide-y-transition">
                         <template #activator="{ props: menuProps }">
                             <VTooltip location="top">
                                 <template #activator="{ props: tooltipProps }">
@@ -378,7 +384,7 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
 
                         <VList>
                             <VListItem v-for="status in statuses" :key="status.value" :value="status.value"
-                                @click="handleStatusUpdate({ id: item.id, status: status.value })">
+                                @click="handleStatusUpdate({ id: item.id, status: item.status, newStatus: status.value })">
                                 {{ status.title }}
                             </VListItem>
                         </VList>
@@ -387,18 +393,17 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
                     <VChip v-else :color="resolveTaskStatusColor(item.status)" size="small" class="text-uppercase"
                         elevation="5">
                         {{ statuses.find((status: any) => status.value === item.status)?.title }}
-                        <!-- {{ slugToTitleCase(item.status) }} -->
                     </VChip>
                 </template>
 
                 <!-- Department -->
                 <template #item.department="{ item }: { item: any }">
-                    {{ item.assigned_to.department?.title ?? 'Not assigned' }}
+                    {{ item.assignee.department?.title ?? 'Not assigned' }}
                 </template>
 
                 <!-- Assigned To -->
                 <template #item.assigned_to="{ item }: { item: any }">
-                    {{ item.assigned_to.name }}
+                    {{ item.assignee.name }}
                 </template>
 
                 <!-- Deadline -->
@@ -412,7 +417,7 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
 
                 <!-- Created By -->
                 <template #item.created_by="{ item }: { item: any }">
-                    {{ item.created_by.name }}
+                    {{ item.creator.name }}
                 </template>
 
                 <!-- Created at -->
@@ -435,9 +440,9 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
                     </IconBtn>
 
                     <IconBtn size="small" @click="openEditTaskForm(item)" color="primary"
-                        :variant="isTasksActionBtnsDisable(item.created_by.id) ? 'text' : 'flat'" class="mx-2"
-                        :disabled="isTasksActionBtnsDisable(item.created_by.id)">
-                        <VIcon :icon="isTasksActionBtnsDisable(item.created_by.id) ?
+                        :variant="isTasksActionBtnsDisable(item.creator.id) ? 'text' : 'flat'" class="mx-2"
+                        :disabled="isTasksActionBtnsDisable(item.creator.id)">
+                        <VIcon :icon="isTasksActionBtnsDisable(item.creator.id) ?
                             'ri-edit-box-line' :
                             'ri-edit-box-fill'" />
                         <VTooltip activator="parent" location="top">
@@ -446,9 +451,9 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
                     </IconBtn>
 
                     <IconBtn @click="isDeleteDialogVisible = true; taskToDelete = item.id" color="error" size="small"
-                        :variant="isTasksActionBtnsDisable(item.created_by.id) ? 'text' : 'flat'"
-                        :disabled="isTasksActionBtnsDisable(item.created_by.id)">
-                        <VIcon :icon="isTasksActionBtnsDisable(item.created_by.id) ?
+                        :variant="isTasksActionBtnsDisable(item.creator.id) ? 'text' : 'flat'"
+                        :disabled="isTasksActionBtnsDisable(item.creator.id)">
+                        <VIcon :icon="isTasksActionBtnsDisable(item.creator.id) ?
                             'ri-delete-bin-line' :
                             'ri-delete-bin-fill'" />
                         <VTooltip activator="parent" location="top">
@@ -487,12 +492,12 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
         </VCard>
 
         <!-- 👉 Add New Task -->
-        <AddNewTaskDrawer v-if="['admin', 'team_lead'].includes(userData.role.value)"
+        <AddNewTaskDrawer v-if="['admin', 'team_lead'].includes(userData?.role.value)"
             v-model:isDrawerOpen="isAddNewTaskDrawerVisible" @task-data="addNewTask" :users="users" :statuses="statuses"
             ref="addNewTaskDrawerRef" :errors="errors" />
 
         <!-- 👉 Edit Task -->
-        <EditTaskDrawer v-if="['admin', 'team_lead'].includes(userData.role.value)"
+        <EditTaskDrawer v-if="['admin', 'team_lead'].includes(userData?.role.value)"
             v-model:isDrawerOpen="isEditTaskDrawerVisible" @task-data="editTask" :users="users" :statuses="statuses"
             :task="selectedTask" ref="editTaskDrawerRef" :errors="errors" />
 
@@ -500,15 +505,6 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
         <ViewTaskDrawer v-model:isDrawerOpen="isViewTaskDrawerVisible" :task="selectedTask" :statuses="statuses"
             :resolveTaskStatusColor="resolveTaskStatusColor" :errors="errors" ref="viewTaskDrawerRef"
             @comment-data="addComment" @status-update="handleStatusUpdate" @delete-comment="deleteComment" />
-
-        <VSnackbar v-model="isSnackBarVisible">
-            {{ taskResponsemessage }}
-            <template #actions>
-                <VBtn color="error" @click="isSnackBarVisible = false">
-                    Close
-                </VBtn>
-            </template>
-        </VSnackbar>
 
         <VDialog v-model="isDeleteDialogVisible" width="400">
             <!-- Dialog Content -->

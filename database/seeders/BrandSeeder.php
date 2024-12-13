@@ -13,14 +13,28 @@ class BrandSeeder extends Seeder
     public function run(): void
     {
         $brands = [
-            'RFS',
-            'Creative',
-            'Mania'
+            [
+                'name' => 'RFS',
+                'country' => 'USA',
+                'currency_id' => 1
+            ],
+            [
+                'name' => 'Creative',
+                'country' => 'UK',
+                'currency_id' => 2
+            ],
+            [
+                'name' => 'Mania',
+                'country' => 'UK',
+                'currency_id' => 2
+            ],
         ];
 
         foreach ($brands as $b) {
             Brand::create([
-                'name' => $b
+                'name' => $b['name'],
+                'country' => $b['country'],
+                'currency_id' => $b['currency_id'],
             ]);
         }
     }

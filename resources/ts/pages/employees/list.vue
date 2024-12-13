@@ -1,27 +1,19 @@
 <script setup lang="ts">
-import AddNewUserDrawer from '@/components/employees/AddNewUserDrawer.vue';
-import EditUserDrawer from '@/components/employees/EditUserDrawer.vue';
+
 
 // 👉 Store
 const searchQuery = ref('')
 const selectedRole = ref()
 const selectedStatus = ref()
 const selectedDepartment = ref()
-const selectedUser = ref({
-    name: '',
-    email: '',
-    phone: '',
-    role: undefined,
-    department: undefined,
-    status: undefined,
-})
+const selectedUser = ref({})
 let userToDelete: number
 
 // Data table options
 const itemsPerPage = ref(20)
 const page = ref(1)
-const sortBy = ref()
-const orderBy = ref()
+const sortBy = ref('id')
+const orderBy = ref<boolean | "desc" | "asc">('desc')
 const selectedRows = ref([])
 const tableLoading = ref(false)
 
@@ -109,7 +101,7 @@ const isAddNewUserDrawerVisible = ref(false)
 const isEditUserDrawerVisible = ref(false)
 const isSnackBarVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
-let userResponsemessage: string
+const userResponsemessage = ref('')
 
 // 👉 Add new user
 const addNewUser = async (userData: any) => {
@@ -121,11 +113,12 @@ const addNewUser = async (userData: any) => {
         },
     })
 
+    isSnackBarVisible.value = true
+    userResponsemessage.value = message
+    addNewUserDrawerRef.value.closeNavigationDrawer()
     if (success) {
-        isSnackBarVisible.value = true
-        userResponsemessage = message
-        addNewUserDrawerRef.value.closeNavigationDrawer()
         fetchUsers()
+        fetchEmployeesCount()
     }
 }
 
@@ -141,9 +134,10 @@ const editUser = async (userData: any) => {
 
     if (success) {
         isSnackBarVisible.value = true
-        userResponsemessage = message
+        userResponsemessage.value = message
         editUserDrawerRef.value.closeNavigationDrawer()
         fetchUsers()
+        fetchEmployeesCount()
     }
 }
 
@@ -160,10 +154,11 @@ const deleteUser = async () => {
 
     isDeleteDialogVisible.value = false
 
+    isSnackBarVisible.value = true
+    userResponsemessage.value = message
     if (success) {
-        isSnackBarVisible.value = true
-        userResponsemessage = message
         fetchUsers()
+        fetchEmployeesCount()
     }
 }
 
@@ -176,15 +171,88 @@ const errors = ref({
     status: undefined,
 })
 
-// 👉 Get employee count for top cards
-const { total: totalEmployees, new: newEmployees, active: activeEmployees, inactive: inactiveEmployees } = await $api('users/count')
+const employeesCountData = ref({
+    totalEmployees: 0,
+    activeEmployees: 0,
+    inactiveEmployees: 0,
+    newEmployees: 0,
+})
 
-const widgetData = ref([
-    { title: 'Total Employees', value: totalEmployees, icon: 'ri-group-line', iconColor: 'primary' },
-    { title: 'Active Employees', value: activeEmployees, icon: 'ri-user-follow-line', iconColor: 'success' },
-    { title: 'Inactive Employees', value: inactiveEmployees, icon: 'ri-user-add-line', iconColor: 'error' },
-    { title: 'New Employees', value: newEmployees, icon: 'ri-user-search-line', iconColor: 'warning', desc: 'Joined last month' },
-])
+// 👉 Get employee count for top cards
+const { execute: fetchEmployeesCount, isFetching: isEmployeesCountFetching } = await useApi<any>(createUrl('users/count'), {
+    afterFetch: ctx => {
+        employeesCountData.value.totalEmployees = ctx.data.total
+        employeesCountData.value.activeEmployees = ctx.data.active
+        employeesCountData.value.inactiveEmployees = ctx.data.inactive
+        employeesCountData.value.newEmployees = ctx.data.new
+
+        return ctx
+    },
+})
+
+const widgetData = computed(() => ([
+    { title: 'Total Employees', value: employeesCountData.value.totalEmployees, icon: 'ri-group-line', iconColor: 'primary' },
+    { title: 'Active Employees', value: employeesCountData.value.activeEmployees, icon: 'ri-user-follow-line', iconColor: 'success' },
+    { title: 'Inactive Employees', value: employeesCountData.value.inactiveEmployees, icon: 'ri-user-add-line', iconColor: 'error' },
+    { title: 'New Employees', value: employeesCountData.value.newEmployees, icon: 'ri-user-search-line', iconColor: 'warning', desc: 'Joined last month' },
+]))
+
+watch(isEditUserDrawerVisible, editDrawer => {
+    if (!editDrawer)
+        selectedUser.value = {}
+})
+
+const isImportShow = ref(false)
+const importFile = ref(undefined)
+
+const downloadSampleImportFile = async () => {
+    const fileBlob = await $api('users/import/sample/download', { responseType: 'blob' })
+    const url = URL.createObjectURL(new Blob([fileBlob]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', 'sample.xlsx')
+    document.body.appendChild(link)
+    link.click()
+    link.parentNode?.removeChild(link)
+}
+
+const isFileUploading = ref(false)
+
+const uploadImportFile = async (file: File | File[]) => {
+    if (file) {
+        isFileUploading.value = true
+        const formData = new FormData()
+        formData.append('file', file as File)
+
+        const { success, message } = await $api('users/import', {
+            method: 'POST',
+            body: formData,
+            onResponseError: context => {
+                isFileUploading.value = false
+                isSnackBarVisible.value = true
+                if (Array.isArray(context.response._data.message))
+                    userResponsemessage.value = context.response._data.message.join('<br/>')
+                else {
+                    userResponsemessage.value = [
+                        `File: ${context.response._data.file}`,
+                        `Line: ${context.response._data.line}`,
+                        `Message: ${context.response._data.message}`,
+                    ].join('<br/>')
+                }
+            },
+        })
+        isFileUploading.value = false
+        isSnackBarVisible.value = true
+        userResponsemessage.value = message
+
+        if (success) {
+            importFile.value = undefined
+            isImportShow.value = false
+            fetchUsers()
+            fetchEmployeesCount()
+        }
+    }
+}
 
 </script>
 
@@ -196,7 +264,7 @@ const widgetData = ref([
             <VRow>
                 <template v-for="(data, id) in widgetData" :key="id">
                     <VCol cols="12" md="3" sm="6">
-                        <VCard class="d-flex align-center" height="100%">
+                        <VCard class="d-flex align-center" height="100%" :loading="isEmployeesCountFetching">
                             <VCardText>
                                 <div class="d-flex justify-space-between align-center">
                                     <div class="d-flex flex-column gap-y-1">
@@ -252,25 +320,52 @@ const widgetData = ref([
 
             <VDivider />
 
-            <VCardText class="d-flex flex-wrap gap-4">
-                <!-- 👉 Export & import buttons -->
-                <VBtn color="success" prepend-icon="ri-upload-2-line">
-                    Import
-                </VBtn>
-                <VBtn color="secondary" prepend-icon="ri-download-2-line">
-                    Export
-                </VBtn>
-                <VSpacer />
-                <VBtn @click="isAddNewUserDrawerVisible = true" prepend-icon="ri-user-add-fill">
-                    Add New Employee
-                </VBtn>
+            <VCardText>
+                <VRow align="center">
+                    <VCol>
+                        <div class="d-flex align-center gap-10">
+                            <div class="d-flex align-center gap-5">
+                                <!-- 👉 Export & import buttons -->
+                                <VBtn color="success" prepend-icon="ri-upload-2-line"
+                                    @click="isImportShow = !isImportShow">
+                                    Import
+                                </VBtn>
+
+                                <!-- <VBtn color="secondary" prepend-icon="ri-download-2-line">
+                                    Export
+                                </VBtn> -->
+                            </div>
+
+                            <Transition>
+                                <div class="w-100" v-if="isImportShow">
+                                    <VFileInput v-model="importFile" class="mb-2" accept=".xlsx"
+                                        :loading="isFileUploading" @update:model-value="uploadImportFile"
+                                        placeholder="Upload file to import employees" prepend-icon=""
+                                        label="Upload file to import employees" chips show-size clearable />
+
+                                    <a href="javascript:void(0)" @click="downloadSampleImportFile">Download sample
+                                        file</a>
+                                </div>
+                            </Transition>
+                        </div>
+                    </VCol>
+
+                    <VCol>
+                        <VBtn @click="isAddNewUserDrawerVisible = true" prepend-icon="ri-user-add-fill"
+                            style="float: right;">
+                            Add New Employee
+                        </VBtn>
+
+                    </VCol>
+                </VRow>
             </VCardText>
 
             <!-- SECTION datatable -->
             <VDataTableServer v-model:items-per-page="itemsPerPage" v-model:model-value="selectedRows" hover show-select
-                :loading="tableLoading" loading-text="Loading Employees..." :disable-sort="tableLoading" fixed-header
-                style="max-height: 500px;" v-model:page="page" :items="users" item-value="id" :items-length="totalUsers"
-                :headers="headers" class="text-no-wrap rounded-0" @update:options="updateOptions" density="default">
+                :sort-by="[{ key: sortBy, order: orderBy }]" :loading="tableLoading" loading-text="Loading Employees..."
+                :disable-sort="tableLoading" fixed-header style="max-height: 500px;" v-model:page="page" :items="users"
+                item-value="id" :items-length="totalUsers" :headers="headers" class="text-no-wrap rounded-0"
+                @update:options="updateOptions" density="default">
 
                 <!-- Name -->
                 <template #item.name="{ item }: { item: any }">
@@ -371,7 +466,7 @@ const widgetData = ref([
             :user="selectedUser" ref="editUserDrawerRef" :roles="roles" :departments="departments" :errors="errors" />
 
         <VSnackbar v-model="isSnackBarVisible">
-            {{ userResponsemessage }}
+            <span v-html="userResponsemessage"></span>
             <template #actions>
                 <VBtn color="error" @click="isSnackBarVisible = false">
                     Close
@@ -389,7 +484,7 @@ const widgetData = ref([
                 </VCardText>
 
                 <VCardText class="d-flex align-center justify-center gap-4">
-                    <VBtn variant="elevated" @click="deleteUser()" color="error">
+                    <VBtn variant="elevated" @click="deleteUser" color="error">
                         Confirm
                     </VBtn>
 
@@ -400,5 +495,16 @@ const widgetData = ref([
             </VCard>
         </VDialog>
     </section>
-
 </template>
+
+<style lang="css" scoped>
+.v-enter-active,
+.v-leave-active {
+    transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+    opacity: 0;
+}
+</style>

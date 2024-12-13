@@ -3,26 +3,18 @@
 namespace App\Models;
 
 use App\Enums\EmployeeStatusesEnum;
+use BackedEnum;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasFactory, HasApiTokens, SoftDeletes, HasRoles;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    // protected $fillable = [
-    //     'name',
-    //     'email',
-    //     'password',
-    // ];
+    use HasFactory, HasApiTokens, SoftDeletes, HasRoles, Notifiable;
 
     protected $guarded = [];
 
@@ -58,9 +50,46 @@ class User extends Authenticatable
         return $this->belongsTo(Department::class);
     }
 
-    public function hasDepartment(string ...$departments)
+    public function leadingDepartment()
+    {
+        return $this->hasOne(Department::class, 'leader_id');
+    }
+
+    public function hasDepartment(string ...$departments): bool
     {
         $this->load('department:id,name');
         return array_search($this->department->name, $departments, true) !== false;
+    }
+
+    function details()
+    {
+        return $this->hasMany(UserDetail::class);
+    }
+
+    protected function employeeDetails(): Attribute
+    {
+        return new Attribute(
+            get: fn() => (object) transformEmployeeDetailsToArray($this->details?->toArray())
+        );
+    }
+
+    public function leads()
+    {
+        return $this->hasMany(Lead::class, 'created_by');
+    }
+
+    public function createdTasks()
+    {
+        return $this->hasMany(Task::class, 'created_by');
+    }
+
+    public function assignedTasks()
+    {
+        return $this->hasMany(Task::class, 'assigned_to');
+    }
+
+    public function taskComments()
+    {
+        return $this->hasMany(TaskComment::class, 'created_by');
     }
 }

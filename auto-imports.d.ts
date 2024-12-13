@@ -37,6 +37,7 @@ declare global {
   const createTemplatePromise: typeof import('@vueuse/core')['createTemplatePromise']
   const createUnrefFn: typeof import('@vueuse/core')['createUnrefFn']
   const createUrl: typeof import('./resources/ts/@core/composable/createUrl')['createUrl']
+  const currencyFormatter: typeof import('./resources/ts/@core/utils/formatters')['currencyFormatter']
   const customRef: typeof import('vue')['customRef']
   const debouncedRef: typeof import('@vueuse/core')['debouncedRef']
   const debouncedWatch: typeof import('@vueuse/core')['debouncedWatch']
@@ -50,6 +51,7 @@ declare global {
   const emailValidator: typeof import('./resources/ts/@core/utils/validators')['emailValidator']
   const extendRef: typeof import('@vueuse/core')['extendRef']
   const extractFileExtension: typeof import('./resources/ts/@core/utils/helpers')['extractFileExtension']
+  const facebookUrlValidator: typeof import('./resources/ts/@core/utils/validators')['facebookUrlValidator']
   const fileValidator: typeof import('./resources/ts/@core/utils/validators')['fileValidator']
   const formatDate: typeof import('./resources/ts/@core/utils/formatters')['formatDate']
   const formatDateNew: typeof import('./resources/ts/@core/utils/formatters')['formatDateNew']
@@ -63,6 +65,7 @@ declare global {
   const ignorableWatch: typeof import('@vueuse/core')['ignorableWatch']
   const inject: typeof import('vue')['inject']
   const injectLocal: typeof import('@vueuse/core')['injectLocal']
+  const instagramUrlValidator: typeof import('./resources/ts/@core/utils/validators')['instagramUrlValidator']
   const integerValidator: typeof import('./resources/ts/@core/utils/validators')['integerValidator']
   const isDefined: typeof import('@vueuse/core')['isDefined']
   const isEmpty: typeof import('./resources/ts/@core/utils/helpers')['isEmpty']
@@ -107,10 +110,13 @@ declare global {
   const onStartTyping: typeof import('@vueuse/core')['onStartTyping']
   const onUnmounted: typeof import('vue')['onUnmounted']
   const onUpdated: typeof import('vue')['onUpdated']
+  const onWatcherCleanup: typeof import('vue')['onWatcherCleanup']
   const paginationMeta: typeof import('./resources/ts/utils/paginationMeta')['paginationMeta']
   const parseDate: typeof import('./resources/ts/@core/utils/formatters')['parseDate']
+  const parseDateWithFormat: typeof import('./resources/ts/@core/utils/formatters')['parseDateWithFormat']
   const passwordValidator: typeof import('./resources/ts/@core/utils/validators')['passwordValidator']
   const pausableWatch: typeof import('@vueuse/core')['pausableWatch']
+  const phoneNumberValidator: typeof import('./resources/ts/@core/utils/validators')['phoneNumberValidator']
   const prefixWithPlus: typeof import('./resources/ts/@core/utils/formatters')['prefixWithPlus']
   const provide: typeof import('vue')['provide']
   const provideLocal: typeof import('@vueuse/core')['provideLocal']
@@ -131,6 +137,7 @@ declare global {
   const registerPlugins: typeof import('./resources/ts/@core/utils/plugins')['registerPlugins']
   const requiredValidator: typeof import('./resources/ts/@core/utils/validators')['requiredValidator']
   const resolveComponent: typeof import('vue')['resolveComponent']
+  const resolveLeadStatusVariant: typeof import('./resources/ts/@core/utils/helpers')['resolveLeadStatusVariant']
   const resolveRef: typeof import('@vueuse/core')['resolveRef']
   const resolveUnref: typeof import('@vueuse/core')['resolveUnref']
   const resolveVuetifyTheme: typeof import('./resources/ts/@core/utils/vuetify')['resolveVuetifyTheme']
@@ -142,6 +149,7 @@ declare global {
   const shallowRef: typeof import('vue')['shallowRef']
   const slugToTitleCase: typeof import('./resources/ts/@core/utils/formatters')['slugToTitleCase']
   const storeToRefs: typeof import('pinia')['storeToRefs']
+  const strToTitleCase: typeof import('./resources/ts/@core/utils/formatters')['strToTitleCase']
   const syncRef: typeof import('@vueuse/core')['syncRef']
   const syncRefs: typeof import('@vueuse/core')['syncRefs']
   const templateRef: typeof import('@vueuse/core')['templateRef']
@@ -238,6 +246,7 @@ declare global {
   const useGenerateImageVariant: typeof import('./resources/ts/@core/composable/useGenerateImageVariant')['useGenerateImageVariant']
   const useGeolocation: typeof import('@vueuse/core')['useGeolocation']
   const useI18n: typeof import('vue-i18n')['useI18n']
+  const useId: typeof import('vue')['useId']
   const useIdle: typeof import('@vueuse/core')['useIdle']
   const useImage: typeof import('@vueuse/core')['useImage']
   const useInfiniteScroll: typeof import('@vueuse/core')['useInfiniteScroll']
@@ -256,6 +265,7 @@ declare global {
   const useMemoize: typeof import('@vueuse/core')['useMemoize']
   const useMemory: typeof import('@vueuse/core')['useMemory']
   const useMin: typeof import('@vueuse/math')['useMin']
+  const useModel: typeof import('vue')['useModel']
   const useMounted: typeof import('@vueuse/core')['useMounted']
   const useMouse: typeof import('@vueuse/core')['useMouse']
   const useMouseInElement: typeof import('@vueuse/core')['useMouseInElement']
@@ -308,6 +318,7 @@ declare global {
   const useSum: typeof import('@vueuse/math')['useSum']
   const useSupported: typeof import('@vueuse/core')['useSupported']
   const useSwipe: typeof import('@vueuse/core')['useSwipe']
+  const useTemplateRef: typeof import('vue')['useTemplateRef']
   const useTemplateRefsList: typeof import('@vueuse/core')['useTemplateRefsList']
   const useTextDirection: typeof import('@vueuse/core')['useTextDirection']
   const useTextSelection: typeof import('@vueuse/core')['useTextSelection']
@@ -323,6 +334,7 @@ declare global {
   const useTitle: typeof import('@vueuse/core')['useTitle']
   const useToNumber: typeof import('@vueuse/core')['useToNumber']
   const useToString: typeof import('@vueuse/core')['useToString']
+  const useToast: typeof import('vue-toastification')['useToast']
   const useToggle: typeof import('@vueuse/core')['useToggle']
   const useTransition: typeof import('@vueuse/core')['useTransition']
   const useTrunc: typeof import('@vueuse/math')['useTrunc']
@@ -360,7 +372,7 @@ declare global {
 // for type re-export
 declare global {
   // @ts-ignore
-  export type { Component, ComponentPublicInstance, ComputedRef, ExtractDefaultPropTypes, ExtractPropTypes, ExtractPublicPropTypes, InjectionKey, PropType, Ref, VNode, WritableComputedRef } from 'vue'
+  export type { Component, ComponentPublicInstance, ComputedRef, DirectiveBinding, ExtractDefaultPropTypes, ExtractPropTypes, ExtractPublicPropTypes, InjectionKey, PropType, Ref, MaybeRef, MaybeRefOrGetter, VNode, WritableComputedRef } from 'vue'
   import('vue')
 }
 // for vue template auto import
@@ -400,6 +412,7 @@ declare module 'vue' {
     readonly createTemplatePromise: UnwrapRef<typeof import('@vueuse/core')['createTemplatePromise']>
     readonly createUnrefFn: UnwrapRef<typeof import('@vueuse/core')['createUnrefFn']>
     readonly createUrl: UnwrapRef<typeof import('./resources/ts/@core/composable/createUrl')['createUrl']>
+    readonly currencyFormatter: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['currencyFormatter']>
     readonly customRef: UnwrapRef<typeof import('vue')['customRef']>
     readonly debouncedRef: UnwrapRef<typeof import('@vueuse/core')['debouncedRef']>
     readonly debouncedWatch: UnwrapRef<typeof import('@vueuse/core')['debouncedWatch']>
@@ -412,6 +425,7 @@ declare module 'vue' {
     readonly emailValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['emailValidator']>
     readonly extendRef: UnwrapRef<typeof import('@vueuse/core')['extendRef']>
     readonly extractFileExtension: UnwrapRef<typeof import('./resources/ts/@core/utils/helpers')['extractFileExtension']>
+    readonly facebookUrlValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['facebookUrlValidator']>
     readonly fileValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['fileValidator']>
     readonly formatDate: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['formatDate']>
     readonly formatDateToMonthShort: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['formatDateToMonthShort']>
@@ -424,6 +438,7 @@ declare module 'vue' {
     readonly ignorableWatch: UnwrapRef<typeof import('@vueuse/core')['ignorableWatch']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
     readonly injectLocal: UnwrapRef<typeof import('@vueuse/core')['injectLocal']>
+    readonly instagramUrlValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['instagramUrlValidator']>
     readonly integerValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['integerValidator']>
     readonly isDefined: UnwrapRef<typeof import('@vueuse/core')['isDefined']>
     readonly isEmpty: UnwrapRef<typeof import('./resources/ts/@core/utils/helpers')['isEmpty']>
@@ -468,10 +483,13 @@ declare module 'vue' {
     readonly onStartTyping: UnwrapRef<typeof import('@vueuse/core')['onStartTyping']>
     readonly onUnmounted: UnwrapRef<typeof import('vue')['onUnmounted']>
     readonly onUpdated: UnwrapRef<typeof import('vue')['onUpdated']>
+    readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
     readonly paginationMeta: UnwrapRef<typeof import('./resources/ts/utils/paginationMeta')['paginationMeta']>
     readonly parseDate: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['parseDate']>
+    readonly parseDateWithFormat: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['parseDateWithFormat']>
     readonly passwordValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['passwordValidator']>
     readonly pausableWatch: UnwrapRef<typeof import('@vueuse/core')['pausableWatch']>
+    readonly phoneNumberValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['phoneNumberValidator']>
     readonly prefixWithPlus: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['prefixWithPlus']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
     readonly provideLocal: UnwrapRef<typeof import('@vueuse/core')['provideLocal']>
@@ -492,6 +510,7 @@ declare module 'vue' {
     readonly registerPlugins: UnwrapRef<typeof import('./resources/ts/@core/utils/plugins')['registerPlugins']>
     readonly requiredValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['requiredValidator']>
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
+    readonly resolveLeadStatusVariant: UnwrapRef<typeof import('./resources/ts/@core/utils/helpers')['resolveLeadStatusVariant']>
     readonly resolveRef: UnwrapRef<typeof import('@vueuse/core')['resolveRef']>
     readonly resolveUnref: UnwrapRef<typeof import('@vueuse/core')['resolveUnref']>
     readonly resolveVuetifyTheme: UnwrapRef<typeof import('./resources/ts/@core/utils/vuetify')['resolveVuetifyTheme']>
@@ -503,6 +522,7 @@ declare module 'vue' {
     readonly shallowRef: UnwrapRef<typeof import('vue')['shallowRef']>
     readonly slugToTitleCase: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['slugToTitleCase']>
     readonly storeToRefs: UnwrapRef<typeof import('pinia')['storeToRefs']>
+    readonly strToTitleCase: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['strToTitleCase']>
     readonly syncRef: UnwrapRef<typeof import('@vueuse/core')['syncRef']>
     readonly syncRefs: UnwrapRef<typeof import('@vueuse/core')['syncRefs']>
     readonly templateRef: UnwrapRef<typeof import('@vueuse/core')['templateRef']>
@@ -598,7 +618,7 @@ declare module 'vue' {
     readonly useGamepad: UnwrapRef<typeof import('@vueuse/core')['useGamepad']>
     readonly useGenerateImageVariant: UnwrapRef<typeof import('./resources/ts/@core/composable/useGenerateImageVariant')['useGenerateImageVariant']>
     readonly useGeolocation: UnwrapRef<typeof import('@vueuse/core')['useGeolocation']>
-    readonly useI18n: UnwrapRef<typeof import('vue-i18n')['useI18n']>
+    readonly useId: UnwrapRef<typeof import('vue')['useId']>
     readonly useIdle: UnwrapRef<typeof import('@vueuse/core')['useIdle']>
     readonly useImage: UnwrapRef<typeof import('@vueuse/core')['useImage']>
     readonly useInfiniteScroll: UnwrapRef<typeof import('@vueuse/core')['useInfiniteScroll']>
@@ -617,6 +637,7 @@ declare module 'vue' {
     readonly useMemoize: UnwrapRef<typeof import('@vueuse/core')['useMemoize']>
     readonly useMemory: UnwrapRef<typeof import('@vueuse/core')['useMemory']>
     readonly useMin: UnwrapRef<typeof import('@vueuse/math')['useMin']>
+    readonly useModel: UnwrapRef<typeof import('vue')['useModel']>
     readonly useMounted: UnwrapRef<typeof import('@vueuse/core')['useMounted']>
     readonly useMouse: UnwrapRef<typeof import('@vueuse/core')['useMouse']>
     readonly useMouseInElement: UnwrapRef<typeof import('@vueuse/core')['useMouseInElement']>
@@ -669,6 +690,7 @@ declare module 'vue' {
     readonly useSum: UnwrapRef<typeof import('@vueuse/math')['useSum']>
     readonly useSupported: UnwrapRef<typeof import('@vueuse/core')['useSupported']>
     readonly useSwipe: UnwrapRef<typeof import('@vueuse/core')['useSwipe']>
+    readonly useTemplateRef: UnwrapRef<typeof import('vue')['useTemplateRef']>
     readonly useTemplateRefsList: UnwrapRef<typeof import('@vueuse/core')['useTemplateRefsList']>
     readonly useTextDirection: UnwrapRef<typeof import('@vueuse/core')['useTextDirection']>
     readonly useTextSelection: UnwrapRef<typeof import('@vueuse/core')['useTextSelection']>
@@ -684,6 +706,7 @@ declare module 'vue' {
     readonly useTitle: UnwrapRef<typeof import('@vueuse/core')['useTitle']>
     readonly useToNumber: UnwrapRef<typeof import('@vueuse/core')['useToNumber']>
     readonly useToString: UnwrapRef<typeof import('@vueuse/core')['useToString']>
+    readonly useToast: UnwrapRef<typeof import('vue-toastification')['useToast']>
     readonly useToggle: UnwrapRef<typeof import('@vueuse/core')['useToggle']>
     readonly useTransition: UnwrapRef<typeof import('@vueuse/core')['useTransition']>
     readonly useTrunc: UnwrapRef<typeof import('@vueuse/math')['useTrunc']>

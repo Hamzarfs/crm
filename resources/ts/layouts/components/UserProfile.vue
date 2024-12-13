@@ -1,22 +1,20 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/@core/stores/auth';
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
 
 const router = useRouter()
 
-// TODO: Get type from backend
-const userData = useCookie<any>('userData')
+const authStore = useAuthStore()
+const userData = authStore.user
+
 
 const logout = async () => {
     try {
-        const res = await $api('/auth/logout', {
+        await $api('/auth/logout', {
             method: 'POST'
         })
 
-        // Remove "accessToken" from cookie
-        useCookie('accessToken').value = null
-
-        // Remove "userData" from cookie
-        userData.value = null
+        authStore.$reset()
 
         // Redirect to login page
         router.push({ name: 'login' })
@@ -71,17 +69,17 @@ const userProfileList = [
             {{ getInitials(userData.name) }}
 
             <!-- SECTION Menu -->
-            <VMenu activator="parent" min-width="230" max-width="265" location="bottom end" offset="15px">
+            <VMenu activator="parent" min-width="230" max-width="275" location="bottom end" offset="15px">
                 <VList>
                     <VListItem>
-                        <div class="d-flex gap-2 align-center">
-                            <VListItemAction>
+                        <div class="d-flex gap-2">
+                            <div>
                                 <VBadge dot location="bottom right" offset-x="3" offset-y="3" color="success">
                                     <VAvatar :color="!(userData && userData.avatar) ? 'primary' : undefined">
                                         {{ getInitials(userData.name) }}
                                     </VAvatar>
                                 </VBadge>
-                            </VListItemAction>
+                            </div>
 
                             <div>
                                 <h6 class="text-h6 font-weight-medium">
@@ -89,6 +87,10 @@ const userProfileList = [
                                 </h6>
                                 <VListItemSubtitle class="text-uppercase text-disabled font-weight-bold">
                                     {{ userData.role.title }}
+                                </VListItemSubtitle>
+                                <VListItemSubtitle v-if="userData.role.value !== 'admin'"
+                                    class="text-uppercase text-disabled font-weight-bold">
+                                    {{ userData.department.title }}
                                 </VListItemSubtitle>
                             </div>
                         </div>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\Notifications\Tasks\Assigned;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\DatabaseNotification;
@@ -12,24 +13,47 @@ class NotificationController extends Controller
 {
     public function all()
     {
+        $notifications = Auth::user()->notifications->map(function ($notification) {
+            // For task assigned notifications
+            if ($notification->type === 'task.assigned') {
+                $task = Task::find($notification->data['task_id'])->load(['assignee', 'creator']);
+                if ($task->assignee->is(Auth::user())) {
+                    $task->isSeen = !is_null($notification->read_at);
+                    return [
+                        'id' => $notification->id,
+                        'type' => $notification->type,
+                        'task' => new Assigned($task),
+                        'isSeen' => !is_null($notification->read_at),
+                        'created_at' => $notification->created_at,
+                    ];
+                }
+            }
+        });
         return response()->json([
-            'notifications' => [
-                ...$this->getTaskCreatedNotifications()
-            ]
+            'notifications' => $notifications
         ]);
     }
 
-    public function getTaskCreatedNotifications(string $type = 'task-created')
+    public function markNotifcationsAsRead(Request $request)
     {
-        return DatabaseNotification::where('type', $type)->get()->map(
-            function ($notification) {
-                $task = $notification->data['task'];
-                if ($task['assignee'] == Auth::id()) {
-                    $task['isSeen'] = !is_null($notification->read_at);
-                    $task['time'] = Carbon::make($task['created_at'])->diffForHumans();
-                    return $task;
-                }
-            }
-        )->filter()->all();
+        $ids = $request->post('ids');
+
+        DatabaseNotification::whereIn('id', $ids)->get()->markAsRead();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notification(s) marked as read'
+        ]);
+    }
+    public function markNotifcationsAsUnread(Request $request)
+    {
+        $ids = $request->post('ids');
+
+        DatabaseNotification::whereIn('id', $ids)->get()->markAsUnread();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notification(s) marked as unread'
+        ]);
     }
 }

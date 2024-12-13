@@ -9,6 +9,7 @@ enum DepartmentsEnum: string
     case DEVELOPMENT = 'development';
     case DESIGNING = 'designing';
     case MARKETING = 'marketing';
+    case LEAD_GENERATION = 'lead_generation';
 
     public function label(): string
     {
@@ -18,6 +19,7 @@ enum DepartmentsEnum: string
             self::DEVELOPMENT => 'Development',
             self::DESIGNING => 'Designing',
             self::MARKETING => 'Marketing',
+            self::LEAD_GENERATION => 'Lead Generation',
         };
     }
 }

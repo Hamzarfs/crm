@@ -1,11 +1,14 @@
-import { createApp } from 'vue'
-
 import App from '@/App.vue'
 import { registerPlugins } from '@core/utils/plugins'
+import { createApp } from 'vue'
+import { initializeEcho } from './echo'
 
 // Styles
 import '@core-scss/template/index.scss'
 import '@styles/styles.scss'
+import "vue-toastification/dist/index.css"
+
+
 
 // Create vue app
 const app = createApp(App)
@@ -15,3 +18,6 @@ registerPlugins(app)
 
 // Mount vue app
 app.mount('#app')
+
+// Echo
+initializeEcho()

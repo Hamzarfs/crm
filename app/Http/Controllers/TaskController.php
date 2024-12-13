@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Task\{Store, Update, Comment\Store as CommentStore};
-use App\Http\Resources\{TaskCommentResource, Collections\TaskResourceCollection};
+use App\Http\Resources\{Tasks\TaskCommentResource, Collections\Tasks\TaskResourceCollection};
 use App\Models\{Task, TaskComment, TaskFile};
+use App\Notifications\Task\Assigned as TaskAssigned;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
 class TaskController extends Controller
@@ -100,6 +102,42 @@ class TaskController extends Controller
         ]);
     }
 
+    /**
+     * Get Tasks for kanban view
+     */
+    public function kanbanList()
+    {
+        $assignedToMe = request()->input('assignedToMe');
+
+        $statuses = ['pending', 'in_progress', 'completed'];
+
+        $tasksQuery = Task::with(['files', 'creator', 'assignee.department', 'comments.files']);
+
+        $tasksQuery->when(
+            value: $assignedToMe,
+            callback: fn(Builder $tasksQuery, $assignedToMe) => $assignedToMe === 'yes' ? $tasksQuery->where('assigned_to', Auth::id()) : $tasksQuery->where('created_by', Auth::id()),
+        );
+
+        if (!request()->user()->hasRole('admin')) {
+            if (request()->user()->hasRole('team_lead')) {
+                $tasksQuery->where(function ($query) {
+                    $query->where('created_by', Auth::id())
+                        ->orWhere('assigned_to', Auth::id());
+                });
+            } else {
+                $tasksQuery->where('assigned_to', Auth::id());
+            }
+        }
+
+        $tasksByStatus = $tasksQuery->get()->groupBy('status');
+
+        $formattedTasks = collect($statuses)->mapWithKeys(fn($status) => [$status => new TaskResourceCollection($tasksByStatus->get($status, []))]);
+
+        return response()->json([
+            'tasksByStatus' => $formattedTasks,
+        ]);
+    }
+
 
     /**
      * Store a newly created resource in storage.
@@ -127,6 +165,9 @@ class TaskController extends Controller
                 ]);
             }
         }
+
+        $task->load(['files', 'creator', 'assignee.department', 'comments.files']);
+        Notification::send($task->assignee, new TaskAssigned($task));
 
         return response()->json([
             'success' => true,
@@ -160,6 +201,7 @@ class TaskController extends Controller
      */
     public function delete(Task $task)
     {
+        $task->notifications()->delete();
         $task->comments()->delete();
         $task->files()->delete();
         $task->delete();

@@ -8,7 +8,6 @@ use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 
 class AuthController extends Controller
 {
@@ -67,8 +66,9 @@ class AuthController extends Controller
         $token = $tokenResult->plainTextToken;
 
         return response()->json([
-            'accessToken' => "Bearer $token",
-            'userData' => new UserResource($user)
+            'success' => true,
+            'accessToken' => $token,
+            'userData' => new UserResource($user),
         ]);
     }
 
@@ -94,6 +94,7 @@ class AuthController extends Controller
         $request->user()->tokens()->delete();
 
         return response()->json([
+            'success' => true,
             'message' => 'Successfully logged out'
         ]);
     }

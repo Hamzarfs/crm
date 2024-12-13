@@ -10,4 +10,9 @@ class LeadSource extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    public function leads()
+    {
+        return $this->hasMany(Lead::class);
+    }
 }

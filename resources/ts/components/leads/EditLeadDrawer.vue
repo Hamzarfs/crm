@@ -1,0 +1,190 @@
+<script setup lang="ts">
+
+import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
+import type { VForm } from 'vuetify/components/VForm';
+
+interface Emit {
+    (e: 'update:isDrawerOpen', value: boolean): void
+    (e: 'leadData', value: any): void
+}
+
+interface Props {
+    lead: Record<string, any>
+    isDrawerOpen: boolean
+    statuses: string[]
+    customers: any[]
+    leadSources: any[]
+    brands: any[]
+    services: any[]
+    errors: Record<string, any>
+    userData: Record<string, any>
+    campaigns: Record<string, any>[]
+}
+
+const props = defineProps<Props>()
+const emit = defineEmits<Emit>()
+
+const isFormValid = ref(false)
+const refForm = ref<VForm>()
+
+const leadToEdit = ref<Record<string, any>>({
+    customer: undefined,
+    lead_source: undefined,
+    brand: undefined,
+    status: undefined,
+    remarks: undefined,
+    lead_closed_date: undefined,
+    lead_closed_amount: undefined,
+    services: undefined,
+    campaign: undefined,
+})
+
+watch(() => props.lead, newVal => {
+    leadToEdit.value.customer = newVal.customer?.id
+    leadToEdit.value.lead_source = newVal.lead_source?.id
+    leadToEdit.value.brand = newVal.brand?.id
+    leadToEdit.value.status = newVal.status
+    leadToEdit.value.remarks = newVal.remarks
+    if (props.userData.department.value !== 'lead_generation') {
+        leadToEdit.value.lead_closed_date = parseDateWithFormat(newVal.lead_closed_date, 'DD MMM YYYY', 'DD-MM-YYYY')
+        leadToEdit.value.lead_closed_amount = newVal.lead_closed_amount
+    }
+    leadToEdit.value.services = newVal.services_sold?.map((ss: Record<string, any>) => ss.service_id)
+    leadToEdit.value.campaign = newVal.campaign?.id
+}, {
+    deep: true,
+})
+
+// 👉 drawer close
+const closeNavigationDrawer = () => {
+    emit('update:isDrawerOpen', false)
+    nextTick(() => {
+        Object.assign(props.errors, {
+            customer: undefined,
+            services: undefined,
+            lead_source: undefined,
+            brand: undefined,
+            status: undefined,
+            remarks: undefined,
+            lead_closed_amount: undefined,
+            lead_closed_date: undefined,
+            campaign: undefined,
+        })
+        refForm.value?.reset()
+        refForm.value?.resetValidation()
+    })
+}
+
+const onSubmit = () => {
+    refForm.value?.validate().then(({ valid }) => {
+        if (valid) {
+            emit('leadData', leadToEdit.value)
+        }
+    })
+}
+
+defineExpose({
+    closeNavigationDrawer
+})
+
+const handleDrawerModelValueUpdate = (val: boolean) => {
+    emit('update:isDrawerOpen', val)
+}
+
+</script>
+
+<template>
+
+    <VNavigationDrawer temporary :width="600" location="end" class="scrollable-content"
+        :model-value="props.isDrawerOpen" @update:model-value="handleDrawerModelValueUpdate">
+
+        <!-- 👉 Title -->
+        <AppDrawerHeaderSection title="Edit Lead" @cancel="closeNavigationDrawer" />
+
+        <VDivider />
+
+        <PerfectScrollbar :options="{ wheelPropagation: false }">
+            <VCard flat>
+                <VCardText>
+                    <!-- 👉 Form -->
+                    <VForm ref="refForm" v-model="isFormValid" @submit.prevent="onSubmit">
+                        <VRow>
+                            <!-- 👉 Customer -->
+                            <VCol cols="12">
+                                <VAutocomplete v-model="leadToEdit.customer" :rules="[requiredValidator]"
+                                    label="Customer" :items="props.customers" placeholder="Select Customer"
+                                    :error-messages="props.errors.customer" clearable />
+                            </VCol>
+
+                            <!-- 👉 Campaign -->
+                            <VCol cols="12">
+                                <VSelect v-model="leadToEdit.campaign" :rules="[requiredValidator]" label="Campaign"
+                                    :items="props.campaigns" placeholder="Select Campaign"
+                                    :error-messages="props.errors.campaign" clearable />
+                            </VCol>
+
+                            <!-- 👉 Lead Source -->
+                            <VCol cols="12">
+                                <VSelect v-model="leadToEdit.lead_source" :rules="[requiredValidator]"
+                                    label="Lead Source" :items="props.leadSources" placeholder="Select Lead source"
+                                    :error-messages="props.errors.lead_source" clearable />
+                            </VCol>
+
+                            <!-- 👉 Brand -->
+                            <VCol cols="12">
+                                <VSelect v-model="leadToEdit.brand" :rules="[requiredValidator]" label="Brand"
+                                    :items="props.brands" placeholder="Select Brand"
+                                    :error-messages="props.errors.brand" clearable />
+                            </VCol>
+
+                            <!-- 👉 Status -->
+                            <VCol cols="12" v-if="props.userData.department.value !== 'lead_generation'">
+                                <VAutocomplete v-model="leadToEdit.status" :items="props.statuses" label="Lead status"
+                                    :rules="[requiredValidator]" placeholder="Select Lead status" clearable
+                                    :error-messages="props.errors.status" />
+                            </VCol>
+
+                            <!-- 👉 Services -->
+                            <VCol cols="12">
+                                <VAutocomplete multiple chips v-model="leadToEdit.services" label="Service sold"
+                                    :items="props.services" :rules="[requiredValidator]"
+                                    placeholder="Select Service sold" clearable
+                                    :error-messages="props.errors.services" />
+                            </VCol>
+
+                            <!-- 👉 Remarks -->
+                            <VCol cols="12">
+                                <VTextarea v-model="leadToEdit.remarks" label="Lead Remarks" placeholder="Lead Remarks"
+                                    auto-grow rows="3" clearable :error-messages="props.errors.remarks" />
+                            </VCol>
+
+                            <!-- 👉 Closed Date -->
+                            <VCol cols="12" v-if="props.userData.department.value !== 'lead_generation'">
+                                <AppDateTimePicker v-model="leadToEdit.lead_closed_date" label="Lead Close Date"
+                                    placeholder="Lead Close Date" clearable :config="{ dateFormat: 'd-m-Y' }"
+                                    :error-messages="props.errors.lead_closed_date" />
+                            </VCol>
+
+                            <!-- 👉 Closed Amount -->
+                            <VCol cols="12" v-if="props.userData.department.value !== 'lead_generation'">
+                                <VTextField type="number" v-model="leadToEdit.lead_closed_amount"
+                                    label="Lead Close Amount" placeholder="Lead Close Amount" clearable min="0.1"
+                                    :rules="[numberValidator]" :error-messages="props.errors.lead_closed_amount" />
+                            </VCol>
+
+                            <!-- 👉 Submit and Cancel -->
+                            <VCol cols="12">
+                                <VBtn type="submit" class="me-4">
+                                    Submit
+                                </VBtn>
+                                <VBtn type="reset" variant="outlined" color="error" @click="closeNavigationDrawer">
+                                    Cancel
+                                </VBtn>
+                            </VCol>
+                        </VRow>
+                    </VForm>
+                </VCardText>
+            </VCard>
+        </PerfectScrollbar>
+    </VNavigationDrawer>
+</template>

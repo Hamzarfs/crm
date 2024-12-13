@@ -13,14 +13,28 @@ class LeadSourceSeeder extends Seeder
     public function run(): void
     {
         $lead_sources = [
-            'PPC',
-            'Organic',
-            'Bark'
+            [
+                'name' => 'PPC Google',
+                'type' => 'paid',
+            ],
+            [
+                'name' => 'Organic',
+                'type' => 'unpaid',
+            ],
+            [
+                'name' => 'Bark',
+                'type' => 'paid',
+            ],
+            [
+                'name' => 'Meta Facebook',
+                'type' => 'paid',
+            ]
         ];
 
         foreach ($lead_sources as $ls) {
             LeadSource::create([
-                'name' => $ls
+                'name' => $ls['name'],
+                'type' => $ls['type'],
             ]);
         }
     }

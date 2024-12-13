@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/@core/stores/auth';
 import { mergeProps } from 'vue';
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
 import type { VForm } from 'vuetify/components/VForm';
 
+const authStore = useAuthStore()
+
 // Get currently logged in user data
-const userData = useCookie('userData').value
+const userData = authStore.user
 
 interface Props {
     isDrawerOpen: boolean
@@ -17,12 +20,20 @@ interface Props {
 interface Emit {
     (e: 'update:isDrawerOpen', value: boolean): void
     (e: 'commentData', value: FormData): void
-    (e: 'statusUpdate', value: { id: number, status: string }): void
+    (e: 'statusUpdate', value: { id: number, status: string, newStatus: string }): void
     (e: 'deleteComment', value: number): void
 }
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
+
+const task = ref(props.task)
+
+watch(() => props.task, newValue => {
+    if (newValue) {
+        task.value = newValue
+    }
+})
 
 const handleDrawerModelValueUpdate = (val: boolean) => {
     emit('update:isDrawerOpen', val)
@@ -82,7 +93,7 @@ defineExpose({
         :model-value="props.isDrawerOpen" @update:model-value="handleDrawerModelValueUpdate">
 
         <!-- 👉 Title -->
-        <AppDrawerHeaderSection :title="props.task.title" @cancel="closeNavigationDrawer" />
+        <AppDrawerHeaderSection :title="task.title" @cancel="closeNavigationDrawer" />
 
         <VDivider />
 
@@ -97,10 +108,10 @@ defineExpose({
                                 <VSpacer />
                                 <div class="d-flex align-center">
                                     <VAvatar size="small" color="primary" variant="tonal" class="me-2">
-                                        {{ getInitials(props.task.assigned_to?.name) }}
+                                        {{ getInitials(task.assignee?.name) }}
                                     </VAvatar>
                                     <span class="text-body-1 font-weight-medium">
-                                        {{ props.task.assigned_to?.name }}
+                                        {{ task.assignee?.name }}
                                     </span>
                                 </div>
                             </div>
@@ -113,16 +124,15 @@ defineExpose({
                             <div class="d-flex align-center">
                                 <h3 class="text-h6">Status</h3>
                                 <VSpacer />
-                                <VMenu v-if="userData.id === props.task.assigned_to?.id"
-                                    transition="slide-y-transition">
+                                <VMenu v-if="userData.id === task.assignee?.id" transition="slide-y-transition">
                                     <template #activator="{ props: menuProps }">
                                         <VTooltip location="top">
                                             <template #activator="{ props: tooltipProps }">
                                                 <VChip v-bind="mergeProps(menuProps, tooltipProps)" elevation="5"
-                                                    :color="resolveTaskStatusColor(props.task.status)" size="small"
+                                                    :color="resolveTaskStatusColor(task.status)" size="small"
                                                     class="text-uppercase">
                                                     {{ statuses.find(
-                                                        (status: any) => status.value === props.task.status)?.title }}
+                                                        (status: any) => status.value === task.status)?.title }}
                                                 </VChip>
                                             </template>
                                             <span>Click to update status</span>
@@ -131,15 +141,15 @@ defineExpose({
 
                                     <VList>
                                         <VListItem v-for="status in statuses" :key="status.value" :value="status.value"
-                                            @click="emit('statusUpdate', { id: props.task.id, status: status.value })">
+                                            @click="emit('statusUpdate', { id: task.id, status: task.status, newStatus: status.value })">
                                             {{ status.title }}
                                         </VListItem>
                                     </VList>
                                 </VMenu>
 
-                                <VChip v-else :color="resolveTaskStatusColor(props.task.status)" size="small"
+                                <VChip v-else :color="resolveTaskStatusColor(task.status)" size="small"
                                     class="text-uppercase" elevation="5">
-                                    {{ statuses.find((status: any) => status.value === props.task.status)?.title }}
+                                    {{ statuses.find((status: any) => status.value === task.status)?.title }}
                                     <!-- {{ slugToTitleCase(item.status) }} -->
                                 </VChip>
                             </div>
@@ -152,22 +162,22 @@ defineExpose({
                             <div class="d-flex align-center">
                                 <h3 class="text-h6">Deadline</h3>
                                 <VSpacer />
-                                <VChip :color="checkDeadlineStatus(props.task.deadline) === 'exceeded' ? 'error' :
-                                    checkDeadlineStatus(props.task.deadline) === 'approaching' ? 'success' : 'warning'"
+                                <VChip :color="checkDeadlineStatus(task.deadline) === 'exceeded' ? 'error' :
+                                    checkDeadlineStatus(task.deadline) === 'approaching' ? 'success' : 'warning'"
                                     elevation="5" size="small" class="font-weight-medium">
-                                    {{ parseDate(props.task.deadline) }}
+                                    {{ parseDate(task.deadline) }}
                                 </VChip>
                             </div>
                         </VCol>
 
                         <VDivider />
 
-                        <template v-if="props.task.files?.length > 0">
+                        <template v-if="task.files?.length > 0">
                             <!-- 👉 Files -->
                             <VCol cols="12">
                                 <h3 class="text-h6">Files</h3>
                                 <div class="d-flex flex-wrap">
-                                    <VChip class="me-2 mb-2" v-for="(file, i) in props.task.files" :key="file.id"
+                                    <VChip class="me-2 mb-2" v-for="(file, i) in task.files" :key="file.id"
                                         style="width: fit-content;" elevation="5" variant="elevated"
                                         prepend-icon="$file" color="primary" @click="downloadFile(file, i)">
                                         {{ `File ${i + 1}.${extractFileExtension(file.file)}` }}
@@ -181,7 +191,7 @@ defineExpose({
                         <!-- 👉 Description -->
                         <VCol cols="12">
                             <h3 class="text-h6 mb-3">Description</h3>
-                            <p>{{ props.task.description }}</p>
+                            <p>{{ task.description }}</p>
                         </VCol>
 
                         <VDivider />
@@ -190,18 +200,18 @@ defineExpose({
                         <VCol cols="12">
                             <h3 class="text-h6 mb-3">Comments</h3>
 
-                            <template v-if="props.task.comments?.length > 0">
+                            <template v-if="task.comments?.length > 0">
                                 <!-- 👉 Comments -->
-                                <div v-for="(comment, i) in props.task.comments" :key="comment.id" class="mb-5">
+                                <div v-for="(comment, i) in task.comments" :key="comment.id" class="mb-5">
                                     <div class="d-flex justify-space-between align-center mb-3">
                                         <div>
                                             <div class="d-flex gap-3 align-center">
                                                 <VAvatar color="primary" variant="tonal">
-                                                    {{ getInitials(comment.created_by.name) }}
+                                                    {{ getInitials(comment.creator.name) }}
                                                 </VAvatar>
                                                 <div>
                                                     <div class="text-body-1 font-weight-medium">
-                                                        {{ comment.created_by.name }}
+                                                        {{ comment.creator.name }}
                                                     </div>
                                                     <div class="text-caption">{{ comment.created_at }}</div>
                                                 </div>
@@ -210,7 +220,7 @@ defineExpose({
 
                                         <div>
                                             <VBtn
-                                                v-if="userData.role.value === 'admin' || comment.created_by.id === userData.id"
+                                                v-if="userData.role.value === 'admin' || comment.creator.id === userData?.id"
                                                 size="small" variant="tonal" color="error" icon="ri-delete-bin-6-line"
                                                 @click="isDeleteDialogVisible = true; commentIndexToDelete = i" />
                                         </div>
@@ -225,7 +235,7 @@ defineExpose({
                                             {{ `File ${i + 1}.${extractFileExtension(file.file)}` }}
                                         </VChip>
                                     </div>
-                                    <VDivider class="my-3" v-if="i !== props.task.comments.length - 1" />
+                                    <VDivider class="my-3" v-if="i !== task.comments.length - 1" />
                                 </div>
                             </template>
 

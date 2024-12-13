@@ -46,8 +46,6 @@
 
         if (loaderColor)
             document.documentElement.style.setProperty('--initial-loader-bg', loaderColor)
-        if (loaderColor)
-            document.documentElement.style.setProperty('--initial-loader-bg', loaderColor)
 
         if (primaryColor)
             document.documentElement.style.setProperty('--initial-loader-color', primaryColor)

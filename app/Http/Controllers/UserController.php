@@ -3,12 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Enums\EmployeeStatusesEnum;
+use App\Http\Requests\User\Import;
 use App\Http\Requests\User\Store;
 use App\Http\Requests\User\Update;
 use App\Http\Resources\Collections\UserResourceCollection;
+use App\Imports\EmployeeImport;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
@@ -23,17 +31,22 @@ class UserController extends Controller
 
     private function getUserAll(Request $request)
     {
-        $department = $request->input('department');
-        $users = User::where([
+        $departments = $request->input('departments');
+        $roles = $request->input('roles');
+
+        $users = User::with('department:id,name')->where([
             ['status', EmployeeStatusesEnum::ACTIVE],
             ['id', '!=', $request->user()->id]
         ])->when(
-            value: $department,
-            callback: fn(Builder $userQuery, string $department) => $userQuery->where('department_id', $department)
+            value: $departments,
+            callback: fn(Builder $userQuery, array $departments) => $userQuery->whereHas('department', fn(Builder $departmentsQuery) => $departmentsQuery->whereIn('name', $departments))
+        )->when(
+            value: $roles,
+            callback: fn(Builder $userQuery, array $roles) => $userQuery->whereHas('roles', fn(Builder $rolesQuery) => $rolesQuery->whereIn('name', $roles))
         )->get();
 
         return response()->json([
-            'users' => $users,
+            'users' => new UserResourceCollection($users),
         ]);
     }
 
@@ -115,8 +128,9 @@ class UserController extends Controller
             'department_id' => $data['department']
         ]);
 
-
         $user->assignRole($data['role']);
+
+        $this->addEmployeeDetails($user, $data['details']);
 
         return response()->json([
             'success' => true,
@@ -137,6 +151,8 @@ class UserController extends Controller
         ]);
 
         $user->syncRoles($data['role']);
+
+        $this->addEmployeeDetails($user, $data['details']);
 
         return response()->json([
             'success' => true,
@@ -166,10 +182,75 @@ class UserController extends Controller
 
     public function delete(User $user)
     {
+        $message = false;
+
+        if ($user->leadingDepartment()->exists())
+            $message = sprintf("Employee: %s is assigned as leader of Department: %s. Please unassign the employee from department leader.", $user->name, Str::title(str_replace('_', ' ', $user->leadingDepartment->name)));
+
+        if ($user->leads()->exists())
+            $message = "Employee: {$user->name} has created lead(s). Please delete the associated lead(s) first to proceed.";
+
+        if ($user->assignedTasks()->exists())
+            $message = "Employee: {$user->name} is assigned to task(s). Please unassign the employee from the corresponding task(s) first.";
+
+        if ($user->createdTasks()->exists())
+            $message = "Employee: {$user->name} has created task(s). Please delete the corresponding task(s) first.";
+
+        if ($message)
+            return response()->json([
+                'success' => false,
+                'message' => $message
+            ]);
+
+        $user->details()->delete();
         $user->delete();
         return response()->json([
             'success' => true,
             'message' => 'Employee deleted successfully!'
+        ]);
+    }
+
+    protected function addEmployeeDetails(User $employee, array $data): void
+    {
+        DB::beginTransaction();
+        try {
+            foreach ($data as $key => $value) {
+                $employee->details()->updateOrCreate([
+                    'key' => $key
+                ], [
+                    'value' => $value
+                ]);
+            }
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error($th->getMessage());
+            Log::error($th->getTraceAsString());
+            throw $th;
+        }
+        DB::commit();
+    }
+
+    public function downloadSample()
+    {
+        return Storage::download('sample.xlsx');
+    }
+
+    public function importEmployees(Import $request)
+    {
+        $file = $request->validated('file');
+
+        try {
+            Excel::import(new EmployeeImport, $file);
+        } catch (ValidationException $e) {
+            $errors = transformErrorMessagesToIncludeRowNumber($e->errors());
+            return response()->json([
+                'success' => false,
+                'message' => $errors
+            ], 422);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Employee imported successfully'
         ]);
     }
 }

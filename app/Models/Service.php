@@ -10,4 +10,9 @@ class Service extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    public function leads()
+    {
+        return $this->belongsToMany(Lead::class, 'leads_sold_services');
+    }
 }

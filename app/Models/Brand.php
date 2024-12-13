@@ -11,5 +11,13 @@ class Brand extends Model
 
     protected $guarded = [];
 
-    
+    public function leads()
+    {
+        return $this->hasMany(Lead::class);
+    }
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class);
+    }
 }

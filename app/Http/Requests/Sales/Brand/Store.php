@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Sales\Brand;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Enums\RolesEnum;
+use Illuminate\Foundation\Http\FormRequest;
 
 
 class Store extends FormRequest
@@ -13,7 +13,7 @@ class Store extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->hasRole([RolesEnum::ADMIN, RolesEnum::TEAM_LEAD]) && $this->user()->hasDepartment('admin', 'sales');
+        return $this->user()->hasDepartment('admin', 'sales') && $this->user()->hasRole([RolesEnum::ADMIN, RolesEnum::TEAM_LEAD]);
     }
 
     /**
@@ -25,6 +25,14 @@ class Store extends FormRequest
     {
         return [
             'name' => 'required|string|unique:brands',
+            'url' => 'required|url',
+            'fb_url' => 'url|nullable',
+            'ig_url' => 'url|nullable',
+            'phone' => 'required|numeric',
+            'whatsapp' => 'numeric|nullable',
+            'chat_support' => 'string|nullable',
+            'country' => 'required|in:USA,UK',
+            'currency' => 'required|exists:currencies,id',
         ];
     }
 
@@ -37,6 +45,8 @@ class Store extends FormRequest
     {
         return [
             'name' => 'Brand name',
+            'fb_url' => 'Facebook URL',
+            'ig_url' => 'Instagram URL',
         ];
     }
 }

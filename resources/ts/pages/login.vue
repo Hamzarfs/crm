@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useAuthStore } from '@core/stores/auth'
 import { themeConfig } from '@themeConfig'
 import { VForm } from 'vuetify/components/VForm'
 
@@ -45,6 +46,8 @@ const credentials = ref({
     password: '',
 })
 
+const authStore = useAuthStore()
+
 const login = async () => {
     try {
         const res = await $api('/auth/login', {
@@ -58,16 +61,18 @@ const login = async () => {
             },
         })
 
-        const { accessToken, userData } = res
+        const { success, accessToken, userData } = res
 
-        useCookie('userData').value = userData
-        useCookie('accessToken').value = accessToken
+        if (success) {
+            authStore.user = userData
+            authStore.token = accessToken
 
-        // Redirect to `to` query if exist or redirect to index route
-        // ❗ nextTick is required to wait for DOM updates and later redirect
-        await nextTick(() => {
-            router.replace(route.query.to ? String(route.query.to) : { name: 'dashboard' })
-        })
+            // Redirect to `to` query if exist or redirect to index route
+            // ❗ nextTick is required to wait for DOM updates and later redirect
+            await nextTick(() => {
+                router.replace(route.query.to ? String(route.query.to) : { name: 'dashboard' })
+            })
+        }
     }
     catch (err) {
         console.log(err)

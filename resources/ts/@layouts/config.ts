@@ -12,7 +12,7 @@ export const layoutConfig: LayoutConfig = {
 
         // isRTL: false,
         i18n: {
-            enable: true,
+            enable: false,
         },
         iconRenderer: h('div'),
     },

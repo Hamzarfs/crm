@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Sales\LeadSource;
 
+use App\Enums\RolesEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class Store extends FormRequest
@@ -11,7 +12,7 @@ class Store extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return $this->user()->hasDepartment('admin', 'sales') && $this->user()->hasRole([RolesEnum::ADMIN, RolesEnum::TEAM_LEAD]);
     }
 
     /**
@@ -22,7 +23,21 @@ class Store extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => 'required|string|unique:lead_sources',
+            'type' => 'required|string|in:paid,unpaid',
+        ];
+    }
+
+    /**
+     * Get custom attributes for validator errors.
+     *
+     * @return array
+     */
+    public function attributes()
+    {
+        return [
+            'name' => 'Lead source name',
+            'type' => 'Lead source type',
         ];
     }
 }
