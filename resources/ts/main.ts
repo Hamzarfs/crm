@@ -1,7 +1,7 @@
 import App from '@/App.vue'
 import { registerPlugins } from '@core/utils/plugins'
 import { createApp } from 'vue'
-import { initializeEcho } from './echo'
+
 
 // Styles
 import '@core-scss/template/index.scss'
@@ -19,5 +19,3 @@ registerPlugins(app)
 // Mount vue app
 app.mount('#app')
 
-// Echo
-initializeEcho()

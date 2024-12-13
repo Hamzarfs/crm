@@ -8,6 +8,7 @@ use App\Models\{Task, TaskComment, TaskFile};
 use App\Notifications\Task\Assigned as TaskAssigned;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
@@ -201,7 +202,7 @@ class TaskController extends Controller
      */
     public function delete(Task $task)
     {
-        $task->notifications()->delete();
+        DatabaseNotification::where('data->task_id', $task->id)->delete();
         $task->comments()->delete();
         $task->files()->delete();
         $task->delete();

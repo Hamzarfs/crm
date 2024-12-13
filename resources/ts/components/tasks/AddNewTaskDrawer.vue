@@ -79,7 +79,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
 
         <VDivider />
 
-        <PerfectScrollbar :options="{ wheelPropagation: false }">
+        <PerfectScrollbar :options="{ wheelPropagation: false, suppressScrollX: true }">
             <VCard flat>
                 <VCardText>
                     <!-- 👉 Form -->

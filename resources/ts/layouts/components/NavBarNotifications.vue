@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import { useAuthStore } from '@/@core/stores/auth';
 import { useNotificationStore } from '@/@core/stores/notification';
+import '@/echo';
 import type { Notification } from '@layouts/types';
+
 
 
 
@@ -23,7 +25,6 @@ window.Echo.private(`Task.Assigned.${userData?.id}`)
     .notification((notification: any) => {
         notifications.value.unshift(notification)
     })
-
 
 const removeNotification = (notificationId: number) => {
     notifications.value.forEach((item, index) => {

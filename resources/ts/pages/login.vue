@@ -1,4 +1,5 @@
 <script setup lang="ts">
+
 import { useAuthStore } from '@core/stores/auth'
 import { themeConfig } from '@themeConfig'
 import { VForm } from 'vuetify/components/VForm'
