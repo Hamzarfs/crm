@@ -63,3 +63,4 @@ public/mockServiceWorker.js
 
 
 *.zip
+public/build
