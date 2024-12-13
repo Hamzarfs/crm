@@ -28,7 +28,7 @@ class Store extends FormRequest
             'deadline' => 'required|date|after_or_equal:today',
             'status' => 'required|in:pending,in_progress,completed',
             'assigned_to' => 'required|integer|exists:users,id',
-            'files' => 'array',
+            'files' => 'array|max:5',
             'files.*' => 'file|mimes:jpeg,png,gif,bmp,svg,webp,pdf,doc,docx,xls,xlsx,ppt,pptx,txt'
         ];
     }

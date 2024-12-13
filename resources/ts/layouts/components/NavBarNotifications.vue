@@ -26,6 +26,11 @@ window.Echo.private(`Task.Assigned.${userData?.id}`)
         notifications.value.unshift(notification)
     })
 
+// window.Echo.private(`Task.Comment.Added.${userData?.id}`)
+//     .notification((notification: any) => {
+//         notifications.value.unshift(notification)
+//     })
+
 const removeNotification = (notificationId: number) => {
     notifications.value.forEach((item, index) => {
         if (notificationId === item.id)

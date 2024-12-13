@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Notifications\Task;
+namespace App\Notifications\Task\Comment;
 
-use App\Http\Resources\Tasks\TaskResource;
-use App\Models\Task;
+use App\Http\Resources\Tasks\TaskCommentResource;
+use App\Models\TaskComment;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
 
-class Assigned extends Notification
+class Added extends Notification
 {
     /**
      * Create a new notification instance.
      */
     public function __construct(
-        private Task $task
+        private TaskComment $taskComment
     ) {}
 
     /**
@@ -27,6 +27,7 @@ class Assigned extends Notification
         return ['broadcast', 'database'];
     }
 
+
     /**
      * Get the array representation of the notification.
      *
@@ -35,7 +36,7 @@ class Assigned extends Notification
     public function toDatabase(): array
     {
         return [
-            'task_id' => $this->task->id,
+            'comment_id' => $this->taskComment->id,
         ];
     }
 
@@ -46,7 +47,7 @@ class Assigned extends Notification
      */
     public function databaseType(): string
     {
-        return 'task.assigned';
+        return 'task.comment.added';
     }
 
     /**
@@ -55,9 +56,9 @@ class Assigned extends Notification
     public function toBroadcast(): BroadcastMessage
     {
         return new BroadcastMessage([
-            'task' => new TaskResource($this->task),
+            'comment' => new TaskCommentResource($this->taskComment),
             'isSeen' => false,
-            'created_at' => $this->task->updated_at, // as task & notification are created at almost the same time
+            'created_at' => $this->taskComment->created_at, // as task & notification are created at almost the same time
         ]);
     }
 
@@ -66,7 +67,12 @@ class Assigned extends Notification
      */
     public function broadcastOn(): PrivateChannel
     {
-        return new PrivateChannel("Task.Assigned.{$this->task->assigned_to}");
+        return new PrivateChannel(sprintf(
+            "Task.Comment.Added.%s",
+            $this->taskComment->createdBy->is($this->taskComment->task->creator) ?
+                $this->taskComment->task->assignee->id :
+                $this->taskComment->task->creator->id
+        ));
     }
 
     /**
@@ -74,6 +80,6 @@ class Assigned extends Notification
      */
     public function broadcastType(): string
     {
-        return 'task.assigned';
+        return 'task.comment.added';
     }
 }

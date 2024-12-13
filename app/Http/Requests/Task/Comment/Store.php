@@ -23,7 +23,7 @@ class Store extends FormRequest
     {
         return [
             'comment' => 'required|string',
-            'files' => 'nullable|array',
+            'files' => 'array|max:5',
             'files.*' => 'file|mimes:jpeg,png,gif,bmp,svg,webp,pdf,doc,docx,xls,xlsx,ppt,pptx,txt'
         ];
     }

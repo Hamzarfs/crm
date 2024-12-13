@@ -32,6 +32,12 @@ const task = ref(props.task)
 watch(() => props.task, newValue => {
     if (newValue) {
         task.value = newValue
+
+        window.Echo.private(`Task.Comment.Added.${props.task.id}`)
+            .notification((notification: any) => {
+                console.log(notification);
+
+            })
     }
 })
 
@@ -83,6 +89,8 @@ const onSubmit = (e: SubmitEvent) => {
 defineExpose({
     commentForm: refForm
 })
+
+
 
 
 
@@ -251,8 +259,8 @@ defineExpose({
                                     <VCol cols="12">
                                         <VFileInput v-model="files" label="Select files" placeholder="Select files"
                                             clearable multiple prepend-icon="" append-icon="$file" chips show-size
-                                            :rules="[fileValidator]" counter color="primary"
-                                            :counter-size-string="String(files?.length)" name="files[]"
+                                            :rules="[fileValidator, fileLengthValidator(files?.length ?? 0, 5)]" counter
+                                            color="primary" :counter-size-string="String(files?.length)" name="files[]"
                                             accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt" />
                                     </VCol>
 

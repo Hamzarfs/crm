@@ -52,6 +52,7 @@ declare global {
   const extendRef: typeof import('@vueuse/core')['extendRef']
   const extractFileExtension: typeof import('./resources/ts/@core/utils/helpers')['extractFileExtension']
   const facebookUrlValidator: typeof import('./resources/ts/@core/utils/validators')['facebookUrlValidator']
+  const fileLengthValidator: typeof import('./resources/ts/@core/utils/validators')['fileLengthValidator']
   const fileValidator: typeof import('./resources/ts/@core/utils/validators')['fileValidator']
   const formatDate: typeof import('./resources/ts/@core/utils/formatters')['formatDate']
   const formatDateNew: typeof import('./resources/ts/@core/utils/formatters')['formatDateNew']
@@ -426,6 +427,7 @@ declare module 'vue' {
     readonly extendRef: UnwrapRef<typeof import('@vueuse/core')['extendRef']>
     readonly extractFileExtension: UnwrapRef<typeof import('./resources/ts/@core/utils/helpers')['extractFileExtension']>
     readonly facebookUrlValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['facebookUrlValidator']>
+    readonly fileLengthValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['fileLengthValidator']>
     readonly fileValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['fileValidator']>
     readonly formatDate: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['formatDate']>
     readonly formatDateToMonthShort: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['formatDateToMonthShort']>

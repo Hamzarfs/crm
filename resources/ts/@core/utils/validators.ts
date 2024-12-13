@@ -135,6 +135,14 @@ export const lengthValidator = (value: unknown, length: number) => {
     return String(value).length === length || `The Min Character field must be at least ${length} characters`
 }
 
+// 👉 Max file Validator
+export const fileLengthValidator = (value: number, length: number) => {
+    if (isEmpty(value))
+        return true
+
+    return value <= length || `Maximum ${length} files are allowed at a time.`
+}
+
 // 👉 Alpha-dash Validator
 export const alphaDashValidator = (value: unknown) => {
     if (isEmpty(value))

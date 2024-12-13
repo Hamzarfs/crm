@@ -122,6 +122,54 @@ const totalUnreadNotifications = computed(() => props.notifications.filter(item 
                                     </div>
                                 </VListItem>
                             </template>
+
+                            <!-- For task comment added notification -->
+                            <template v-if="notification.type === 'task.comment.added'">
+                                <VListItem link lines="one" min-height="66px" class="list-item-hover-class py-3"
+                                    @click="$emit('click:notification', notification)">
+                                    <!-- Slot: Prepend -->
+                                    <!-- Handles Avatar: Image, Icon, Text -->
+                                    <div class="d-flex align-start gap-3">
+                                        <div>
+                                            <VAvatar class="cursor-pointer" size="38" variant="tonal" color="primary">
+                                                {{ getInitials(notification.comment.createdBy.name) }}
+                                            </VAvatar>
+                                        </div>
+
+                                        <div>
+                                            <h6 class="text-h6 mb-1">
+                                                New task comment added!
+                                            </h6>
+                                            <p class="text-body-2 mb-2"
+                                                style="letter-spacing: 0.4px !important; line-height: 18px;">
+                                                {{ notification.comment.createdBy.name }} has added a new comment added
+                                                in task "{{ notification.comment.task.title }}".
+                                            </p>
+                                            <p class="text-sm text-disabled mb-0"
+                                                style="letter-spacing: 0.4px !important; line-height: 18px;">
+                                                {{ moment(notification.created_at).fromNow() }}
+                                            </p>
+                                        </div>
+
+                                        <VSpacer />
+
+                                        <div class="d-flex flex-column align-end gap-2">
+                                            <VIcon :color="!notification.isSeen ? 'primary' : '#a8aaae'"
+                                                icon="ri-circle-fill" size="10"
+                                                :class="`${notification.isSeen ? 'visible-in-hover' : ''} ms-1`"
+                                                @click.stop="notification.isSeen ?
+                                                    emit('unread', [notification.id]) :
+                                                    emit('read', [notification.id])" />
+
+                                            <div style="block-size: 20px; inline-size: 20px;">
+                                                <VIcon size="20" icon="ri-close-line" color="secondary"
+                                                    class="visible-in-hover"
+                                                    @click="$emit('remove', notification.id)" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </VListItem>
+                            </template>
                         </template>
 
                         <VListItem v-show="!props.notifications.length" class="text-center text-medium-emphasis"

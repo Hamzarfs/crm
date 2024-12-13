@@ -68,6 +68,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
         refForm.value?.resetValidation()
     })
 }
+
 </script>
 
 <template>
@@ -121,8 +122,9 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                             <!-- 👉 Files -->
                             <VCol cols="12">
                                 <VFileInput v-model="files" label="Select files" placeholder="Select files" multiple
-                                    prepend-icon="" append-icon="$file" chips show-size clearable
-                                    :error-messages="props.errors.files" :rules="[fileValidator]"
+                                    prepend-icon append-icon="$file" chips show-size clearable
+                                    :error-messages="props.errors.files"
+                                    :rules="[fileValidator, fileLengthValidator(files?.length ?? 0, 5)]"
                                     accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt" counter
                                     :counter-size-string="String(files?.length)" />
                             </VCol>
