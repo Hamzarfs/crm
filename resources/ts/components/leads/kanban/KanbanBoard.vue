@@ -1,72 +1,80 @@
 <script setup lang="ts">
 
-import { VForm } from 'vuetify/components';
+    import { VForm } from 'vuetify/components';
 
 
-const $toast = useToast()
+    const $toast = useToast()
 
-const props = defineProps<{
-    kanbanData: any[]
-}>()
+    const props = defineProps<{
+        kanbanData: any[]
+    }>()
 
-const emit = defineEmits<{
-    (e: 'addNewBoard', value: string): void
-    (e: 'renameBoard', value: Record<string, any>): void
-    (e: 'deleteBoard', value: number): void
-    (e: 'addNewItem', value: any): void
-    (e: 'editItem', value: any): void
-    (e: 'deleteItem', value: number): void
-    (e: 'updateItemsState', value: any): void
-    (e: 'updateBoardState', value: number[]): void
-    (e: 'addLeadToPipeline', value: Record<string, any>): void
-}>()
+    const emit = defineEmits<{
+        (e: 'addNewBoard', value: string): void
+        (e: 'renameBoard', value: Record<string, any>): void
+        (e: 'deleteBoard', value: number): void
+        (e: 'addNewItem', value: any): void
+        (e: 'editItem', value: any): void
+        (e: 'deleteItem', value: number): void
+        (e: 'updateItemsState', value: any): void
+        (e: 'updateBoardState', value: number[]): void
+        (e: 'addLeadToPipeline', value: Record<string, any>): void
+    }>()
 
-const isAddNewBoardFormVisible = ref(false)
+    const isAddNewBoardFormVisible = ref(false)
+    const isViewLeadDetailsDrawerVisible = ref(false)
+    const selectedLead = ref<any>(undefined)
 
-const refAddNewBoard = ref<VForm>()
 
-const boardTitle = ref<string>('')
+    const refAddNewBoard = ref<VForm>()
 
-// 👉 Add new board function that emit the name and id of new board
-const addNewBoard = () => {
-    refAddNewBoard.value?.validate().then(valid => {
-        if (valid.valid) {
-            emit('addNewBoard', boardTitle.value)
-            isAddNewBoardFormVisible.value = false
-            boardTitle.value = ''
-        }
-    })
-}
+    const boardTitle = ref<string>('')
 
-// 👉 emit delete board event
-const deleteBoard = (boardId: number) => {
-    emit('deleteBoard', boardId)
-}
+    // 👉 Add new board function that emit the name and id of new board
+    const addNewBoard = () => {
+        refAddNewBoard.value?.validate().then(valid => {
+            if (valid.valid) {
+                emit('addNewBoard', boardTitle.value)
+                isAddNewBoardFormVisible.value = false
+                boardTitle.value = ''
+            }
+        })
+    }
 
-// 👉 emit rename board event
-const renameBoard = ({ id, name }: any) => {
-    emit('renameBoard', { id, name })
-}
+    // 👉 emit delete board event
+    const deleteBoard = (boardId: number) => {
+        emit('deleteBoard', boardId)
+    }
 
-// 👉  delete kanban item
-const deleteKanbanItemFn = (item: number) => {
-    emit('deleteItem', item)
-}
+    // 👉 emit rename board event
+    const renameBoard = ({ id, name }: any) => {
+        emit('renameBoard', { id, name })
+    }
 
-const hideAddNewForm = () => {
-    isAddNewBoardFormVisible.value = false
-    refAddNewBoard.value?.reset()
-}
+    // 👉  delete kanban item
+    const deleteKanbanItemFn = (item: number) => {
+        emit('deleteItem', item)
+    }
 
-// close add new item form when you loose focus from the form
-onClickOutside(refAddNewBoard, hideAddNewForm)
+    const hideAddNewForm = () => {
+        isAddNewBoardFormVisible.value = false
+        refAddNewBoard.value?.reset()
+    }
 
-const { leads: unassignedLeads } = await $api('leads/without-pipeline-stage')
+    // close add new item form when you loose focus from the form
+    onClickOutside(refAddNewBoard, hideAddNewForm)
 
-const rmLeadFromUnassignedLeads = (lead: any) => {
-    const index = unassignedLeads.findIndex((l: any) => l.id == lead.id)
-    unassignedLeads.splice(index, 1)
-}
+    const { leads: unassignedLeads } = await $api('leads/without-pipeline-stage')
+
+    const rmLeadFromUnassignedLeads = (lead: any) => {
+        const index = unassignedLeads.findIndex((l: any) => l.id == lead.id)
+        unassignedLeads.splice(index, 1)
+    }
+
+    const selectLeadToViewDetails = (lead: any) => {
+        selectedLead.value = lead
+        isViewLeadDetailsDrawerVisible.value = true
+    }
 
 
 
@@ -81,7 +89,7 @@ const rmLeadFromUnassignedLeads = (lead: any) => {
                 <KanbanItems :kanban-ids="pipeline.itemsIds" :board-name="pipeline.title" :board-id="pipeline.id"
                     :kanban-items="pipeline.items" @delete-board="deleteBoard" @rename-board="renameBoard"
                     @delete-item="deleteKanbanItemFn" @rm-lead-from-unassigned-leads="rmLeadFromUnassignedLeads"
-                    :unassigned-leads="unassignedLeads" />
+                    @select-lead-to-view-details="selectLeadToViewDetails" :unassigned-leads="unassignedLeads" />
             </template>
         </div>
 
@@ -110,32 +118,35 @@ const rmLeadFromUnassignedLeads = (lead: any) => {
             </VForm>
         </div>
 
+        <!-- View lead details drawer -->
+        <ViewLeadDetailsDrawer v-model:is-drawer-open="isViewLeadDetailsDrawerVisible" v-model:lead="selectedLead" />
+
     </div>
 </template>
 
 <style lang="scss">
-@use "@styles/variables/_vuetify.scss" as vuetify;
+    @use "@styles/variables/_vuetify.scss" as vuetify;
 
-.kanban-main-wrapper {
-    overflow: auto hidden;
-    margin-inline-start: -0.6rem;
-    min-block-size: calc(100vh - 10.5rem);
-    padding-inline-start: 0.6rem;
+    .kanban-main-wrapper {
+        overflow: auto hidden;
+        margin-inline-start: -0.6rem;
+        min-block-size: calc(100vh - 10.5rem);
+        padding-inline-start: 0.6rem;
 
-    .kanban-board {
-        inline-size: 16.875rem;
-        min-inline-size: 16.875rem;
+        .kanban-board {
+            inline-size: 16.875rem;
+            min-inline-size: 16.875rem;
 
-        .kanban-board-drop-zone {
-            min-block-size: 100%;
+            .kanban-board-drop-zone {
+                min-block-size: 100%;
+            }
+        }
+
+        .add-new-form {
+            .v-field__field {
+                border-radius: vuetify.$border-radius-root;
+                background-color: rgb(var(--v-theme-surface));
+            }
         }
     }
-
-    .add-new-form {
-        .v-field__field {
-            border-radius: vuetify.$border-radius-root;
-            background-color: rgb(var(--v-theme-surface));
-        }
-    }
-}
 </style>

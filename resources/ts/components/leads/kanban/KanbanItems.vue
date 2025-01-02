@@ -1,137 +1,137 @@
 <script setup lang="ts">
 
-import { animations, handleEnd } from '@formkit/drag-and-drop';
-import { useDragAndDrop } from '@formkit/drag-and-drop/vue';
-import { VForm } from 'vuetify/components/VForm';
+    import { animations, handleEnd } from '@formkit/drag-and-drop';
+    import { useDragAndDrop } from '@formkit/drag-and-drop/vue';
+    import { VForm } from 'vuetify/components/VForm';
 
 
-const $toast = useToast()
+    const $toast = useToast()
 
 
-const props = defineProps<{
-    kanbanIds: number[]
-    boardName: string
-    boardId: string | number | undefined
-    kanbanItems: Record<any, any>[]
-    unassignedLeads: Record<any, any>[]
-}>()
+    const props = defineProps<{
+        kanbanIds: number[]
+        boardName: string
+        boardId: string | number | undefined
+        kanbanItems: Record<any, any>[]
+        unassignedLeads: Record<any, any>[]
+    }>()
 
-const emit = defineEmits<{
-    (e: 'renameBoard', value: Record<string, any>): void
-    (e: 'deleteBoard', value: number): void
-    (e: 'addNewItem', value: any): void
-    (e: 'editItem', value: any | undefined): void
-    (e: 'updateItemsState', value: any): void
-    (e: 'deleteItem', value: number): void
-    (e: 'rmLeadFromUnassignedLeads', value: Record<string, any>): void
-}>()
+    const emit = defineEmits<{
+        (e: 'renameBoard', value: Record<string, any>): void
+        (e: 'deleteBoard', value: number): void
+        (e: 'addNewItem', value: any): void
+        (e: 'editItem', value: any | undefined): void
+        (e: 'updateItemsState', value: any): void
+        (e: 'deleteItem', value: number): void
+        (e: 'rmLeadFromUnassignedLeads', value: Record<string, any>): void
+        (e: 'selectLeadToViewDetails', value: Record<string, any>): void
+    }>()
 
-const [refKanbanBoard, leads] = useDragAndDrop(props.kanbanItems, {
-    plugins: [animations()],
-    draggable: child => child.classList.contains('kanban-card'),
-    sortable: false,
-    group: 'pipelines',
-    handleEnd: async (data) => {
-        const { success, message } = await $api(`leads/${data.draggedNode.el.id}/update-pipeline-stage`, {
-            method: 'PATCH',
-            body: {
-                stage: data.currentParent.el.id
-            },
-        })
-
-        if (success)
-            $toast.success(message)
-        else
-            $toast.error(message ?? 'Something went wrong. Please try again or contact support.')
-
-        handleEnd(data)
-    },
-})
-
-const localBoardName = ref(props.boardName)
-const isAddNewFormVisible = ref(false)
-const isBoardNameEditing = ref(false)
-const refForm = ref<VForm>()
-const newLeadToAssign = ref<any>(undefined)
-const refKanbanBoardTitle = ref<VForm>()
-const isViewLeadDetailsDrawerVisible = ref(false)
-const selectedLead = ref<any>(undefined)
-
-const boardActions = [
-    {
-        title: 'Rename',
-        prependIcon: 'ri-pencil-line',
-        onClick: () => { isBoardNameEditing.value = true },
-    },
-    {
-        title: 'Delete',
-        prependIcon: 'ri-delete-bin-line',
-        onClick: () => (emit('deleteBoard', props.boardId as number)),
-    },
-]
-
-// 👉 emit rename board event
-const renameBoard = () => {
-    refKanbanBoardTitle.value?.validate().then(valid => {
-        if (valid.valid) {
-            emit('renameBoard', {
-                id: props.boardId,
-                name: localBoardName.value,
+    const [refKanbanBoard, leads] = useDragAndDrop(props.kanbanItems, {
+        plugins: [animations()],
+        draggable: child => child.classList.contains('kanban-card'),
+        sortable: false,
+        group: 'pipelines',
+        handleEnd: async (data) => {
+            const { success, message } = await $api(`leads/${data.draggedNode.el.id}/update-pipeline-stage`, {
+                method: 'PATCH',
+                body: {
+                    stage: data.currentParent.el.id
+                },
             })
-            isBoardNameEditing.value = false
-        }
-    })
-}
 
-// 👉 emit add new item event
-const addNewItem = async () => {
-    const { success, message } = await $api(`leads/${newLeadToAssign.value.id}/update-pipeline-stage`, {
-        method: 'PATCH',
-        body: {
-            stage: props.boardId
+            if (success)
+                $toast.success(message)
+            else
+                $toast.error(message ?? 'Something went wrong. Please try again or contact support.')
+
+            handleEnd(data)
         },
     })
 
-    if (success) {
-        props.kanbanItems.push(newLeadToAssign.value)
-        emit('rmLeadFromUnassignedLeads', newLeadToAssign.value)
-        newLeadToAssign.value = undefined
+    const localBoardName = ref(props.boardName)
+    const isAddNewFormVisible = ref(false)
+    const isBoardNameEditing = ref(false)
+    const refForm = ref<VForm>()
+    const newLeadToAssign = ref<any>(undefined)
+    const refKanbanBoardTitle = ref<VForm>()
+
+
+    const boardActions = [
+        {
+            title: 'Rename',
+            prependIcon: 'ri-pencil-line',
+            onClick: () => { isBoardNameEditing.value = true },
+        },
+        {
+            title: 'Delete',
+            prependIcon: 'ri-delete-bin-line',
+            onClick: () => (emit('deleteBoard', props.boardId as number)),
+        },
+    ]
+
+    // 👉 emit rename board event
+    const renameBoard = () => {
+        refKanbanBoardTitle.value?.validate().then(valid => {
+            if (valid.valid) {
+                emit('renameBoard', {
+                    id: props.boardId,
+                    name: localBoardName.value,
+                })
+                isBoardNameEditing.value = false
+            }
+        })
+    }
+
+    // 👉 emit add new item event
+    const addNewItem = async () => {
+        const { success, message } = await $api(`leads/${newLeadToAssign.value.id}/update-pipeline-stage`, {
+            method: 'PATCH',
+            body: {
+                stage: props.boardId
+            },
+        })
+
+        if (success) {
+            props.kanbanItems.push(newLeadToAssign.value)
+            emit('rmLeadFromUnassignedLeads', newLeadToAssign.value)
+            newLeadToAssign.value = undefined
+            isAddNewFormVisible.value = false
+            $toast.success(message)
+        } else
+            $toast.error(message ?? 'Something went wrong. Please try again or contact support.')
+    }
+
+    const deleteItem = (item: number) => {
+        emit('deleteItem', item)
+    }
+
+    // 👉 reset add new item form when esc or close
+    const hideAddNewForm = () => {
         isAddNewFormVisible.value = false
-        $toast.success(message)
-    } else
-        $toast.error(message ?? 'Something went wrong. Please try again or contact support.')
-}
+        refForm.value?.reset()
+    }
 
-const deleteItem = (item: number) => {
-    emit('deleteItem', item)
-}
+    // close board name form when you loose focus from the form
+    onClickOutside(refKanbanBoardTitle, () => {
+        isBoardNameEditing.value = false
+    })
+    onClickOutside(refKanbanBoard, () => {
+        isAddNewFormVisible.value = false
+        newLeadToAssign.value = undefined
+    })
 
-// 👉 reset add new item form when esc or close
-const hideAddNewForm = () => {
-    isAddNewFormVisible.value = false
-    refForm.value?.reset()
-}
+    // 👉 reset board rename form when esc or close
+    const hideResetBoardNameForm = () => {
+        isBoardNameEditing.value = false
+        localBoardName.value = props.boardName
+    }
 
-// close board name form when you loose focus from the form
-onClickOutside(refKanbanBoardTitle, () => {
-    isBoardNameEditing.value = false
-})
-onClickOutside(refKanbanBoard, () => {
-    isAddNewFormVisible.value = false
-    newLeadToAssign.value = undefined
-})
-
-// 👉 reset board rename form when esc or close
-const hideResetBoardNameForm = () => {
-    isBoardNameEditing.value = false
-    localBoardName.value = props.boardName
-}
-
-// 👉 submit form on enter and new line on shift-enter
-const handleEnterKeydown = (event: { key: string; shiftKey: any }) => {
-    if (event.key === 'Enter' && !event.shiftKey)
-        addNewItem()
-}
+    // 👉 submit form on enter and new line on shift-enter
+    const handleEnterKeydown = (event: { key: string; shiftKey: any }) => {
+        if (event.key === 'Enter' && !event.shiftKey)
+            addNewItem()
+    }
 
 </script>
 
@@ -168,8 +168,7 @@ const handleEnterKeydown = (event: { key: string; shiftKey: any }) => {
             :id="(props.boardId as string)" :class="leads.length ? 'mb-4' : ''">
             <template v-for="lead in leads" :key="lead.id">
                 <KanbanCard :item="lead" :board-id="(props.boardId as number)" :board-name="props.boardName"
-                    :id="lead.id" @delete-kanban-item="deleteItem"
-                    @click="selectedLead = lead; isViewLeadDetailsDrawerVisible = true" />
+                    :id="lead.id" @delete-kanban-item="deleteItem" @click="emit('selectLeadToViewDetails', lead)" />
             </template>
 
             <!-- 👉 Add new Form -->
@@ -209,7 +208,6 @@ const handleEnterKeydown = (event: { key: string; shiftKey: any }) => {
         </div>
     </div>
 
-    <ViewLeadDetailsDrawer v-model:is-drawer-open="isViewLeadDetailsDrawerVisible" v-model:lead="selectedLead" />
 </template>
 
 <style lang="scss"></style>
