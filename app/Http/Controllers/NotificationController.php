@@ -28,7 +28,7 @@ class NotificationController extends Controller
                     ];
                 }
             }
-        });
+        })->filter();
         return response()->json([
             'notifications' => $notifications
         ]);

@@ -55,9 +55,9 @@ class UserController extends Controller
         $page = (int) $request->input('page', 1);
         $itemsPerPage = (int) $request->input('itemsPerPage', 10);
         $query = $request->input('q');
-        $status = $request->input('status');
-        $role = $request->input('role');
-        $department = $request->input('department');
+        $statuses = $request->input('status');
+        $roles = $request->input('role');
+        $departments = $request->input('department');
         $orderByColumn = $request->input('sortBy');
         $orderByDir = $request->input('orderBy');
 
@@ -73,15 +73,21 @@ class UserController extends Controller
                     ['phone', 'LIKE', "%$query%", 'or'],
                 ],
             ),
-        )->when(        // Apply status filter
-            value: $status,
-            callback: fn(Builder $userQuery, string $status) => $userQuery->where('status', $status)
-        )->when(        // Apply role filter
-            value: $role,
-            callback: fn(Builder $userQuery, string $role) => $userQuery->whereRelation('roles', 'name', '=', $role)
-        )->when(        // Apply department filter
-            value: $department,
-            callback: fn(Builder $userQuery, string $department) => $userQuery->whereRelation('department', 'name', '=', $department)
+        )->when(        // Apply statuses filter
+            value: $statuses,
+            callback: fn(Builder $userQuery, array $statuses) => $userQuery->whereIn('status', $statuses)
+        )->when(        // Apply roles filter
+            value: $roles,
+            callback: fn(Builder $userQuery, array $roles) => $userQuery->whereRelation(
+                'roles',
+                fn($rolesQuery) => $rolesQuery->whereIn('name', $roles)
+            )
+        )->when(        // Apply departments filter
+            value: $departments,
+            callback: fn(Builder $userQuery, array $departments) => $userQuery->whereRelation(
+                'department',
+                fn($departmentsQuery) => $departmentsQuery->whereIn('name', $departments)
+            )
         )->when(        // Apply ordering
             value: fn() => (!is_null($orderByColumn) && !is_null($orderByDir)) ? ['column' => $orderByColumn, 'dir' => $orderByDir] : null,
             callback: fn(Builder $userQuery, array $orderBy) => $userQuery->orderBy($orderBy['column'], $orderBy['dir'])

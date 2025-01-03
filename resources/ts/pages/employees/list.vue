@@ -1,258 +1,263 @@
 <script setup lang="ts">
 
+    const $toast = useToast()
 
-// 👉 Store
-const searchQuery = ref('')
-const selectedRole = ref()
-const selectedStatus = ref()
-const selectedDepartment = ref()
-const selectedUser = ref({})
-let userToDelete: number
+    // 👉 Store
+    const searchQuery = ref('')
+    const selectedRoles = ref([])
+    const selectedStatuses = ref([])
+    const selectedDepartments = ref([])
+    const selectedUser = ref({})
+    const userToDelete = ref(undefined)
 
-// Data table options
-const itemsPerPage = ref(20)
-const page = ref(1)
-const sortBy = ref('id')
-const orderBy = ref<boolean | "desc" | "asc">('desc')
-const selectedRows = ref([])
-const tableLoading = ref(false)
+    // Data table options
+    const itemsPerPage = ref(20)
+    const page = ref(1)
+    const sortBy = ref('id')
+    const orderBy = ref<boolean | "desc" | "asc">('desc')
+    const selectedRows = ref([])
+    const tableLoading = ref(false)
 
 
-// Add a ref for the AddNewUserDrawer & editUserDrawerRef component
-const addNewUserDrawerRef = ref()
-const editUserDrawerRef = ref()
+    // Add a ref for the AddNewUserDrawer & editUserDrawerRef component
+    const addNewUserDrawerRef = ref()
+    const editUserDrawerRef = ref()
 
-// Update data table options
-const updateOptions = (options: any) => {
-    sortBy.value = options.sortBy[0]?.key
-    orderBy.value = options.sortBy[0]?.order
-}
-
-// Headers
-const headers = [
-    { title: 'ID', key: 'id' },
-    { title: 'Name', key: 'name' },
-    { title: 'Department', key: 'department', sortable: false },
-    { title: 'Role', key: 'role', sortable: false },
-    { title: 'Status', key: 'status' },
-    { title: 'Email', key: 'email' },
-    { title: 'Phone', key: 'phone' },
-    { title: 'Actions', key: 'actions', sortable: false },
-]
-
-// 👉 Fetching users
-const { data: usersData, execute: fetchUsers, isFetching } = await useApi<any>(createUrl('users', {
-    query: {
-        q: searchQuery,
-        status: selectedStatus,
-        role: selectedRole,
-        department: selectedDepartment,
-        itemsPerPage,
-        page,
-        sortBy,
-        orderBy,
-    },
-}))
-
-// Watch isFetching from the useApi to toggle tableLoading
-watch(() => isFetching.value, (newValue) => {
-    tableLoading.value = newValue
-}, { immediate: true })
-
-const users = computed(() => usersData.value.users)
-const totalUsers = computed(() => usersData.value.totalUsers)
-
-const { roles } = await $api('roles')
-const { status } = await $api('users/statuses')
-const { departments } = await $api('departments')
-
-const resolveUserRoleVariant = (role: string): string => {
-    switch (role) {
-        case 'admin':
-            return 'success'
-        case 'employee':
-            return 'primary'
-        case 'hr':
-            return 'red'
-        case 'team_lead':
-            return 'blue-grey'
-        case 'account_manager':
-            return 'deep-orange'
-        case 'accountant':
-            return 'amber'
-        case 'sales_agent':
-            return 'teal'
-        default:
-            return 'info'
+    // Update data table options
+    const updateOptions = (options: any) => {
+        sortBy.value = options.sortBy[0]?.key
+        orderBy.value = options.sortBy[0]?.order
     }
-}
 
-const resolveUserStatusVariant = (stat: string) => {
-    const statLowerCase = stat.toLowerCase()
-    if (statLowerCase === 'active')
-        return 'success'
-    if (statLowerCase === 'inactive')
-        return 'warning'
+    // Headers
+    const headers = [
+        { title: 'ID', key: 'id' },
+        { title: 'Name', key: 'name' },
+        { title: 'Department', key: 'department', sortable: false },
+        { title: 'Role', key: 'role', sortable: false },
+        { title: 'Status', key: 'status' },
+        { title: 'Email', key: 'email' },
+        { title: 'Phone', key: 'phone' },
+        { title: 'Actions', key: 'actions', sortable: false },
+    ]
 
-    return 'primary'
-}
-
-const isAddNewUserDrawerVisible = ref(false)
-const isEditUserDrawerVisible = ref(false)
-const isSnackBarVisible = ref(false)
-const isDeleteDialogVisible = ref(false)
-const userResponsemessage = ref('')
-
-// 👉 Add new user
-const addNewUser = async (userData: any) => {
-    const { success, message } = await $api('/users', {
-        method: 'POST',
-        body: userData,
-        onResponseError({ response }) {
-            errors.value = response._data.errors
+    // 👉 Fetching users
+    const { data: usersData, execute: fetchUsers, isFetching } = await useApi<any>(createUrl('users', {
+        query: {
+            q: searchQuery,
+            'status[]': selectedStatuses,
+            'role[]': selectedRoles,
+            'department[]': selectedDepartments,
+            itemsPerPage,
+            page,
+            sortBy,
+            orderBy,
         },
-    })
+    }))
 
-    isSnackBarVisible.value = true
-    userResponsemessage.value = message
-    addNewUserDrawerRef.value.closeNavigationDrawer()
-    if (success) {
-        fetchUsers()
-        fetchEmployeesCount()
-    }
-}
+    // Watch isFetching from the useApi to toggle tableLoading
+    watch(() => isFetching.value, (newValue) => {
+        tableLoading.value = newValue
+    }, { immediate: true })
 
-// 👉 Edit user
-const editUser = async (userData: any) => {
-    const { success, message } = await $api(`users/${userData.id}`, {
-        method: 'PUT',
-        body: userData,
-        onResponseError({ response }) {
-            errors.value = response._data.errors
-        },
-    })
+    const users = computed(() => usersData.value.users)
+    const totalUsers = computed(() => usersData.value.totalUsers)
 
-    if (success) {
-        isSnackBarVisible.value = true
-        userResponsemessage.value = message
-        editUserDrawerRef.value.closeNavigationDrawer()
-        fetchUsers()
-        fetchEmployeesCount()
-    }
-}
+    const { roles } = await $api('roles')
+    const { status } = await $api('users/statuses')
+    const { departments } = await $api('departments')
 
-const openEditUserForm = (user: any) => {
-    selectedUser.value = user
-    isEditUserDrawerVisible.value = true
-}
-
-// 👉 Delete user
-const deleteUser = async () => {
-    const { success, message } = await $api(`users/${userToDelete}`, {
-        method: 'DELETE',
-    })
-
-    isDeleteDialogVisible.value = false
-
-    isSnackBarVisible.value = true
-    userResponsemessage.value = message
-    if (success) {
-        fetchUsers()
-        fetchEmployeesCount()
-    }
-}
-
-const errors = ref({
-    name: undefined,
-    email: undefined,
-    phone: undefined,
-    role: undefined,
-    department: undefined,
-    status: undefined,
-})
-
-const employeesCountData = ref({
-    totalEmployees: 0,
-    activeEmployees: 0,
-    inactiveEmployees: 0,
-    newEmployees: 0,
-})
-
-// 👉 Get employee count for top cards
-const { execute: fetchEmployeesCount, isFetching: isEmployeesCountFetching } = await useApi<any>(createUrl('users/count'), {
-    afterFetch: ctx => {
-        employeesCountData.value.totalEmployees = ctx.data.total
-        employeesCountData.value.activeEmployees = ctx.data.active
-        employeesCountData.value.inactiveEmployees = ctx.data.inactive
-        employeesCountData.value.newEmployees = ctx.data.new
-
-        return ctx
-    },
-})
-
-const widgetData = computed(() => ([
-    { title: 'Total Employees', value: employeesCountData.value.totalEmployees, icon: 'ri-group-line', iconColor: 'primary' },
-    { title: 'Active Employees', value: employeesCountData.value.activeEmployees, icon: 'ri-user-follow-line', iconColor: 'success' },
-    { title: 'Inactive Employees', value: employeesCountData.value.inactiveEmployees, icon: 'ri-user-add-line', iconColor: 'error' },
-    { title: 'New Employees', value: employeesCountData.value.newEmployees, icon: 'ri-user-search-line', iconColor: 'warning', desc: 'Joined last month' },
-]))
-
-watch(isEditUserDrawerVisible, editDrawer => {
-    if (!editDrawer)
-        selectedUser.value = {}
-})
-
-const isImportShow = ref(false)
-const importFile = ref(undefined)
-
-const downloadSampleImportFile = async () => {
-    const fileBlob = await $api('users/import/sample/download', { responseType: 'blob' })
-    const url = URL.createObjectURL(new Blob([fileBlob]))
-    const link = document.createElement('a')
-    link.href = url
-    link.setAttribute('download', 'sample.xlsx')
-    document.body.appendChild(link)
-    link.click()
-    link.parentNode?.removeChild(link)
-}
-
-const isFileUploading = ref(false)
-
-const uploadImportFile = async (file: File | File[]) => {
-    if (file) {
-        isFileUploading.value = true
-        const formData = new FormData()
-        formData.append('file', file as File)
-
-        const { success, message } = await $api('users/import', {
-            method: 'POST',
-            body: formData,
-            onResponseError: context => {
-                isFileUploading.value = false
-                isSnackBarVisible.value = true
-                if (Array.isArray(context.response._data.message))
-                    userResponsemessage.value = context.response._data.message.join('<br/>')
-                else {
-                    userResponsemessage.value = [
-                        `File: ${context.response._data.file}`,
-                        `Line: ${context.response._data.line}`,
-                        `Message: ${context.response._data.message}`,
-                    ].join('<br/>')
-                }
-            },
-        })
-        isFileUploading.value = false
-        isSnackBarVisible.value = true
-        userResponsemessage.value = message
-
-        if (success) {
-            importFile.value = undefined
-            isImportShow.value = false
-            fetchUsers()
-            fetchEmployeesCount()
+    const resolveUserRoleVariant = (role: string): string => {
+        switch (role) {
+            case 'admin':
+                return 'success'
+            case 'employee':
+                return 'primary'
+            case 'hr':
+                return 'red'
+            case 'team_lead':
+                return 'blue-grey'
+            case 'account_manager':
+                return 'deep-orange'
+            case 'accountant':
+                return 'amber'
+            case 'sales_agent':
+                return 'teal'
+            default:
+                return 'info'
         }
     }
-}
+
+    const resolveUserStatusVariant = (stat: string) => {
+        const statLowerCase = stat.toLowerCase()
+        if (statLowerCase === 'active')
+            return 'success'
+        if (statLowerCase === 'inactive')
+            return 'warning'
+
+        return 'primary'
+    }
+
+    const isAddNewUserDrawerVisible = ref(false)
+    const isEditUserDrawerVisible = ref(false)
+    const isDeleteDialogVisible = ref(false)
+
+    // 👉 Add new user
+    const addNewUser = async (userData: any) => {
+        const { success, message } = await $api('/users', {
+            method: 'POST',
+            body: userData,
+            onResponseError({ response }) {
+                errors.value = response._data.errors
+            },
+        })
+
+        addNewUserDrawerRef.value.closeNavigationDrawer()
+        if (success) {
+            $toast.success(message)
+            fetchUsers()
+            fetchEmployeesCount()
+        } else {
+            $toast.error(message ?? 'Something went wrong! Please try again or contact support.')
+        }
+    }
+
+    // 👉 Edit user
+    const editUser = async (userData: any) => {
+        const { success, message } = await $api(`users/${userData.id}`, {
+            method: 'PUT',
+            body: userData,
+            onResponseError({ response }) {
+                errors.value = response._data.errors
+            },
+        })
+
+        editUserDrawerRef.value.closeNavigationDrawer()
+        if (success) {
+            $toast.success(message)
+            fetchUsers()
+            fetchEmployeesCount()
+        } else {
+            $toast.error(message ?? 'Something went wrong! Please try again or contact support.')
+        }
+    }
+
+    const openEditUserForm = (user: any) => {
+        selectedUser.value = user
+        isEditUserDrawerVisible.value = true
+    }
+
+    // 👉 Delete user
+    const deleteUser = async () => {
+        const { success, message } = await $api(`users/${userToDelete.value}`, {
+            method: 'DELETE',
+        })
+
+        isDeleteDialogVisible.value = false
+
+        if (success) {
+            $toast.success(message)
+            fetchUsers()
+            fetchEmployeesCount()
+        } else {
+            $toast.error(message ?? 'Something went wrong! Please try again or contact support.')
+        }
+    }
+
+    const errors = ref({
+        name: undefined,
+        email: undefined,
+        phone: undefined,
+        role: undefined,
+        department: undefined,
+        status: undefined,
+    })
+
+    const employeesCountData = ref({
+        totalEmployees: 0,
+        activeEmployees: 0,
+        inactiveEmployees: 0,
+        newEmployees: 0,
+    })
+
+    // 👉 Get employee count for top cards
+    const { execute: fetchEmployeesCount, isFetching: isEmployeesCountFetching } = await useApi<any>(createUrl('users/count'), {
+        afterFetch: ctx => {
+            employeesCountData.value.totalEmployees = ctx.data.total
+            employeesCountData.value.activeEmployees = ctx.data.active
+            employeesCountData.value.inactiveEmployees = ctx.data.inactive
+            employeesCountData.value.newEmployees = ctx.data.new
+
+            return ctx
+        },
+    })
+
+    const widgetData = computed(() => ([
+        { title: 'Total Employees', value: employeesCountData.value.totalEmployees, icon: 'ri-group-line', iconColor: 'primary' },
+        { title: 'Active Employees', value: employeesCountData.value.activeEmployees, icon: 'ri-user-follow-line', iconColor: 'success' },
+        { title: 'Inactive Employees', value: employeesCountData.value.inactiveEmployees, icon: 'ri-user-add-line', iconColor: 'error' },
+        { title: 'New Employees', value: employeesCountData.value.newEmployees, icon: 'ri-user-search-line', iconColor: 'warning', desc: 'Joined last month' },
+    ]))
+
+    watch(isEditUserDrawerVisible, editDrawer => {
+        if (!editDrawer)
+            selectedUser.value = {}
+    })
+
+    const isImportShow = ref(false)
+    const importFile = ref(undefined)
+
+    const downloadSampleImportFile = async () => {
+        const fileBlob = await $api('users/import/sample/download', { responseType: 'blob' })
+        const url = URL.createObjectURL(new Blob([fileBlob]))
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'sample.xlsx')
+        document.body.appendChild(link)
+        link.click()
+        link.parentNode?.removeChild(link)
+    }
+
+    const isFileUploading = ref(false)
+
+    const uploadImportFile = async (file: File | File[]) => {
+        if (file) {
+            isFileUploading.value = true
+            const formData = new FormData()
+            formData.append('file', file as File)
+
+            const { success, message } = await $api('users/import', {
+                method: 'POST',
+                body: formData,
+                onResponseError: context => {
+                    let msg
+                    isFileUploading.value = false
+                    if (Array.isArray(context.response._data.message))
+                        msg = context.response._data.message.join('<br/>')
+                    else {
+                        msg = [
+                            `File: ${context.response._data.file}`,
+                            `Line: ${context.response._data.line}`,
+                            `Message: ${context.response._data.message}`,
+                        ].join('<br/>')
+                    }
+
+                    $toast.error(msg)
+                },
+            })
+            isFileUploading.value = false
+
+            if (success) {
+                $toast.success(message)
+                importFile.value = undefined
+                isImportShow.value = false
+                fetchUsers()
+                fetchEmployeesCount()
+            } else {
+                $toast.error(message ?? 'Something went wrong! Please try again or contact support.')
+            }
+        }
+    }
 
 </script>
 
@@ -293,21 +298,21 @@ const uploadImportFile = async (file: File | File[]) => {
                 <VRow align="center">
                     <!-- 👉 Select Role -->
                     <VCol cols="12" sm="3">
-                        <VSelect v-model="selectedRole" label="Filter by Role" placeholder="Filter by Role"
+                        <VSelect v-model="selectedRoles" label="Filter by Role" placeholder="Filter by Role" multiple
                             :items="roles" clearable clear-icon="ri-close-line" chips />
                     </VCol>
 
                     <!-- 👉 Select Department -->
                     <VCol cols="12" sm="3">
-                        <VSelect v-model="selectedDepartment" label="Filter by Department"
+                        <VSelect v-model="selectedDepartments" label="Filter by Department" multiple
                             placeholder="Filter by Department" :items="departments" clearable clear-icon="ri-close-line"
                             chips />
                     </VCol>
 
                     <!-- 👉 Select Status -->
                     <VCol cols="12" sm="3">
-                        <VSelect v-model="selectedStatus" label="Filter by Status" placeholder="Filter by Status"
-                            :items="status" clearable clear-icon="ri-close-line" chips />
+                        <VSelect v-model="selectedStatuses" label="Filter by Status" placeholder="Filter by Status"
+                            multiple :items="status" clearable clear-icon="ri-close-line" chips />
                     </VCol>
 
                     <VCol cols="12" sm="3">
@@ -331,9 +336,9 @@ const uploadImportFile = async (file: File | File[]) => {
                                     Import
                                 </VBtn>
 
-                                <!-- <VBtn color="secondary" prepend-icon="ri-download-2-line">
+                                <VBtn color="secondary" prepend-icon="ri-download-2-line">
                                     Export
-                                </VBtn> -->
+                                </VBtn>
                             </div>
 
                             <Transition>
@@ -465,15 +470,6 @@ const uploadImportFile = async (file: File | File[]) => {
         <EditUserDrawer v-model:isDrawerOpen="isEditUserDrawerVisible" @user-data="editUser" :status="status"
             :user="selectedUser" ref="editUserDrawerRef" :roles="roles" :departments="departments" :errors="errors" />
 
-        <VSnackbar v-model="isSnackBarVisible">
-            <span v-html="userResponsemessage"></span>
-            <template #actions>
-                <VBtn color="error" @click="isSnackBarVisible = false">
-                    Close
-                </VBtn>
-            </template>
-        </VSnackbar>
-
         <VDialog v-model="isDeleteDialogVisible" width="400">
             <!-- Dialog Content -->
             <VCard title="Confirmation" class="pb-5">
@@ -498,13 +494,14 @@ const uploadImportFile = async (file: File | File[]) => {
 </template>
 
 <style lang="css" scoped>
-.v-enter-active,
-.v-leave-active {
-    transition: opacity 0.5s ease;
-}
 
-.v-enter-from,
-.v-leave-to {
-    opacity: 0;
-}
+    .v-enter-active,
+    .v-leave-active {
+        transition: opacity 0.5s ease-in-out;
+    }
+
+    .v-enter-from,
+    .v-leave-to {
+        opacity: 0;
+    }
 </style>

@@ -1,377 +1,377 @@
 <script setup lang="ts">
-import { useAuthStore } from '@/@core/stores/auth';
+    import { useAuthStore } from '@/@core/stores/auth';
 
 
-const $toast = useToast();
+    const $toast = useToast();
 
-const authStore = useAuthStore()
+    const authStore = useAuthStore()
 
-// Get currently logged in user data
-const userData = authStore.user
+    // Get currently logged in user data
+    const userData = authStore.user
 
-// 👉 Filters
-const selectedUser = ref([])
-const selectedCustomers = ref([])
-const selectedLeadSources = ref([])
-const selectedBrands = ref([])
-const searchRemarks = ref()
-const selectedServices = ref([])
-const selectedStatuses = ref([])
-const selectedClosedDateRange = ref()
-const selectedCreatedAtRange = ref()
-const selectedCloseAmount = ref()
+    // 👉 Filters
+    const selectedUser = ref([])
+    const selectedCustomers = ref([])
+    const selectedLeadSources = ref([])
+    const selectedBrands = ref([])
+    const searchRemarks = ref()
+    const selectedServices = ref([])
+    const selectedStatuses = ref([])
+    const selectedClosedDateRange = ref()
+    const selectedCreatedAtRange = ref()
+    const selectedCloseAmount = ref()
 
-const selectedLead = ref<Record<string, any>>({})
-let leadToDelete: number
-const assignedUser = ref()
+    const selectedLead = ref<Record<string, any>>({})
+    let leadToDelete: number
+    const assignedUser = ref()
 
-// Data table options
-const itemsPerPage = ref(20)
-const page = ref(1)
-const sortBy = ref('id')
-const orderBy = ref<boolean | 'asc' | 'desc'>('desc')
-const tableLoading = ref(false)
+    // Data table options
+    const itemsPerPage = ref(20)
+    const page = ref(1)
+    const sortBy = ref('id')
+    const orderBy = ref<boolean | 'asc' | 'desc'>('desc')
+    const tableLoading = ref(false)
 
-// Child component refs
-const addNewLeadDrawerRef = ref()
-const editLeadDrawerRef = ref()
-const addLeadDetailsDrawerRef = ref()
+    // Child component refs
+    const addNewLeadDrawerRef = ref()
+    const editLeadDrawerRef = ref()
+    const addLeadDetailsDrawerRef = ref()
 
-// Update data table options
-const updateOptions = (options: any) => {
-    sortBy.value = options.sortBy[0]?.key
-    orderBy.value = options.sortBy[0]?.order
-}
-
-// Headers
-const headers = [
-    { title: '', key: 'data-table-expand' },
-    { title: 'ID', key: 'id' },
-    { title: 'Created By', key: 'created_by' },
-    { title: 'Assigned By', key: 'assigned_by' },
-    { title: 'Assigned To', key: 'assigned_to' },
-    { title: 'Campaign', key: 'campaign' },
-    { title: 'Customer name', key: 'customer_id' },
-    { title: 'Lead Source', key: 'lead_source_id' },
-    { title: 'Brand', key: 'brand_id' },
-    { title: 'Services sold', key: 'services', sortable: false },
-    { title: 'Upsells', key: 'upsells', sortable: false },
-    { title: 'Status', key: 'status' },
-    { title: 'Remarks', key: 'remarks' },
-    { title: 'Lead closed date', key: 'lead_closed_date' },
-    { title: 'Lead closed amount', key: 'lead_closed_amount' },
-    { title: 'Created at', key: 'created_at' },
-    { title: 'Updated at', key: 'updated_at' },
-    { title: 'Created at (by Country)', key: 'created_at_country', sortable: false },
-    { title: 'Updated at (by Country)', key: 'updated_at_country', sortable: false },
-    { title: 'Actions', key: 'actions', sortable: false },
-]
-const expandedRowDTHeader = [
-    { title: '#', key: 'sr' },
-    { title: 'Sales Agent', key: 'agent' },
-    { title: 'Contact Status', key: 'contact_status' },
-    { title: 'Notes', key: 'notes' },
-    { title: 'Follow-up', key: 'follow_up' },
-    { title: 'Final Status', key: 'final_status' },
-    { title: 'Final Status Date/Time', key: 'final_status_date' },
-    { title: 'Call Status', key: 'call_status' },
-    { title: 'Call Status Date/Time', key: 'call_date' },
-    { title: 'Email Status', key: 'email_status' },
-    { title: 'Email Status Date/Time', key: 'email_date' },
-    { title: 'SMS Status', key: 'sms_status' },
-    { title: 'SMS Status Date/Time', key: 'sms_date' },
-    { title: 'Created at', key: 'created_at' },
-]
-
-// Expanded rows
-const expandedRows = ref([])
-
-const toggleExpand = (item: any) => {
-    const index = expandedRows.value.indexOf(item.id as never);
-    if (index !== -1) {
-        expandedRows.value.splice(index, 1); // Collapse the row
-    } else {
-        expandedRows.value.push(item.id as never); // Expand the row
+    // Update data table options
+    const updateOptions = (options: any) => {
+        sortBy.value = options.sortBy[0]?.key
+        orderBy.value = options.sortBy[0]?.order
     }
-}
 
-const isRowExpanded = (item: any) => {
-    return expandedRows.value.includes(item.id as never);
-}
+    // Headers
+    const headers = [
+        { title: '', key: 'data-table-expand' },
+        { title: 'ID', key: 'id' },
+        { title: 'Created By', key: 'created_by' },
+        { title: 'Assigned By', key: 'assigned_by' },
+        { title: 'Assigned To', key: 'assigned_to' },
+        { title: 'Campaign', key: 'campaign' },
+        { title: 'Customer name', key: 'customer_id' },
+        { title: 'Lead Source', key: 'lead_source_id' },
+        { title: 'Brand', key: 'brand_id' },
+        { title: 'Services sold', key: 'services', sortable: false },
+        { title: 'Upsells', key: 'upsells', sortable: false },
+        { title: 'Status', key: 'status' },
+        { title: 'Remarks', key: 'remarks' },
+        { title: 'Lead closed date', key: 'lead_closed_date' },
+        { title: 'Lead closed amount', key: 'lead_closed_amount' },
+        { title: 'Created at', key: 'created_at' },
+        { title: 'Updated at', key: 'updated_at' },
+        { title: 'Created at (by Country)', key: 'created_at_country', sortable: false },
+        { title: 'Updated at (by Country)', key: 'updated_at_country', sortable: false },
+        { title: 'Actions', key: 'actions', sortable: false },
+    ]
+    const expandedRowDTHeader = [
+        { title: '#', key: 'sr' },
+        { title: 'Sales Agent', key: 'agent' },
+        { title: 'Contact Status', key: 'contact_status' },
+        { title: 'Notes', key: 'notes' },
+        { title: 'Follow-up', key: 'follow_up' },
+        { title: 'Final Status', key: 'final_status' },
+        { title: 'Final Status Date/Time', key: 'final_status_date' },
+        { title: 'Call Status', key: 'call_status' },
+        { title: 'Call Status Date/Time', key: 'call_date' },
+        { title: 'Email Status', key: 'email_status' },
+        { title: 'Email Status Date/Time', key: 'email_date' },
+        { title: 'SMS Status', key: 'sms_status' },
+        { title: 'SMS Status Date/Time', key: 'sms_date' },
+        { title: 'Created at', key: 'created_at' },
+    ]
 
-// 👉 Fetching leads
-const { data: leadsData, execute: fetchLeads, isFetching } = await useApi<any>(createUrl('leads', {
-    query: {
-        'users[]': selectedUser,
-        'customers[]': selectedCustomers,
-        'leadSources[]': selectedLeadSources,
-        'brands[]': selectedBrands,
-        'services[]': selectedServices,
-        'statuses[]': selectedStatuses,
-        remarks: searchRemarks,
-        leadClosedDateRange: selectedClosedDateRange,
-        createdAtRange: selectedCreatedAtRange,
-        leadClosedAmount: selectedCloseAmount,
-        itemsPerPage,
-        page,
-        sortBy,
-        orderBy,
-    },
-}))
+    // Expanded rows
+    const expandedRows = ref([])
 
-// Watch isFetching from the useApi to toggle tableLoading
-watch(() => isFetching.value, (newValue) => {
-    tableLoading.value = newValue
-}, { immediate: true })
-
-const leads = computed(() => leadsData.value.leads)
-const totalLeads = computed(() => leadsData.value.totalLeads)
-
-const { services } = await $api('services')
-const { brands } = await $api('brands')
-const { customers } = await $api('customers')
-const { leadsources } = await $api('leadsources')
-const { statuses } = await $api('leads/statuses')
-const { users } = await $api('users', {
-    query: {
-        'departments[]': ['admin', 'sales', 'lead_generation'] // Sales, Lead Generation & Admin departments
+    const toggleExpand = (item: any) => {
+        const index = expandedRows.value.indexOf(item.id as never);
+        if (index !== -1) {
+            expandedRows.value.splice(index, 1); // Collapse the row
+        } else {
+            expandedRows.value.push(item.id as never); // Expand the row
+        }
     }
-})
-const salesAgentUsers = await $api('users', {
-    query: {
-        'roles[]': ['sales_agent'],
-        'departments[]': ['sales'],
+
+    const isRowExpanded = (item: any) => {
+        return expandedRows.value.includes(item.id as never);
     }
-}).then(({ users }) => users.map((u: any) => ({ title: u.name, value: u.id })))
-const { campaigns } = await $api('campaigns')
 
-const _services = services.map((s: any) => ({ title: s.name, value: s.id }))
-const _brands = brands.map((b: any) => ({ title: b.name, value: b.id }))
-const _customers = customers.map((c: any) => ({ title: c.full_name, value: c.id }))
-const leadSources = leadsources.map((ls: any) => ({ title: ls.name, value: ls.id }))
-const createdByUsers = users.map((u: any) => ({ title: u.name, value: u.id }))
-createdByUsers.unshift({ title: 'Me', value: userData?.id })
+    // 👉 Fetching leads
+    const { data: leadsData, execute: fetchLeads, isFetching } = await useApi<any>(createUrl('leads', {
+        query: {
+            'users[]': selectedUser,
+            'customers[]': selectedCustomers,
+            'leadSources[]': selectedLeadSources,
+            'brands[]': selectedBrands,
+            'services[]': selectedServices,
+            'statuses[]': selectedStatuses,
+            remarks: searchRemarks,
+            leadClosedDateRange: selectedClosedDateRange,
+            createdAtRange: selectedCreatedAtRange,
+            leadClosedAmount: selectedCloseAmount,
+            itemsPerPage,
+            page,
+            sortBy,
+            orderBy,
+        },
+    }))
 
-// Drawers
-const isAddNewLeadDrawerVisible = ref(false)
-const isEditLeadDrawerVisible = ref(false)
-const isAddLeadDetailsDrawerVisible = ref(false)
+    // Watch isFetching from the useApi to toggle tableLoading
+    watch(() => isFetching.value, (newValue) => {
+        tableLoading.value = newValue
+    }, { immediate: true })
 
-// Dialogs
-const isDeleteDialogVisible = ref(false)
-const isLeadAssigningDialogVisible = ref(false)
-const isLeadPickingDialogVisible = ref(false)
+    const leads = computed(() => leadsData.value.leads)
+    const totalLeads = computed(() => leadsData.value.totalLeads)
 
-// 👉 Add new lead
-const addNewLead = async (leadData: any) => {
-    const { success, message } = await $api('leads', {
-        method: 'POST',
-        body: leadData,
-        onResponseError({ response }) {
-            errors.value = response._data.errors
+    const { services } = await $api('services')
+    const { brands } = await $api('brands')
+    const { customers } = await $api('customers')
+    const { leadsources } = await $api('leadsources')
+    const { statuses } = await $api('leads/statuses')
+    const { users } = await $api('users', {
+        query: {
+            'departments[]': ['admin', 'sales', 'lead_generation'] // Sales, Lead Generation & Admin departments
+        }
+    })
+    const salesAgentUsers = await $api('users', {
+        query: {
+            'roles[]': ['sales_agent'],
+            'departments[]': ['sales'],
+        }
+    }).then(({ users }) => users.map((u: any) => ({ title: u.name, value: u.id })))
+    const { campaigns } = await $api('campaigns')
+
+    const _services = services.map((s: any) => ({ title: s.name, value: s.id }))
+    const _brands = brands.map((b: any) => ({ title: b.name, value: b.id }))
+    const _customers = customers.map((c: any) => ({ title: c.full_name, value: c.id }))
+    const leadSources = leadsources.map((ls: any) => ({ title: ls.name, value: ls.id }))
+    const createdByUsers = users.map((u: any) => ({ title: u.name, value: u.id }))
+    createdByUsers.unshift({ title: 'Me', value: userData?.id })
+
+    // Drawers
+    const isAddNewLeadDrawerVisible = ref(false)
+    const isEditLeadDrawerVisible = ref(false)
+    const isAddLeadDetailsDrawerVisible = ref(false)
+
+    // Dialogs
+    const isDeleteDialogVisible = ref(false)
+    const isLeadAssigningDialogVisible = ref(false)
+    const isLeadPickingDialogVisible = ref(false)
+
+    // 👉 Add new lead
+    const addNewLead = async (leadData: any) => {
+        const { success, message } = await $api('leads', {
+            method: 'POST',
+            body: leadData,
+            onResponseError({ response }) {
+                errors.value = response._data.errors
+            },
+        })
+
+        if (success) {
+            $toast.success(message)
+            addNewLeadDrawerRef.value.closeNavigationDrawer()
+            fetchLeads()
+            fetchLeadsCount()
+        } else {
+            $toast.error(message ?? 'Something went wrong! Please try again or contact support.')
+        }
+    }
+
+    // 👉 Add lead details
+    const addLeadDetails = async (leadDetails: any) => {
+        const { success, message } = await $api(`leads/${selectedLead.value.id}/details`, {
+            method: 'POST',
+            body: leadDetails,
+            onResponseError() {
+                $toast.error('Something went wrong! Please try again or contact support.')
+            },
+        })
+
+        if (success) {
+            $toast.success(message)
+            addLeadDetailsDrawerRef.value.closeNavigationDrawer()
+            fetchLeads()
+        } else {
+            $toast.error(message)
+        }
+    }
+
+    // 👉 Edit lead
+    const editLead = async (leadData: any) => {
+        const { success, message } = await $api(`leads/${selectedLead.value.id}`, {
+            method: 'PUT',
+            body: leadData,
+            onResponseError({ response }) {
+                errors.value = response._data.errors
+            },
+        })
+
+        if (success) {
+            $toast.success(message)
+            editLeadDrawerRef.value.closeNavigationDrawer()
+            fetchLeads()
+            fetchLeadsCount()
+        } else {
+            $toast.error(message)
+        }
+    }
+
+    const openEditLeadForm = (lead: any) => {
+        selectedLead.value = lead
+        isEditLeadDrawerVisible.value = true
+    }
+
+    // 👉 Delete lead
+    const deleteLead = async () => {
+        const { success, message } = await $api(`leads/${leadToDelete}`, {
+            method: 'DELETE',
+        })
+
+        isDeleteDialogVisible.value = false
+
+        if (success) {
+            $toast.success(message)
+            fetchLeads()
+            fetchLeadsCount()
+        } else {
+            $toast.error(message)
+        }
+    }
+
+    const errors = ref<Record<string, any>>({
+        customer: undefined,
+        services: undefined,
+        lead_source: undefined,
+        brand: undefined,
+        status: undefined,
+        remarks: undefined,
+        lead_closed_amount: undefined,
+        lead_closed_date: undefined,
+        assigned_to: undefined,
+        campaign: undefined,
+    })
+
+    const leadsCountData = ref({
+        totalLeads: 0,
+        leadsThisMonth: 0,
+        closedLeads: 0,
+        totalAmount: {
+            usd: '',
+            gbp: '',
         },
     })
 
-    if (success) {
-        $toast.success(message)
-        addNewLeadDrawerRef.value.closeNavigationDrawer()
-        fetchLeads()
-        fetchLeadsCount()
-    } else {
-        $toast.error(message)
-    }
-}
+    // 👉 Get leads count for top cards
+    const { execute: fetchLeadsCount, isFetching: isLeadsCountFetching } = await useApi<any>(createUrl('leads/count'), {
+        afterFetch: ctx => {
+            leadsCountData.value.totalLeads = ctx.data.totalLeads
+            leadsCountData.value.leadsThisMonth = ctx.data.leadsThisMonth
+            leadsCountData.value.closedLeads = ctx.data.closedLeads
 
-// 👉 Add lead details
-const addLeadDetails = async (leadDetails: any) => {
-    const { success, message } = await $api(`leads/${selectedLead.value.id}/details`, {
-        method: 'POST',
-        body: leadDetails,
-        onResponseError({ response }) {
-            $toast.error('Something went wrong! Please try again or report to the developers.')
+            leadsCountData.value.totalAmount = {
+                usd: currencyFormatter(ctx.data.totalAmount?.usd || 0, 'usd'),
+                gbp: currencyFormatter(ctx.data.totalAmount?.gbp || 0, 'gbp'),
+            }
+
+            return ctx
         },
     })
 
-    if (success) {
-        $toast.success(message)
-        addLeadDetailsDrawerRef.value.closeNavigationDrawer()
-        fetchLeads()
-    } else {
-        $toast.error(message)
-    }
-}
-
-// 👉 Edit lead
-const editLead = async (leadData: any) => {
-    const { success, message } = await $api(`leads/${selectedLead.value.id}`, {
-        method: 'PUT',
-        body: leadData,
-        onResponseError({ response }) {
-            errors.value = response._data.errors
+    const widgetData = computed(() => ([
+        { title: 'Total Leads', value: leadsCountData.value.totalLeads, icon: 'ri-group-line', iconColor: 'primary' },
+        { title: 'Leads this month', value: leadsCountData.value.leadsThisMonth, icon: 'ri-user-follow-line', iconColor: 'success' },
+        { title: 'Closed leads', value: leadsCountData.value.closedLeads, icon: 'ri-user-add-line', iconColor: 'error' },
+        {
+            title: 'Total amount',
+            value: leadsCountData.value.totalAmount,
+            icon: 'ri-user-search-line',
+            iconColor: 'warning'
         },
+    ]))
+
+    watch(isEditLeadDrawerVisible, editDrawer => {
+        if (!editDrawer)
+            selectedLead.value = {}
     })
 
-    if (success) {
-        $toast.success(message)
-        editLeadDrawerRef.value.closeNavigationDrawer()
-        fetchLeads()
-        fetchLeadsCount()
-    } else {
-        $toast.error(message)
-    }
-}
 
-const openEditLeadForm = (lead: any) => {
-    selectedLead.value = lead
-    isEditLeadDrawerVisible.value = true
-}
+    const canEditLeads =
+        (lead: any) =>
+            (userData?.department.value === 'admin' && userData.role.value === 'admin') ||
+            (userData?.department.value === 'lead_generation' && userData.id == lead.created_by.id) ||
+            (userData?.department.value === 'sales' && userData.role.value === 'team_lead')
 
-// 👉 Delete lead
-const deleteLead = async () => {
-    const { success, message } = await $api(`leads/${leadToDelete}`, {
-        method: 'DELETE',
-    })
+    const canDeleteLeads =
+        (lead: any) => (isNullOrUndefined(lead.assigned_to)) &&
+            ((userData?.department.value === 'admin' && userData.role.value === 'admin') ||
+                (userData?.department.value === 'lead_generation' && userData.id == lead.created_by.id) ||
+                (userData?.department.value === 'sales' && userData.role.value === 'team_lead'))
 
-    isDeleteDialogVisible.value = false
+    const canAssignLeads =
+        (lead: any) => (
+            (isNullOrUndefined(lead.assigned_to)) &&
+            ((userData?.department.value === 'admin' && userData.role.value === 'admin') ||
+                (userData?.department.value === 'sales' && userData.role.value === 'team_lead'))
+        ) || (isCurrentUserSalesAgent && lead.lead_source?.type === 'unpaid' && lead.assigned_to?.id == userData?.id)
 
-    if (success) {
-        $toast.success(message)
-        fetchLeads()
-        fetchLeadsCount()
-    } else {
-        $toast.error(message)
-    }
-}
+    const canPickLeads =
+        (lead: any) => (isNullOrUndefined(lead.assigned_to)) &&
+            (lead.lead_source?.type === 'unpaid') &&
+            (userData?.department.value === 'sales' && userData.role.value === 'sales_agent')
 
-const errors = ref<Record<string, any>>({
-    customer: undefined,
-    services: undefined,
-    lead_source: undefined,
-    brand: undefined,
-    status: undefined,
-    remarks: undefined,
-    lead_closed_amount: undefined,
-    lead_closed_date: undefined,
-    assigned_to: undefined,
-    campaign: undefined,
-})
+    const canAddLeadDetails =
+        (lead: any) => (
+            (userData?.department.value === 'sales' && userData.role.value === 'sales_agent') &&
+            (userData.id == lead.assigned_to?.id)
+        )
 
-const leadsCountData = ref({
-    totalLeads: 0,
-    leadsThisMonth: 0,
-    closedLeads: 0,
-    totalAmount: {
-        usd: '',
-        gbp: '',
-    },
-})
+    const isCurrentUserSalesAgent = computed(() => (userData?.department.value === 'sales' && userData.role.value === 'sales_agent'))
 
-// 👉 Get leads count for top cards
-const { execute: fetchLeadsCount, isFetching: isLeadsCountFetching } = await useApi<any>(createUrl('leads/count'), {
-    afterFetch: ctx => {
-        leadsCountData.value.totalLeads = ctx.data.totalLeads
-        leadsCountData.value.leadsThisMonth = ctx.data.leadsThisMonth
-        leadsCountData.value.closedLeads = ctx.data.closedLeads
 
-        leadsCountData.value.totalAmount = {
-            usd: currencyFormatter(ctx.data.totalAmount?.usd || 0, 'usd'),
-            gbp: currencyFormatter(ctx.data.totalAmount?.gbp || 0, 'gbp'),
+    const assignLead = async (assignedTo: number) => {
+        if (!assignedTo) {
+            errors.value.assigned_to = 'Please select the sales agent'
         }
 
-        return ctx
-    },
-})
+        const { success, message } = await $api(`leads/${selectedLead.value.id}/assign`, {
+            body: { assignedTo },
+            method: 'PATCH'
+        })
 
-const widgetData = computed(() => ([
-    { title: 'Total Leads', value: leadsCountData.value.totalLeads, icon: 'ri-group-line', iconColor: 'primary' },
-    { title: 'Leads this month', value: leadsCountData.value.leadsThisMonth, icon: 'ri-user-follow-line', iconColor: 'success' },
-    { title: 'Closed leads', value: leadsCountData.value.closedLeads, icon: 'ri-user-add-line', iconColor: 'error' },
-    {
-        title: 'Total amount',
-        value: leadsCountData.value.totalAmount,
-        icon: 'ri-user-search-line',
-        iconColor: 'warning'
-    },
-]))
-
-watch(isEditLeadDrawerVisible, editDrawer => {
-    if (!editDrawer)
-        selectedLead.value = {}
-})
-
-
-const canEditLeads =
-    (lead: any) =>
-        (userData?.department.value === 'admin' && userData.role.value === 'admin') ||
-        (userData?.department.value === 'lead_generation' && userData.id == lead.created_by.id) ||
-        (userData?.department.value === 'sales' && userData.role.value === 'team_lead')
-
-const canDeleteLeads =
-    (lead: any) => (isNullOrUndefined(lead.assigned_to)) &&
-        ((userData?.department.value === 'admin' && userData.role.value === 'admin') ||
-            (userData?.department.value === 'lead_generation' && userData.id == lead.created_by.id) ||
-            (userData?.department.value === 'sales' && userData.role.value === 'team_lead'))
-
-const canAssignLeads =
-    (lead: any) => (
-        (isNullOrUndefined(lead.assigned_to)) &&
-        ((userData?.department.value === 'admin' && userData.role.value === 'admin') ||
-            (userData?.department.value === 'sales' && userData.role.value === 'team_lead'))
-    ) || (isCurrentUserSalesAgent && lead.lead_source?.type === 'unpaid' && lead.assigned_to?.id == userData?.id)
-
-const canPickLeads =
-    (lead: any) => (isNullOrUndefined(lead.assigned_to)) &&
-        (lead.lead_source?.type === 'unpaid') &&
-        (userData?.department.value === 'sales' && userData.role.value === 'sales_agent')
-
-const canAddLeadDetails =
-    (lead: any) => (
-        (userData?.department.value === 'sales' && userData.role.value === 'sales_agent') &&
-        (userData.id == lead.assigned_to?.id)
-    )
-
-const isCurrentUserSalesAgent = computed(() => (userData?.department.value === 'sales' && userData.role.value === 'sales_agent'))
-
-
-const assignLead = async (assignedTo: number) => {
-    if (!assignedTo) {
-        errors.value.assigned_to = 'Please select the sales agent'
+        if (success) {
+            $toast.success(message)
+            isLeadAssigningDialogVisible.value = false
+            selectedLead.value = {}
+            assignedUser.value = undefined
+            fetchLeads()
+        } else {
+            $toast.error(message)
+        }
     }
 
-    const { success, message } = await $api(`leads/${selectedLead.value.id}/assign`, {
-        body: { assignedTo },
-        method: 'PATCH'
+    const pickLead = async () => {
+        const { success, message } = await $api(`leads/${selectedLead.value.id}/pick`, {
+            method: 'PATCH'
+        })
+
+        if (success) {
+            $toast.success(message)
+            isLeadPickingDialogVisible.value = false
+            selectedLead.value = {}
+            fetchLeads()
+        } else {
+            $toast.error(message)
+        }
+    }
+
+    watch(assignedUser, () => {
+        errors.value.assigned_to = undefined
     })
-
-    if (success) {
-        $toast.success(message)
-        isLeadAssigningDialogVisible.value = false
-        selectedLead.value = {}
-        assignedUser.value = undefined
-        fetchLeads()
-    } else {
-        $toast.error(message)
-    }
-}
-
-const pickLead = async () => {
-    const { success, message } = await $api(`leads/${selectedLead.value.id}/pick`, {
-        method: 'PATCH'
-    })
-
-    if (success) {
-        $toast.success(message)
-        isLeadPickingDialogVisible.value = false
-        selectedLead.value = {}
-        fetchLeads()
-    } else {
-        $toast.error(message)
-    }
-}
-
-watch(assignedUser, () => {
-    errors.value.assigned_to = undefined
-})
 
 </script>
 
