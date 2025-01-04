@@ -1,158 +1,144 @@
 <script setup lang="ts">
-import { useAuthStore } from '@/@core/stores/auth';
+    import { useAuthStore } from '@/@core/stores/auth';
 
 
-const $toast = useToast()
+    const $toast = useToast()
 
-const authStore = useAuthStore()
+    const authStore = useAuthStore()
 
-const userData = authStore.user
+    const userData = authStore.user
 
-const toggleAssignedToMe = ref(true)
-const assignedToMe = ref('yes')
+    const toggleAssignedToMe = ref(true)
+    const assignedToMe = ref('yes')
 
-watch(toggleAssignedToMe, newValue => {
-    assignedToMe.value = newValue ? 'yes' : 'no'
-})
-
-// Selected task to edit
-const selectedTask = ref<Record<string, any>>({})
-let taskToDelete: number
-
-// Add a ref for the AddNewTaskDrawer, editTaskDrawerRef & viewTaskDrawerRef component
-const addNewTaskDrawerRef = ref()
-const editTaskDrawerRef = ref()
-const viewTaskDrawerRef = ref()
-
-const query = computed(() => userData?.role.value === 'team_lead' ? { assignedToMe } : {})
-
-// 👉 Fetching tasks
-const { data: tasksByStatusData, execute: fetchTasksByStatus } = await useApi<any>(createUrl('tasks/kanban', { query }))
-
-const tasksByStatus = ref(tasksByStatusData.value.tasksByStatus)
-
-window.Echo.private(`Task.Assigned.${userData?.id}`)
-    .notification((notification: any) => {
-        tasksByStatus.value[notification.task.status].unshift(notification.task)
+    watch(toggleAssignedToMe, newValue => {
+        assignedToMe.value = newValue ? 'yes' : 'no'
     })
 
-watch(tasksByStatusData, (newVal) => {
-    tasksByStatus.value = newVal.tasksByStatus
-})
+    // Selected task to edit
+    const selectedTask = ref<Record<string, any>>({})
+    let taskToDelete: number
 
-const statuses = [
-    {
-        title: 'Pending',
-        value: 'pending'
-    },
-    {
-        title: 'In Progress',
-        value: 'in_progress'
-    },
-    {
-        title: 'Completed',
-        value: 'completed'
-    },
-]
+    // Add a ref for the AddNewTaskDrawer, editTaskDrawerRef & viewTaskDrawerRef component
+    const addNewTaskDrawerRef = ref()
+    const editTaskDrawerRef = ref()
+    const viewTaskDrawerRef = ref()
 
-const users = ref([])
-const departments = ref([])
+    const query = computed(() => userData?.role.value === 'team_lead' ? { assignedToMe } : {})
 
-if (userData?.role.value === 'admin' && userData.department.value === 'admin') {
-    users.value = await $api('users')
-        .then(({ users }) => users.map((u: any) => ({ title: u.name, value: u.id })))
-    departments.value = await $api('departments')
-        .then(({ departments }) => departments.map((d: any) => ({ title: d.title, value: d.id })))
-} else if (userData?.role.value === 'team_lead') {
-    users.value = await $api('users', {
-        query: {
-            'departments[]': [userData.department.value],
-        }
-    }).then(({ users }) => users.map((u: any) => ({ title: u.name, value: u.id })))
-}
+    // 👉 Fetching tasks
+    const { data: tasksByStatusData, execute: fetchTasksByStatus } = await useApi<any>(createUrl('tasks/kanban', { query }))
 
-const resolveTaskStatusColor = (status: string): string => {
-    switch (status) {
-        case 'completed':
-            return 'success'
-        case 'in_progress':
-            return 'info'
-        default:
-            return 'error'
+    const tasksByStatus = ref(tasksByStatusData.value.tasksByStatus)
+
+    window.Echo.private(`Task.Assigned.${userData?.id}`)
+        .notification((notification: any) => {
+            console.log(`toggleAssignedToMe: ${toggleAssignedToMe}`);
+            console.log(notification);
+
+            if (toggleAssignedToMe)
+                tasksByStatus.value[notification.task.status].unshift(notification.task)
+        })
+
+    watch(tasksByStatusData, (newVal) => {
+        tasksByStatus.value = newVal.tasksByStatus
+    })
+
+    const statuses = [
+        {
+            title: 'Pending',
+            value: 'pending'
+        },
+        {
+            title: 'In Progress',
+            value: 'in_progress'
+        },
+        {
+            title: 'Completed',
+            value: 'completed'
+        },
+    ]
+
+    const users = ref([])
+    const departments = ref([])
+
+    if (userData?.role.value === 'admin' && userData.department.value === 'admin') {
+        users.value = await $api('users')
+            .then(({ users }) => users.map((u: any) => ({ title: u.name, value: u.id })))
+        departments.value = await $api('departments')
+            .then(({ departments }) => departments.map((d: any) => ({ title: d.title, value: d.id })))
+    } else if (userData?.role.value === 'team_lead') {
+        users.value = await $api('users', {
+            query: {
+                'departments[]': [userData.department.value],
+            }
+        }).then(({ users }) => users.map((u: any) => ({ title: u.name, value: u.id })))
     }
-}
 
-const isAddNewTaskDrawerVisible = ref(false)
-const isEditTaskDrawerVisible = ref(false)
-const isViewTaskDrawerVisible = ref(false)
-const isDeleteDialogVisible = ref(false)
+    const resolveTaskStatusColor = (status: string): string => {
+        switch (status) {
+            case 'completed':
+                return 'success'
+            case 'in_progress':
+                return 'info'
+            default:
+                return 'error'
+        }
+    }
 
-const errors = ref({
-    title: undefined,
-    description: undefined,
-    deadline: undefined,
-    assigned_to: undefined,
-    files: [],
-    status: undefined,
-    comment: undefined,
-})
+    const isAddNewTaskDrawerVisible = ref(false)
+    const isEditTaskDrawerVisible = ref(false)
+    const isViewTaskDrawerVisible = ref(false)
+    const isDeleteDialogVisible = ref(false)
 
-// 👉 Add new task
-const addNewTask = async (taskData: FormData) => {
-    const { success, message } = await $api('tasks', {
-        method: 'POST',
-        body: taskData,
-        onResponseError({ response }) {
-            errors.value = response._data.errors
-        },
+    const errors = ref({
+        title: undefined,
+        description: undefined,
+        deadline: undefined,
+        assigned_to: undefined,
+        files: [],
+        status: undefined,
+        comment: undefined,
     })
 
-    addNewTaskDrawerRef.value.closeNavigationDrawer()
-    if (success) {
-        $toast.success(message)
-        fetchTasksByStatus()
-    } else
-        $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
-}
+    // 👉 Add new task
+    const addNewTask = async (taskData: FormData) => {
+        const { success, message } = await $api('tasks', {
+            method: 'POST',
+            body: taskData,
+            onResponseError({ response }) {
+                errors.value = response._data.errors
+            },
+        })
 
-// 👉 Add comment
-const addComment = async (commentData: FormData) => {
-    const { success, message, comment } = await $api(`tasks/${selectedTask.value.id}/comments`, {
-        method: 'POST',
-        body: commentData,
-    })
+        addNewTaskDrawerRef.value.closeNavigationDrawer()
+        if (success) {
+            $toast.success(message)
+            fetchTasksByStatus()
+        } else
+            $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
+    }
 
-    if (success) {
-        $toast.success(message)
-        selectedTask.value.comments.push(comment)
-        viewTaskDrawerRef.value.commentForm.reset()
-    } else
-        $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
-}
+    // 👉 Add comment
+    const addComment = async (commentData: FormData) => {
+        const { success, message, comment } = await $api(`tasks/${selectedTask.value.id}/comments`, {
+            method: 'POST',
+            body: commentData,
+        })
 
-const deleteComment = async (commentIndex: number) => {
-    const comment = selectedTask.value.comments[commentIndex]
+        if (success) {
+            $toast.success(message)
+            selectedTask.value.comments.push(comment)
+            viewTaskDrawerRef.value.commentForm.reset()
+        } else
+            $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
+    }
 
-    const { success, message } = await $api(`tasks/comments/${comment.id}`, {
-        method: 'DELETE',
-        onResponseError({ response }) {
-            console.error(response._data.message)
-            $toast.error("Something went wrong! Please try again or contact support.")
-        },
-    })
+    const deleteComment = async (commentIndex: number) => {
+        const comment = selectedTask.value.comments[commentIndex]
 
-    if (success) {
-        $toast.success(message)
-        selectedTask.value.comments.splice(commentIndex, 1)
-    } else
-        $toast.error(message ?? "Something went wrong! Please try again or contact support.")
-}
-
-const updateTaskStatus = async ({ id, status, newStatus }: { id: number, status: string, newStatus: string }) => {
-    if (status !== newStatus) {
-        const { success, message } = await $api(`tasks/${id}/status`, {
-            method: 'PATCH',
-            body: { status: newStatus },
+        const { success, message } = await $api(`tasks/comments/${comment.id}`, {
+            method: 'DELETE',
             onResponseError({ response }) {
                 console.error(response._data.message)
                 $toast.error("Something went wrong! Please try again or contact support.")
@@ -161,72 +147,90 @@ const updateTaskStatus = async ({ id, status, newStatus }: { id: number, status:
 
         if (success) {
             $toast.success(message)
-            fetchTasksByStatus()
-                .then(r => r.json())
-                .then(({ tasksByStatus }) => {
-                    let task
-                    for (const status in tasksByStatus) {
-                        if (Object.prototype.hasOwnProperty.call(tasksByStatus, status)) {
-                            const tasks = tasksByStatus[status];
-                            task = tasks.find((t: any) => t.id === id)
-                            if (task) break
-                        }
-                    }
-                    selectedTask.value = task
-                    return { tasksByStatus }
-                })
+            selectedTask.value.comments.splice(commentIndex, 1)
         } else
             $toast.error(message ?? "Something went wrong! Please try again or contact support.")
     }
-}
 
-provide('openEditTaskDrawer', (task: any) => {
-    selectedTask.value = task
-    isEditTaskDrawerVisible.value = true
-})
+    const updateTaskStatus = async ({ id, status, newStatus }: { id: number, status: string, newStatus: string }) => {
+        if (status !== newStatus) {
+            const { success, message } = await $api(`tasks/${id}/status`, {
+                method: 'PATCH',
+                body: { status: newStatus },
+                onResponseError({ response }) {
+                    console.error(response._data.message)
+                    $toast.error("Something went wrong! Please try again or contact support.")
+                },
+            })
 
-provide('openDeleteTaskDialog', (taskId: number) => {
-    taskToDelete = taskId
-    isDeleteDialogVisible.value = true
-})
+            if (success) {
+                $toast.success(message)
+                fetchTasksByStatus()
+                    .then(r => r.json())
+                    .then(({ tasksByStatus }) => {
+                        let task
+                        for (const status in tasksByStatus) {
+                            if (Object.prototype.hasOwnProperty.call(tasksByStatus, status)) {
+                                const tasks = tasksByStatus[status];
+                                task = tasks.find((t: any) => t.id === id)
+                                if (task) break
+                            }
+                        }
+                        selectedTask.value = task
+                        return { tasksByStatus }
+                    })
+            } else
+                $toast.error(message ?? "Something went wrong! Please try again or contact support.")
+        }
+    }
 
-// 👉 Edit task
-const editTask = async (taskData: any) => {
-    const { success, message } = await $api(`tasks/${taskData.id}`, {
-        method: 'PUT',
-        body: taskData,
-        onResponseError({ response }) {
-            errors.value = response._data.errors
-        },
+    provide('openEditTaskDrawer', (task: any) => {
+        selectedTask.value = task
+        isEditTaskDrawerVisible.value = true
     })
 
-    editTaskDrawerRef.value.closeNavigationDrawer()
-    if (success) {
-        $toast.success(message)
-        fetchTasksByStatus()
-    } else
-        $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
-}
-
-// 👉 Delete task
-const deleteTask = async () => {
-    const { success, message } = await $api(`tasks/${taskToDelete}`, {
-        method: 'DELETE',
+    provide('openDeleteTaskDialog', (taskId: number) => {
+        taskToDelete = taskId
+        isDeleteDialogVisible.value = true
     })
 
-    isDeleteDialogVisible.value = false
+    // 👉 Edit task
+    const editTask = async (taskData: any) => {
+        const { success, message } = await $api(`tasks/${taskData.id}`, {
+            method: 'PUT',
+            body: taskData,
+            onResponseError({ response }) {
+                errors.value = response._data.errors
+            },
+        })
 
-    if (success) {
-        $toast.success(message)
-        fetchTasksByStatus()
-    } else
-        $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
-}
+        editTaskDrawerRef.value.closeNavigationDrawer()
+        if (success) {
+            $toast.success(message)
+            fetchTasksByStatus()
+        } else
+            $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
+    }
 
-watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDrawer]) => {
-    if (!editDrawer && !viewDrawer)
-        selectedTask.value = {}
-})
+    // 👉 Delete task
+    const deleteTask = async () => {
+        const { success, message } = await $api(`tasks/${taskToDelete}`, {
+            method: 'DELETE',
+        })
+
+        isDeleteDialogVisible.value = false
+
+        if (success) {
+            $toast.success(message)
+            fetchTasksByStatus()
+        } else
+            $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
+    }
+
+    watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDrawer]) => {
+        if (!editDrawer && !viewDrawer)
+            selectedTask.value = {}
+    })
 
 </script>
 
@@ -302,28 +306,28 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
 </template>
 
 <style lang="scss">
-@use "@styles/variables/_vuetify.scss" as vuetify;
+    @use "@styles/variables/_vuetify.scss" as vuetify;
 
-.kanban-main-wrapper {
-    overflow: auto hidden;
-    margin-inline-start: -0.6rem;
-    // min-block-size: calc(100vh - 10.5rem);
-    padding-inline-start: 0.6rem;
+    .kanban-main-wrapper {
+        overflow: auto hidden;
+        margin-inline-start: -0.6rem;
+        // min-block-size: calc(100vh - 10.5rem);
+        padding-inline-start: 0.6rem;
 
-    .kanban-board {
-        inline-size: 16.875rem;
-        min-inline-size: 16.875rem;
+        .kanban-board {
+            inline-size: 16.875rem;
+            min-inline-size: 16.875rem;
 
-        .kanban-board-drop-zone {
-            min-block-size: 100%;
+            .kanban-board-drop-zone {
+                min-block-size: 100%;
+            }
+        }
+
+        .add-new-form {
+            .v-field__field {
+                border-radius: vuetify.$border-radius-root;
+                background-color: rgb(var(--v-theme-surface));
+            }
         }
     }
-
-    .add-new-form {
-        .v-field__field {
-            border-radius: vuetify.$border-radius-root;
-            background-color: rgb(var(--v-theme-surface));
-        }
-    }
-}
 </style>

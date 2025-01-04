@@ -37,12 +37,16 @@ class TaskController extends Controller
 
         $tasks = Task::with(['files', 'creator', 'assignee.department', 'comments.files']);
 
+
         if (!$request->user()->hasRole('admin')) {
             if ($request->user()->hasRole('team_lead'))
-                $tasks = $tasks->where([
-                    ['created_by', '=', Auth::id(), 'OR'],
-                    ['assigned_to', '=', Auth::id(), 'OR'],
-                ]);
+                $tasks = $tasks->where(
+                    column: [
+                        ['created_by', '=', Auth::id()],
+                        ['assigned_to', '=', Auth::id()],
+                    ],
+                    boolean: 'OR'
+                );
             else
                 $tasks = $tasks->where('assigned_to', Auth::id());
         }
