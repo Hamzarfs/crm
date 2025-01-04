@@ -45,9 +45,9 @@
     const { data: usersData, execute: fetchUsers, isFetching } = await useApi<any>(createUrl('users', {
         query: {
             q: searchQuery,
-            'status[]': selectedStatuses,
-            'role[]': selectedRoles,
-            'department[]': selectedDepartments,
+            'statuses[]': selectedStatuses,
+            'roles[]': selectedRoles,
+            'departments[]': selectedDepartments,
             itemsPerPage,
             page,
             sortBy,

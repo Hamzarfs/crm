@@ -55,9 +55,9 @@ class UserController extends Controller
         $page = (int) $request->input('page', 1);
         $itemsPerPage = (int) $request->input('itemsPerPage', 10);
         $query = $request->input('q');
-        $statuses = $request->input('status');
-        $roles = $request->input('role');
-        $departments = $request->input('department');
+        $statuses = $request->input('statuses');
+        $roles = $request->input('roles');
+        $departments = $request->input('departments');
         $orderByColumn = $request->input('sortBy');
         $orderByDir = $request->input('orderBy');
 
