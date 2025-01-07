@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
@@ -25,11 +26,11 @@ class TaskController extends Controller
         $page = (int) $request->input('page', 1);
         $itemsPerPage = (int) $request->input('itemsPerPage', 10);
 
-        $department = $request->input('department');
-        $user = $request->input('user');
+        $departments = $request->input('departments');
+        $users = $request->input('users');
+        $statuses = $request->input('statuses');
         $date = $request->input('date');
         $assignedToMe = $request->input('assignedToMe');
-        $status = $request->input('status');
         $query = $request->input('q');
 
         $orderByColumn = $request->input('sortBy');
@@ -53,16 +54,22 @@ class TaskController extends Controller
 
         // Applying DT filters
         $tasks = $tasks->when(
-            value: $department,
-            callback: fn(Builder $tasksQuery, $department) => $tasksQuery->whereRelation('assignee', 'department_id', '=', $department)
-        )->when(
-            value: $user,
-            callback: fn(Builder $tasksQuery, $user) => $tasksQuery->where(
-                column: [
-                    ['created_by', '=', $user, 'OR'],
-                    ['assigned_to', '=', $user, 'OR'],
-                ],
+            value: $departments,
+            callback: fn(Builder $tasksQuery, array $departments) => $tasksQuery->whereRelation(
+                'assignee',
+                fn($assigneeQuery) => $assigneeQuery->whereRelation('department', fn($assigneeDepartmentQuery) => $assigneeDepartmentQuery->whereIn('name', $departments))
             )
+        )->when(
+            value: $users,
+            callback: fn(Builder $tasksQuery, array $users) => $tasksQuery->where(
+                fn($tasksSubQuery) => $tasksSubQuery->whereIn('created_by', $users)->orWhereIn('assigned_to', $users)
+            )
+            // callback: fn(Builder $tasksQuery, array $users) => $tasksQuery->where(
+            //     column: [
+            //         ['created_by', 'IN', $users, 'OR'],
+            //         ['assigned_to', 'IN', $users, 'OR'],
+            //     ],
+            // )
         )->when(
             value: $date,
             callback: function (Builder $tasksQuery, $date) {
@@ -74,8 +81,8 @@ class TaskController extends Controller
                     ->orWhereDate('updated_at', '=', $formattedDate));
             }
         )->when(
-            value: $status,
-            callback: fn(Builder $tasksQuery, $status) => $tasksQuery->where('status', $status)
+            value: $statuses,
+            callback: fn(Builder $tasksQuery, array $status) => $tasksQuery->whereIn('status', $status)
         )->when(
             value: $assignedToMe,
             callback: fn(Builder $tasksQuery, $assignedToMe) => $assignedToMe === 'yes' ? $tasksQuery->where('assigned_to', Auth::id()) : $tasksQuery->where('created_by', Auth::id()),

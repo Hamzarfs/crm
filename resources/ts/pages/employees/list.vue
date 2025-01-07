@@ -341,7 +341,7 @@
                                 </VBtn>
                             </div>
 
-                            <Transition>
+                            <Transition name="import-field">
                                 <div class="w-100" v-if="isImportShow">
                                     <VFileInput v-model="importFile" class="mb-2" accept=".xlsx"
                                         :loading="isFileUploading" @update:model-value="uploadImportFile"

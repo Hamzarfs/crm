@@ -1,246 +1,268 @@
 <script setup lang="ts">
 
-import { useAuthStore } from '@/@core/stores/auth';
-import { mergeProps } from 'vue';
+    import { useAuthStore } from '@/@core/stores/auth';
+    import { mergeProps } from 'vue';
 
 
-const authStore = useAuthStore()
+    const authStore = useAuthStore()
 
-// Get currently logged in user data
-const userData = authStore.user
+    // Get currently logged in user data
+    const userData = authStore.user
 
-const $toast = useToast()
+    const $toast = useToast()
 
-// Filter values
-const searchQuery = ref('')
-const selectedUser = ref()
-const selectedDepartment = ref()
-const selectedDate = ref()
-const selectedStatus = ref()
-const toggleAssignedToMe = ref(true)
-const assignedToMe = ref('yes')
+    // Filter values
+    const searchQuery = ref('')
+    const selectedUsers = ref([])
+    const selectedDepartments = ref([])
+    const selectedStatuses = ref([])
+    const selectedDate = ref()
+    const toggleAssignedToMe = ref(true)
+    const assignedToMe = ref('yes')
 
-watch(toggleAssignedToMe, newValue => {
-    assignedToMe.value = newValue ? 'yes' : 'no'
-})
-
-// Selected task to edit
-const selectedTask = ref<Record<string, any>>({})
-let taskToDelete: number
-
-// Data table options
-const itemsPerPage = ref(20)
-const page = ref(1)
-const sortBy = ref('id')
-const orderBy = ref<boolean | 'asc' | 'desc'>('desc')
-const selectedRows = ref([])
-const tableLoading = ref(false)
-
-// Add a ref for the AddNewTaskDrawer, editTaskDrawerRef & viewTaskDrawerRef component
-const addNewTaskDrawerRef = ref()
-const editTaskDrawerRef = ref()
-const viewTaskDrawerRef = ref()
-
-// Update data table options
-const updateOptions = (options: any) => {
-    sortBy.value = options.sortBy[0]?.key
-    orderBy.value = options.sortBy[0]?.order
-}
-
-// Headers
-const headers = [
-    { title: 'ID', key: 'id' },
-    { title: 'Title', key: 'title' },
-    { title: 'Status', key: 'status' },
-    { title: 'Department', key: 'department', sortable: false, showToOnly: ['admin'] },
-    { title: 'Assigned To', key: 'assigned_to', sortable: false, showToOnly: ['admin', 'team_lead'] },
-    { title: 'Deadline', key: 'deadline' },
-    { title: 'Created By', key: 'created_by', sortable: false, showToOnly: ['admin'] },
-    { title: 'Creation Date', key: 'created_at' },
-    { title: 'Last Updated', key: 'updated_at' },
-    { title: 'Actions', key: 'actions', sortable: false },
-]
-
-const _headers = computed(() => headers.filter(h => h.showToOnly ? (h.showToOnly.includes(userData?.role.value)) : h))
-
-const query = computed(() => {
-    const query: any = {
-        q: searchQuery,
-        user: selectedUser,
-        department: selectedDepartment,
-        date: selectedDate,
-        status: selectedStatus,
-        itemsPerPage,
-        page,
-        sortBy,
-        orderBy,
-    }
-    if (userData?.role.value === 'team_lead')
-        query.assignedToMe = assignedToMe
-
-    return query
-})
-
-// 👉 Fetching tasks
-const { data: tasksData, execute: fetchTasks, isFetching } = await useApi<any>(createUrl('tasks', { query }))
-
-// Watch isFetching from the useApi to toggle tableLoading
-watch(() => isFetching.value, (newValue) => {
-    tableLoading.value = newValue
-}, { immediate: true })
-
-const tasks = ref(tasksData.value.tasks)
-const totalTasks = computed(() => tasksData.value.totalTasks)
-
-window.Echo.private(`Task.Assigned.${userData?.id}`)
-    .notification((notification: any) => {
-        tasks.value.unshift(notification.task)
+    watch(toggleAssignedToMe, newValue => {
+        assignedToMe.value = newValue ? 'yes' : 'no'
     })
 
-watch(tasksData, (newVal) => {
-    tasks.value = newVal.tasks
-})
+    // Selected task to edit
+    const selectedTask = ref<Record<string, any>>({})
+    let taskToDelete: number
 
-const statuses = [
-    {
-        title: 'Pending',
-        value: 'pending'
-    },
-    {
-        title: 'In Progress',
-        value: 'in_progress'
-    },
-    {
-        title: 'Completed',
-        value: 'completed'
-    },
-]
+    // Data table options
+    const itemsPerPage = ref(20)
+    const page = ref(1)
+    const sortBy = ref('id')
+    const orderBy = ref<boolean | 'asc' | 'desc'>('desc')
+    const selectedRows = ref([])
+    const tableLoading = ref(false)
 
-const users = ref([])
-const departments = ref([])
+    // Add a ref for the AddNewTaskDrawer, editTaskDrawerRef & viewTaskDrawerRef component
+    const addNewTaskDrawerRef = ref()
+    const editTaskDrawerRef = ref()
+    const viewTaskDrawerRef = ref()
 
-if (userData?.role.value === 'admin' && userData.department.value === 'admin') {
-    users.value = await $api('users')
-        .then(({ users }) => users.map((u: any) => ({ title: u.name, value: u.id })))
-    departments.value = await $api('departments')
-        .then(({ departments }) => departments.map((d: any) => ({ title: d.title, value: d.id })))
-} else if (userData?.role.value === 'team_lead') {
-    users.value = await $api('users', {
-        query: {
-            'departments[]': [userData.department.value],
+    // Update data table options
+    const updateOptions = (options: any) => {
+        sortBy.value = options.sortBy[0]?.key
+        orderBy.value = options.sortBy[0]?.order
+    }
+
+    // Headers
+    const headers = [
+        { title: 'ID', key: 'id' },
+        { title: 'Title', key: 'title' },
+        { title: 'Status', key: 'status' },
+        { title: 'Department', key: 'department', sortable: false, showToOnly: ['admin'] },
+        { title: 'Assigned To', key: 'assigned_to', sortable: false, showToOnly: ['admin', 'team_lead'] },
+        { title: 'Deadline', key: 'deadline' },
+        { title: 'Created By', key: 'created_by', sortable: false, showToOnly: ['admin'] },
+        { title: 'Creation Date', key: 'created_at' },
+        { title: 'Last Updated', key: 'updated_at' },
+        { title: 'Actions', key: 'actions', sortable: false },
+    ]
+
+    const _headers = computed(() => headers.filter(h => h.showToOnly ? (h.showToOnly.includes(userData?.role.value)) : h))
+
+    const query = computed(() => {
+        const query: any = {
+            q: searchQuery,
+            'users[]': selectedUsers,
+            'departments[]': selectedDepartments,
+            'statuses[]': selectedStatuses,
+            date: selectedDate,
+            itemsPerPage,
+            page,
+            sortBy,
+            orderBy,
         }
-    }).then(({ users }) => users.map((u: any) => ({ title: u.name, value: u.id })))
-}
+        if (userData?.role.value === 'team_lead')
+            query.assignedToMe = assignedToMe
 
-const resolveTaskStatusColor = (status: string): string => {
-    switch (status) {
-        case 'completed':
-            return 'success'
-        case 'in_progress':
-            return 'info'
-        default:
-            return 'error'
+        return query
+    })
+
+    // 👉 Fetching tasks
+    const { data: tasksData, execute: fetchTasks, isFetching } = await useApi<any>(createUrl('tasks', { query }))
+
+    // Watch isFetching from the useApi to toggle tableLoading
+    watch(() => isFetching.value, (newValue) => {
+        tableLoading.value = newValue
+    }, { immediate: true })
+
+    const tasks = ref(tasksData.value.tasks)
+    const totalTasks = computed(() => tasksData.value.totalTasks)
+
+    window.Echo.private(`Task.Assigned.${userData?.id}`)
+        .notification((notification: any) => {
+            tasks.value.unshift(notification.task)
+        })
+
+    watch(tasksData, (newVal) => {
+        tasks.value = newVal.tasks
+    })
+
+    const statuses = [
+        {
+            title: 'Pending',
+            value: 'pending'
+        },
+        {
+            title: 'In Progress',
+            value: 'in_progress'
+        },
+        {
+            title: 'Completed',
+            value: 'completed'
+        },
+    ]
+
+    const users = ref([])
+    const departments = ref([])
+
+    if (userData?.role.value === 'admin' && userData.department.value === 'admin') {
+        users.value = await $api('users')
+            .then(({ users }) => users.map((u: any) => ({ title: u.name, value: u.id })))
+        departments.value = await $api('departments')
+            .then(({ departments }) => departments.map((d: any) => ({ title: d.title, value: d.value })))
+    } else if (userData?.role.value === 'team_lead') {
+        users.value = await $api('users', {
+            query: {
+                'departments[]': [userData.department.value],
+            }
+        }).then(({ users }) => users.map((u: any) => ({ title: u.name, value: u.id })))
     }
-}
 
-const isAddNewTaskDrawerVisible = ref(false)
-const isEditTaskDrawerVisible = ref(false)
-const isViewTaskDrawerVisible = ref(false)
-const isDeleteDialogVisible = ref(false)
+    const resolveTaskStatusColor = (status: string): string => {
+        switch (status) {
+            case 'completed':
+                return 'success'
+            case 'in_progress':
+                return 'info'
+            default:
+                return 'error'
+        }
+    }
 
-// 👉 Add new task
-const addNewTask = async (taskData: FormData) => {
-    const { success, message } = await $api('tasks', {
-        method: 'POST',
-        body: taskData,
-        onResponseError({ response }) {
-            errors.value = response._data.errors
-        },
+    const isAddNewTaskDrawerVisible = ref(false)
+    const isEditTaskDrawerVisible = ref(false)
+    const isViewTaskDrawerVisible = ref(false)
+    const isDeleteDialogVisible = ref(false)
+
+    // 👉 Add new task
+    const addNewTask = async (taskData: FormData) => {
+        const { success, message } = await $api('tasks', {
+            method: 'POST',
+            body: taskData,
+            onResponseError({ response }) {
+                errors.value = response._data.errors
+            },
+        })
+
+        addNewTaskDrawerRef.value.closeNavigationDrawer()
+        if (success) {
+            $toast.success(message)
+            fetchTasks()
+        } else
+            $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
+    }
+
+    // 👉 Edit task
+    const editTask = async (taskData: any) => {
+        const { success, message } = await $api(`tasks/${taskData.id}`, {
+            method: 'PUT',
+            body: taskData,
+            onResponseError({ response }) {
+                errors.value = response._data.errors
+            },
+        })
+
+        editTaskDrawerRef.value.closeNavigationDrawer()
+        if (success) {
+            $toast.success(message)
+            fetchTasks()
+        } else
+            $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
+    }
+
+    // 👉 View task
+    const viewTask = (task: any) => {
+        selectedTask.value = task
+        isViewTaskDrawerVisible.value = true
+    }
+
+    // 👉 Delete task
+    const deleteTask = async () => {
+        const { success, message } = await $api(`tasks/${taskToDelete}`, {
+            method: 'DELETE',
+        })
+
+        isDeleteDialogVisible.value = false
+
+        if (success) {
+            $toast.success(message)
+            fetchTasks()
+        } else
+            $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
+    }
+
+    // 👉 Add comment
+    const addComment = async (commentData: FormData) => {
+        const { success, message, comment } = await $api(`tasks/${selectedTask.value.id}/comments`, {
+            method: 'POST',
+            body: commentData,
+        })
+
+        if (success) {
+            $toast.success(message)
+            selectedTask.value.comments.push(comment)
+            viewTaskDrawerRef.value.commentForm.reset()
+        } else
+            $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
+    }
+
+    const openEditTaskForm = (task: any) => {
+        selectedTask.value = task
+        isEditTaskDrawerVisible.value = true
+    }
+
+    const errors = ref({
+        title: undefined,
+        description: undefined,
+        deadline: undefined,
+        assigned_to: undefined,
+        files: [],
+        status: undefined,
+        comment: undefined,
     })
 
-    addNewTaskDrawerRef.value.closeNavigationDrawer()
-    if (success) {
-        $toast.success(message)
-        fetchTasks()
-    } else
-        $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
-}
+    const handleStatusUpdate = async ({ id, status, newStatus }: { id: number, status: string, newStatus: string }) => {
 
-// 👉 Edit task
-const editTask = async (taskData: any) => {
-    const { success, message } = await $api(`tasks/${taskData.id}`, {
-        method: 'PUT',
-        body: taskData,
-        onResponseError({ response }) {
-            errors.value = response._data.errors
-        },
-    })
+        if (newStatus !== status) {
+            const { success, message } = await $api(`tasks/${id}/status`, {
+                method: 'PATCH',
+                body: { status: newStatus },
+                onResponseError({ response }) {
+                    $toast.error('Something went wrong. Plz try again or contact support.')
+                    console.error(response._data.message)
+                },
+            })
 
-    editTaskDrawerRef.value.closeNavigationDrawer()
-    if (success) {
-        $toast.success(message)
-        fetchTasks()
-    } else
-        $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
-}
+            if (success) {
+                $toast.success(message)
+                const task = tasks.value.find((t: any) => t.id === id)
+                task.status = newStatus
+            } else
+                $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
+        }
+    }
 
-// 👉 View task
-const viewTask = (task: any) => {
-    selectedTask.value = task
-    isViewTaskDrawerVisible.value = true
-}
+    const isTasksActionBtnsDisable = (taskCreatorId: number): boolean => (tableLoading.value || !(userData?.role.value === 'admin' || taskCreatorId === userData?.id))
 
-// 👉 Delete task
-const deleteTask = async () => {
-    const { success, message } = await $api(`tasks/${taskToDelete}`, {
-        method: 'DELETE',
-    })
+    const deleteComment = async (commentIndex: number) => {
+        const comment = selectedTask.value.comments[commentIndex]
 
-    isDeleteDialogVisible.value = false
-
-    if (success) {
-        $toast.success(message)
-        fetchTasks()
-    } else
-        $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
-}
-
-// 👉 Add comment
-const addComment = async (commentData: FormData) => {
-    const { success, message, comment } = await $api(`tasks/${selectedTask.value.id}/comments`, {
-        method: 'POST',
-        body: commentData,
-    })
-
-    if (success) {
-        $toast.success(message)
-        selectedTask.value.comments.push(comment)
-        viewTaskDrawerRef.value.commentForm.reset()
-    } else
-        $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
-}
-
-const openEditTaskForm = (task: any) => {
-    selectedTask.value = task
-    isEditTaskDrawerVisible.value = true
-}
-
-const errors = ref({
-    title: undefined,
-    description: undefined,
-    deadline: undefined,
-    assigned_to: undefined,
-    files: [],
-    status: undefined,
-    comment: undefined,
-})
-
-const handleStatusUpdate = async ({ id, status, newStatus }: { id: number, status: string, newStatus: string }) => {
-
-    if (newStatus !== status) {
-        const { success, message } = await $api(`tasks/${id}/status`, {
-            method: 'PATCH',
-            body: { status: newStatus },
+        const { success, message } = await $api(`tasks/comments/${comment.id}`, {
+            method: 'DELETE',
             onResponseError({ response }) {
                 $toast.error('Something went wrong. Plz try again or contact support.')
                 console.error(response._data.message)
@@ -249,37 +271,15 @@ const handleStatusUpdate = async ({ id, status, newStatus }: { id: number, statu
 
         if (success) {
             $toast.success(message)
-            const task = tasks.value.find((t: any) => t.id === id)
-            task.status = newStatus
+            selectedTask.value.comments.splice(commentIndex, 1)
         } else
             $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
     }
-}
 
-const isTasksActionBtnsDisable = (taskCreatorId: number): boolean => (tableLoading.value || !(userData?.role.value === 'admin' || taskCreatorId === userData?.id))
-
-const deleteComment = async (commentIndex: number) => {
-    const comment = selectedTask.value.comments[commentIndex]
-
-    const { success, message } = await $api(`tasks/comments/${comment.id}`, {
-        method: 'DELETE',
-        onResponseError({ response }) {
-            $toast.error('Something went wrong. Plz try again or contact support.')
-            console.error(response._data.message)
-        },
+    watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDrawer]) => {
+        if (!editDrawer && !viewDrawer)
+            selectedTask.value = {}
     })
-
-    if (success) {
-        $toast.success(message)
-        selectedTask.value.comments.splice(commentIndex, 1)
-    } else
-        $toast.error(message ?? 'Something went wrong. Plz try again or contact support.')
-}
-
-watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDrawer]) => {
-    if (!editDrawer && !viewDrawer)
-        selectedTask.value = {}
-})
 
 </script>
 
@@ -304,14 +304,14 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
 
                     <!-- 👉 Select Department -->
                     <VCol v-if="userData?.role.value === 'admin'">
-                        <VSelect v-model="selectedDepartment" label="Filter by Department"
+                        <VSelect v-model="selectedDepartments" label="Filter by Department" multiple
                             placeholder="Filter by Department" :items="departments" clearable chips />
                     </VCol>
 
                     <!-- 👉 Select User -->
                     <VCol v-if="['admin', 'team_lead'].includes(userData?.role.value)">
-                        <VAutocomplete v-model="selectedUser" label="Filter by User" placeholder="Filter by User"
-                            :items="users" auto-select-first clearable chips />
+                        <VAutocomplete v-model="selectedUsers" label="Filter by User" placeholder="Filter by User"
+                            multiple :items="users" auto-select-first clearable chips />
                     </VCol>
 
                     <!-- 👉 Select Date -->
@@ -322,8 +322,8 @@ watch([isEditTaskDrawerVisible, isViewTaskDrawerVisible], ([editDrawer, viewDraw
 
                     <!-- 👉 Select Status -->
                     <VCol v-if="['admin', 'team_lead'].includes(userData?.role.value)">
-                        <VSelect v-model="selectedStatus" label="Filter by Status" placeholder="Filter by Status"
-                            :items="statuses" clearable chips />
+                        <VSelect v-model="selectedStatuses" label="Filter by Status" placeholder="Filter by Status"
+                            multiple :items="statuses" clearable chips />
                     </VCol>
 
                     <!-- 👉 Search  -->
