@@ -12,7 +12,6 @@ use Illuminate\Http\Request;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
@@ -64,12 +63,6 @@ class TaskController extends Controller
             callback: fn(Builder $tasksQuery, array $users) => $tasksQuery->where(
                 fn($tasksSubQuery) => $tasksSubQuery->whereIn('created_by', $users)->orWhereIn('assigned_to', $users)
             )
-            // callback: fn(Builder $tasksQuery, array $users) => $tasksQuery->where(
-            //     column: [
-            //         ['created_by', 'IN', $users, 'OR'],
-            //         ['assigned_to', 'IN', $users, 'OR'],
-            //     ],
-            // )
         )->when(
             value: $date,
             callback: function (Builder $tasksQuery, $date) {

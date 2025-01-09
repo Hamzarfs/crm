@@ -4,7 +4,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev": "vite",
+        "dev": "vite --open",
         "build": "vite build",
         "socket-start": "node resources/js/socket-server",
         "typecheck": "vue-tsc --noEmit",

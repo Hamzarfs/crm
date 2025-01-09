@@ -16,8 +16,8 @@ class NotificationController extends Controller
         $notifications = Auth::user()->notifications->map(function ($notification) {
             // For task assigned notifications
             if ($notification->type === 'task.assigned') {
-                $task = Task::find($notification->data['task_id'])->load(['assignee', 'creator']);
-                if ($task->assignee->is(Auth::user())) {
+                $task = Task::find($notification->data['task_id'])?->load(['assignee', 'creator']);
+                if ($task && $task->assignee->is(Auth::user())) {
                     $task->isSeen = !is_null($notification->read_at);
                     return [
                         'id' => $notification->id,
