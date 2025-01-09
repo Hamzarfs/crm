@@ -37,7 +37,6 @@ class TaskController extends Controller
 
         $tasks = Task::with(['files', 'creator', 'assignee.department', 'comments.files']);
 
-
         if (!$request->user()->hasRole('admin')) {
             if ($request->user()->hasRole('team_lead'))
                 $tasks = $tasks->where(
@@ -83,9 +82,10 @@ class TaskController extends Controller
             value: $query,
             callback: fn(Builder $tasksQuery, $query) => $tasksQuery->where(
                 column: [
-                    ['title', 'LIKE', "%$query%", 'OR'],
-                    ['description', 'LIKE', "%$query%", 'OR'],
+                    ['title', 'LIKE', "%$query%"],
+                    ['description', 'LIKE', "%$query%"],
                 ],
+                boolean: 'OR'
             )
         )->when(        // Apply ordering
             value: fn() => (!is_null($orderByColumn) && !is_null($orderByDir)) ? ['column' => $orderByColumn, 'dir' => $orderByDir] : null,

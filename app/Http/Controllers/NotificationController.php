@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\Notifications\Tasks\Assigned;
+use App\Http\Resources\Tasks\TaskResource;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\DatabaseNotification;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
@@ -22,7 +21,7 @@ class NotificationController extends Controller
                     return [
                         'id' => $notification->id,
                         'type' => $notification->type,
-                        'task' => new Assigned($task),
+                        'task' => new TaskResource($task),
                         'isSeen' => !is_null($notification->read_at),
                         'created_at' => $notification->created_at,
                     ];
