@@ -1,41 +1,41 @@
 <script lang="ts" setup>
-import type { Notification } from '@layouts/types';
-import moment from 'moment';
-import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
+    import type { Notification } from '@layouts/types';
+    import moment from 'moment';
+    import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
 
-interface Props {
-    notifications: Notification[]
-    badgeProps?: object
-    location?: any
-}
-interface Emit {
-    (e: 'read', value: number[]): void
-    (e: 'unread', value: number[]): void
-    (e: 'remove', value: number): void
-    (e: 'click:notification', value: Notification): void
-}
+    interface Props {
+        notifications: Notification[]
+        badgeProps?: object
+        location?: any
+    }
+    interface Emit {
+        (e: 'read', value: number[]): void
+        (e: 'unread', value: number[]): void
+        (e: 'remove', value: number): void
+        (e: 'click:notification', value: Notification): void
+    }
 
-const props = withDefaults(defineProps<Props>(), {
-    location: 'bottom end',
-    badgeProps: undefined,
-})
+    const props = withDefaults(defineProps<Props>(), {
+        location: 'bottom end',
+        badgeProps: undefined,
+    })
 
-const emit = defineEmits<Emit>()
+    const emit = defineEmits<Emit>()
 
-const isAllMarkRead = computed(() => {
-    return props.notifications.some(item => item.isSeen === false)
-})
+    const isAllMarkRead = computed(() => {
+        return props.notifications.some(item => item.isSeen === false)
+    })
 
-const markAllReadOrUnread = () => {
-    const allNotificationsIds = props.notifications.map(item => item.id)
+    const markAllReadOrUnread = () => {
+        const allNotificationsIds = props.notifications.map(item => item.id)
 
-    if (!isAllMarkRead.value)
-        emit('unread', allNotificationsIds)
-    else
-        emit('read', allNotificationsIds)
-}
+        if (!isAllMarkRead.value)
+            emit('unread', allNotificationsIds)
+        else
+            emit('read', allNotificationsIds)
+    }
 
-const totalUnreadNotifications = computed(() => props.notifications.filter(item => !item.isSeen).length)
+    const totalUnreadNotifications = computed(() => props.notifications.filter(item => !item.isSeen).length)
 </script>
 
 <template>
@@ -72,7 +72,8 @@ const totalUnreadNotifications = computed(() => props.notifications.filter(item 
                 <VDivider />
 
                 <!-- 👉 Notifications list -->
-                <PerfectScrollbar :options="{ wheelPropagation: false }" style="max-block-size: 27rem;">
+                <PerfectScrollbar :options="{ wheelPropagation: false, suppressScrollX: true }"
+                    style="max-block-size: 27rem;">
                     <VList class="py-0">
                         <template v-for="(notification, index) in props.notifications" :key="notification.title">
                             <VDivider v-if="index > 0" />
@@ -184,19 +185,19 @@ const totalUnreadNotifications = computed(() => props.notifications.filter(item 
 </template>
 
 <style lang="scss">
-.notification-section {
-    padding: 14px !important;
-}
-
-.list-item-hover-class {
-    .visible-in-hover {
-        display: none;
+    .notification-section {
+        padding: 14px !important;
     }
 
-    &:hover {
+    .list-item-hover-class {
         .visible-in-hover {
-            display: block;
+            display: none;
+        }
+
+        &:hover {
+            .visible-in-hover {
+                display: block;
+            }
         }
     }
-}
 </style>

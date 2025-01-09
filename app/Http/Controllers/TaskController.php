@@ -39,15 +39,12 @@ class TaskController extends Controller
 
         if (!$request->user()->hasRole('admin')) {
             if ($request->user()->hasRole('team_lead'))
-                $tasks = $tasks->where(
-                    column: [
-                        ['created_by', '=', Auth::id()],
-                        ['assigned_to', '=', Auth::id()],
-                    ],
-                    boolean: 'OR'
+                $tasks->where(
+                    fn($query) =>  $query->where('created_by', Auth::id())
+                        ->orWhere('assigned_to', Auth::id())
                 );
             else
-                $tasks = $tasks->where('assigned_to', Auth::id());
+                $tasks->where('assigned_to', Auth::id());
         }
 
         // Applying DT filters

@@ -1,27 +1,34 @@
 <script setup lang="ts">
+    import { useAuthStore } from '@/@core/stores/auth';
 
 
-const props = defineProps<{
-    task: Record<any, any>
-}>()
 
-const openEditTaskDrawer = inject<any>('openEditTaskDrawer')
-const openDeleteTaskDialog = inject<any>('openDeleteTaskDialog')
+    const props = defineProps<{
+        task: Record<any, any>
+    }>()
 
-const moreOptions = [
-    {
-        title: 'Edit',
-        onClick: () => {
-            openEditTaskDrawer(props.task)
+    const openEditTaskDrawer = inject<any>('openEditTaskDrawer')
+    const openDeleteTaskDialog = inject<any>('openDeleteTaskDialog')
+
+    const authStore = useAuthStore()
+
+    // Get currently logged in user data
+    const userData = authStore.user
+
+    const moreOptions = [
+        {
+            title: 'Edit',
+            onClick: () => {
+                openEditTaskDrawer(props.task)
+            },
         },
-    },
-    {
-        title: 'Delete',
-        onClick: () => {
-            openDeleteTaskDialog(props.task.id)
+        {
+            title: 'Delete',
+            onClick: () => {
+                openDeleteTaskDialog(props.task.id)
+            },
         },
-    },
-]
+    ]
 
 </script>
 
@@ -34,7 +41,7 @@ const moreOptions = [
                     {{ props.task.title }}
                 </p>
 
-                <VMenu>
+                <VMenu v-if="userData?.role.value === 'admin' || props.task.creator.id === userData?.id">
                     <template #activator="{ props: p, isActive }">
                         <VIcon v-bind="p" icon="ri-more-2-line" class="more-options"
                             :style="isActive ? 'opacity: 1' : ''" size="20" @click.stop />
@@ -72,23 +79,23 @@ const moreOptions = [
 </template>
 
 <style lang="scss" scoped>
-.kanban-card {
-    cursor: grab;
+    .kanban-card {
+        cursor: grab;
 
-    :active {
-        cursor: grabbing;
-    }
+        :active {
+            cursor: grabbing;
+        }
 
-    &[style^="z-index"] {
-        cursor: grabbing !important;
-    }
+        &[style^="z-index"] {
+            cursor: grabbing !important;
+        }
 
-    .more-options {
-        opacity: 0;
-    }
+        .more-options {
+            opacity: 0;
+        }
 
-    &:hover .more-options {
-        opacity: 1;
+        &:hover .more-options {
+            opacity: 1;
+        }
     }
-}
 </style>

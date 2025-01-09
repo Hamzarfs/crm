@@ -1,76 +1,77 @@
 <script setup lang="ts">
-import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
-import type { VForm } from 'vuetify/components/VForm';
+    import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
+    import type { VForm } from 'vuetify/components/VForm';
 
-interface Emit {
-    (e: 'update:isDrawerOpen', value: boolean): void
-    (e: 'taskData', value: any): void
-}
-
-interface Props {
-    isDrawerOpen: boolean
-    users: Record<number, any>[]
-    statuses: Record<string, string>[]
-    errors: any | any[]
-    task: Record<string, any>
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emit>()
-
-const isFormValid = ref(false)
-const refForm = ref<VForm>()
-const title = ref(props.task.title)
-const description = ref(props.task.description)
-const deadline = ref(parseDate(props.task.deadline))
-const assigned_to = ref(props.task.assignee?.id)
-const status = ref(props.task.status)
-
-
-// 👉 drawer close
-const closeNavigationDrawer = () => {
-    emit('update:isDrawerOpen', false)
-    nextTick(() => {
-        refForm.value?.reset()
-        refForm.value?.resetValidation()
-    })
-}
-
-watch(() => props.task, newVal => {
-    if (newVal) {
-        title.value = newVal.title
-        description.value = newVal.description
-        deadline.value = parseDate(newVal.deadline)
-        assigned_to.value = newVal.assignee?.id
-        status.value = newVal.status
+    interface Emit {
+        (e: 'update:isDrawerOpen', value: boolean): void
+        (e: 'taskData', value: any): void
     }
-}, {
-    immediate: true,
-    deep: true
-})
 
-const onSubmit = () => {
-    refForm.value?.validate().then(({ valid }) => {
-        if (valid) {
-            emit('taskData', {
-                id: props.task.id,
-                title: title.value,
-                description: description.value,
-                deadline: deadline.value,
-                assigned_to: assigned_to.value,
-                status: status.value,
-            })
+    interface Props {
+        isDrawerOpen: boolean
+        users: Record<number, any>[]
+        statuses: Record<string, string>[]
+        errors: any | any[]
+        task: Record<string, any>
+    }
+
+    const props = defineProps<Props>()
+    const emit = defineEmits<Emit>()
+
+    const isFormValid = ref(false)
+    const refForm = ref<VForm>()
+    const title = ref(props.task.title)
+    const description = ref(props.task.description)
+    const deadline = ref(props.task.deadline ? parseDate(props.task.deadline) : '')
+
+    const assigned_to = ref(props.task.assignee?.id)
+    const status = ref(props.task.status)
+
+
+    // 👉 drawer close
+    const closeNavigationDrawer = () => {
+        emit('update:isDrawerOpen', false)
+        nextTick(() => {
+            refForm.value?.reset()
+            refForm.value?.resetValidation()
+        })
+    }
+
+    watch(() => props.task, newVal => {
+        if (newVal) {
+            title.value = newVal.title
+            description.value = newVal.description
+            deadline.value = parseDate(newVal.deadline)
+            assigned_to.value = newVal.assignee?.id
+            status.value = newVal.status
         }
+    }, {
+        immediate: true,
+        deep: true
     })
-}
 
-defineExpose({
-    closeNavigationDrawer
-})
+    const onSubmit = () => {
+        refForm.value?.validate().then(({ valid }) => {
+            if (valid) {
+                emit('taskData', {
+                    id: props.task.id,
+                    title: title.value,
+                    description: description.value,
+                    deadline: deadline.value,
+                    assigned_to: assigned_to.value,
+                    status: status.value,
+                })
+            }
+        })
+    }
 
-const handleDrawerModelValueUpdate = (val: boolean) => {
-    emit('update:isDrawerOpen', val)
-}
+    defineExpose({
+        closeNavigationDrawer
+    })
+
+    const handleDrawerModelValueUpdate = (val: boolean) => {
+        emit('update:isDrawerOpen', val)
+    }
 </script>
 
 <template>

@@ -1,73 +1,73 @@
 <script setup lang="ts">
-import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
-import type { VForm } from 'vuetify/components/VForm';
+    import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
+    import type { VForm } from 'vuetify/components/VForm';
 
-interface Emit {
-    (e: 'update:isDrawerOpen', value: boolean): void
-    (e: 'taskData', value: FormData): void
-}
+    interface Emit {
+        (e: 'update:isDrawerOpen', value: boolean): void
+        (e: 'taskData', value: FormData): void
+    }
 
-interface Props {
-    isDrawerOpen: boolean
-    users: Record<number, any>[]
-    statuses: Record<number, any>[]
-    errors: any
-}
+    interface Props {
+        isDrawerOpen: boolean
+        users: Record<number, any>[]
+        statuses: Record<number, any>[]
+        errors: any
+    }
 
-const props = defineProps<Props>()
-const emit = defineEmits<Emit>()
+    const props = defineProps<Props>()
+    const emit = defineEmits<Emit>()
 
 
-const isFormValid = ref(false)
-const refForm = ref<VForm>()
-const title = ref('')
-const description = ref('')
-const deadline = ref()
-const assigned_to = ref()
-const status = ref('pending')
-const files = ref([])
+    const isFormValid = ref(false)
+    const refForm = ref<VForm>()
+    const title = ref('')
+    const description = ref('')
+    const deadline = ref('')
+    const assigned_to = ref()
+    const status = ref('pending')
+    const files = ref([])
 
-// 👉 drawer close
-const closeNavigationDrawer = () => {
-    emit('update:isDrawerOpen', false)
-    nextTick(() => {
-        refForm.value?.reset()
-        refForm.value?.resetValidation()
+    // 👉 drawer close
+    const closeNavigationDrawer = () => {
+        emit('update:isDrawerOpen', false)
+        nextTick(() => {
+            refForm.value?.reset()
+            refForm.value?.resetValidation()
+        })
+    }
+
+    const onSubmit = () => {
+        refForm.value?.validate().then(({ valid }) => {
+            if (valid) {
+                const formData = new FormData()
+
+                // Append non-file data
+                formData.append('title', title.value)
+                formData.append('description', description.value)
+                formData.append('deadline', deadline.value)
+                formData.append('assigned_to', assigned_to.value)
+                formData.append('status', status.value)
+
+                // Append files
+                files.value?.length && files.value.forEach((file: File, index: number) => {
+                    formData.append(`files[${index}]`, file)
+                })
+
+                emit('taskData', formData)
+            }
+        })
+    }
+
+    defineExpose({
+        closeNavigationDrawer
     })
-}
 
-const onSubmit = () => {
-    refForm.value?.validate().then(({ valid }) => {
-        if (valid) {
-            const formData = new FormData()
-
-            // Append non-file data
-            formData.append('title', title.value)
-            formData.append('description', description.value)
-            formData.append('deadline', deadline.value)
-            formData.append('assigned_to', assigned_to.value)
-            formData.append('status', status.value)
-
-            // Append files
-            files.value?.length && files.value.forEach((file: File, index: number) => {
-                formData.append(`files[${index}]`, file)
-            })
-
-            emit('taskData', formData)
-        }
-    })
-}
-
-defineExpose({
-    closeNavigationDrawer
-})
-
-const handleDrawerModelValueUpdate = (val: boolean) => {
-    emit('update:isDrawerOpen', val)
-    !val && nextTick(() => {
-        refForm.value?.resetValidation()
-    })
-}
+    const handleDrawerModelValueUpdate = (val: boolean) => {
+        emit('update:isDrawerOpen', val)
+        !val && nextTick(() => {
+            refForm.value?.resetValidation()
+        })
+    }
 
 </script>
 
