@@ -1,94 +1,94 @@
 <script setup lang="ts">
 
-const selectedService = ref<Record<string, any>>({})
-let serviceToDelete: number
-let serviceToUpdateIndex: number
+    const selectedService = ref<Record<string, any>>({})
+    let serviceToDelete: number
+    let serviceToUpdateIndex: number
 
 
-// Add a ref for the AddNewServiceDrawer & EditServiceDrawer component
-const addNewServiceDrawerRef = ref()
-const editServiceDrawerRef = ref()
-const dataTableRef = ref()
-// Headers
-const headers = [
-    { title: 'ID', key: 'id' },
-    { title: 'Name', key: 'name' },
-    { title: 'Actions', key: 'actions', sortable: false },
-]
+    // Add a ref for the AddNewServiceDrawer & EditServiceDrawer component
+    const addNewServiceDrawerRef = ref()
+    const editServiceDrawerRef = ref()
+    const dataTableRef = ref()
+    // Headers
+    const headers = [
+        { title: 'ID', key: 'id' },
+        { title: 'Name', key: 'name' },
+        { title: 'Actions', key: 'actions', sortable: false },
+    ]
 
-// 👉 Fetching roles
-const { services } = await $api('services')
-const servicesData = ref(services)
+    // 👉 Fetching roles
+    const { services } = await $api('services')
+    const servicesData = ref(services)
 
 
-const isAddNewServiceDrawerVisible = ref(false)
-const isEditServiceDrawerVisible = ref(false)
-const isSnackBarVisible = ref(false)
-const isDeleteDialogVisible = ref(false)
-const serviceResponsemessage = ref('')
+    const isAddNewServiceDrawerVisible = ref(false)
+    const isEditServiceDrawerVisible = ref(false)
+    const isSnackBarVisible = ref(false)
+    const isDeleteDialogVisible = ref(false)
+    const serviceResponsemessage = ref('')
 
-// 👉 Add new service
-const addNewService = async (serviceData: any) => {
-    const { success, message, service } = await $api('/services', {
-        method: 'POST',
-        body: serviceData,
-        onResponseError({ response }) {
-            errors.value = response._data.errors
-        },
-    })
-
-    if (success) {
-        isSnackBarVisible.value = true
-        servicesData.value = [...servicesData.value, service]
-        serviceResponsemessage.value = message
-        addNewServiceDrawerRef.value.closeNavigationDrawer()
-        nextTick(() => {
-            dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollTop = dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollHeight
+    // 👉 Add new service
+    const addNewService = async (serviceData: any) => {
+        const { success, message, service } = await $api('/services', {
+            method: 'POST',
+            body: serviceData,
+            onResponseError({ response }) {
+                errors.value = response._data.errors
+            },
         })
-    }
-}
 
-// 👉 Edit service
-const editService = async (serviceData: any) => {
-    const { success, message, service } = await $api(`services/${selectedService.value.id}`, {
-        method: 'PUT',
-        body: serviceData,
-        onResponseError({ response }) {
-            errors.value = response._data.errors
-        },
-    })
-    if (success) {
+        if (success) {
+            isSnackBarVisible.value = true
+            servicesData.value = [...servicesData.value, service]
+            serviceResponsemessage.value = message
+            addNewServiceDrawerRef.value.closeNavigationDrawer()
+            nextTick(() => {
+                dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollTop = dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollHeight
+            })
+        }
+    }
+
+    // 👉 Edit service
+    const editService = async (serviceData: any) => {
+        const { success, message, service } = await $api(`services/${selectedService.value.id}`, {
+            method: 'PUT',
+            body: serviceData,
+            onResponseError({ response }) {
+                errors.value = response._data.errors
+            },
+        })
+        if (success) {
+            isSnackBarVisible.value = true
+            servicesData.value[serviceToUpdateIndex] = service
+            serviceResponsemessage.value = message
+            editServiceDrawerRef.value.closeNavigationDrawer()
+        }
+    }
+
+    const openEditServiceForm = (service: any) => {
+        selectedService.value = service
+        serviceToUpdateIndex = servicesData.value.indexOf(service)
+        isEditServiceDrawerVisible.value = true
+    }
+
+    // 👉 Delete service
+    const deleteService = async () => {
+        const { success, message } = await $api(`services/${serviceToDelete}`, {
+            method: 'DELETE',
+        })
+
+        isDeleteDialogVisible.value = false
+
         isSnackBarVisible.value = true
-        servicesData.value[serviceToUpdateIndex] = service
         serviceResponsemessage.value = message
-        editServiceDrawerRef.value.closeNavigationDrawer()
+        if (success) {
+            servicesData.value = servicesData.value.filter((service: any) => service.id !== serviceToDelete)
+        }
     }
-}
 
-const openEditServiceForm = (service: any) => {
-    selectedService.value = service
-    serviceToUpdateIndex = servicesData.value.indexOf(service)
-    isEditServiceDrawerVisible.value = true
-}
-
-// 👉 Delete service
-const deleteService = async () => {
-    const { success, message } = await $api(`services/${serviceToDelete}`, {
-        method: 'DELETE',
+    const errors = ref({
+        name: undefined
     })
-
-    isDeleteDialogVisible.value = false
-
-    isSnackBarVisible.value = true
-    serviceResponsemessage.value = message
-    if (success) {
-        servicesData.value = servicesData.value.filter((service: any) => service.id !== serviceToDelete)
-    }
-}
-
-const errors = ref({
-    name: undefined
-})
 
 </script>
 
@@ -174,15 +174,15 @@ const errors = ref({
 </template>
 
 <style lang="scss">
-.app-user-search-filter {
-    inline-size: 24.0625rem;
-}
+    .app-user-search-filter {
+        inline-size: 24.0625rem;
+    }
 
-.text-capitalize {
-    text-transform: capitalize;
-}
+    .text-capitalize {
+        text-transform: capitalize;
+    }
 
-.user-list-name:not(:hover) {
-    color: rgba(var(--v-theme-on-background), var(--v-high-emphasis-opacity));
-}
+    .user-list-name:not(:hover) {
+        color: rgba(var(--v-theme-on-background), var(--v-high-emphasis-opacity));
+    }
 </style>

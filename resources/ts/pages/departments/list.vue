@@ -1,103 +1,103 @@
 <script setup lang="ts">
 
-import AddNewDepartmentDrawer from '@/components/departments/AddNewDepartmentDrawer.vue';
-import EditDepartmentDrawer from '@/components/departments/EditDepartmentDrawer.vue';
+    import AddNewDepartmentDrawer from '@/components/departments/AddNewDepartmentDrawer.vue';
+    import EditDepartmentDrawer from '@/components/departments/EditDepartmentDrawer.vue';
 
 
-const selectedDepartment = ref({
-    name: '',
-})
-let departmentToDelete: number
-let departmentToUpdateIndex: number
-
-
-// Add a ref for the AddNewUserDrawer & editUserDrawerRef component
-const addNewDepartmentDrawerRef = ref()
-const editDepartmentDrawerRef = ref()
-
-const dataTableRef = ref()
-
-// Headers
-const headers = [
-    { title: 'ID', key: 'id' },
-    { title: 'Name', key: 'title' },
-    { title: 'Leader', key: 'leader' },
-    { title: 'Actions', key: 'actions', sortable: false },
-]
-
-// 👉 Fetching roles
-const { departments } = await $api('departments')
-const { users } = await $api('users')
-const departmentsData = ref(departments)
-
-const isAddNewDepartmentDrawerVisible = ref(false)
-const isEditDepartmentDrawerVisible = ref(false)
-const isSnackBarVisible = ref(false)
-const isDeleteDialogVisible = ref(false)
-const departmentResponsemessage = ref('')
-
-// 👉 Add new department
-const addNewDepartment = async (departmentData: any) => {
-    const { success, message, department } = await $api('/departments', {
-        method: 'POST',
-        body: departmentData,
-        onResponseError({ response }) {
-            errors.value = response._data.errors
-        },
+    const selectedDepartment = ref({
+        name: '',
     })
+    let departmentToDelete: number
+    let departmentToUpdateIndex: number
 
-    if (success) {
-        isSnackBarVisible.value = true
-        departmentsData.value = [...departmentsData.value, department]
-        departmentResponsemessage.value = message
-        addNewDepartmentDrawerRef.value.closeNavigationDrawer()
-        nextTick(() => {
-            dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollTop = dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollHeight
+
+    // Add a ref for the AddNewUserDrawer & editUserDrawerRef component
+    const addNewDepartmentDrawerRef = ref()
+    const editDepartmentDrawerRef = ref()
+
+    const dataTableRef = ref()
+
+    // Headers
+    const headers = [
+        { title: 'ID', key: 'id' },
+        { title: 'Name', key: 'title' },
+        { title: 'Leader', key: 'leader' },
+        { title: 'Actions', key: 'actions', sortable: false },
+    ]
+
+    // 👉 Fetching roles
+    const { departments } = await $api('departments')
+    const { users } = await $api('users')
+    const departmentsData = ref(departments)
+
+    const isAddNewDepartmentDrawerVisible = ref(false)
+    const isEditDepartmentDrawerVisible = ref(false)
+    const isSnackBarVisible = ref(false)
+    const isDeleteDialogVisible = ref(false)
+    const departmentResponsemessage = ref('')
+
+    // 👉 Add new department
+    const addNewDepartment = async (departmentData: any) => {
+        const { success, message, department } = await $api('/departments', {
+            method: 'POST',
+            body: departmentData,
+            onResponseError({ response }) {
+                errors.value = response._data.errors
+            },
         })
-    }
-}
 
-// 👉 Edit department
-const editDepartment = async (departmentData: any) => {
-    const { success, message, department } = await $api(`departments/${departmentData.id}`, {
-        method: 'PUT',
-        body: departmentData,
-        onResponseError({ response }) {
-            errors.value = response._data.errors
-        },
-    })
-    if (success) {
+        if (success) {
+            isSnackBarVisible.value = true
+            departmentsData.value = [...departmentsData.value, department]
+            departmentResponsemessage.value = message
+            addNewDepartmentDrawerRef.value.closeNavigationDrawer()
+            nextTick(() => {
+                dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollTop = dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollHeight
+            })
+        }
+    }
+
+    // 👉 Edit department
+    const editDepartment = async (departmentData: any) => {
+        const { success, message, department } = await $api(`departments/${departmentData.id}`, {
+            method: 'PUT',
+            body: departmentData,
+            onResponseError({ response }) {
+                errors.value = response._data.errors
+            },
+        })
+        if (success) {
+            isSnackBarVisible.value = true
+            departmentsData.value[departmentToUpdateIndex] = department
+            departmentResponsemessage.value = message
+            editDepartmentDrawerRef.value.closeNavigationDrawer()
+        }
+    }
+
+    const openEditDepartmentForm = (department: any) => {
+        selectedDepartment.value = department
+        departmentToUpdateIndex = departmentsData.value.indexOf(department)
+        isEditDepartmentDrawerVisible.value = true
+    }
+
+    // 👉 Delete department
+    const deleteDepartment = async () => {
+        const { success, message } = await $api(`departments/${departmentToDelete}`, {
+            method: 'DELETE',
+        })
+
+        isDeleteDialogVisible.value = false
+
         isSnackBarVisible.value = true
-        departmentsData.value[departmentToUpdateIndex] = department
         departmentResponsemessage.value = message
-        editDepartmentDrawerRef.value.closeNavigationDrawer()
+        if (success) {
+            departmentsData.value = departmentsData.value.filter((department: any) => department.id !== departmentToDelete)
+        }
     }
-}
 
-const openEditDepartmentForm = (department: any) => {
-    selectedDepartment.value = department
-    departmentToUpdateIndex = departmentsData.value.indexOf(department)
-    isEditDepartmentDrawerVisible.value = true
-}
-
-// 👉 Delete department
-const deleteDepartment = async () => {
-    const { success, message } = await $api(`departments/${departmentToDelete}`, {
-        method: 'DELETE',
+    const errors = ref({
+        name: undefined
     })
-
-    isDeleteDialogVisible.value = false
-
-    isSnackBarVisible.value = true
-    departmentResponsemessage.value = message
-    if (success) {
-        departmentsData.value = departmentsData.value.filter((department: any) => department.id !== departmentToDelete)
-    }
-}
-
-const errors = ref({
-    name: undefined
-})
 
 </script>
 
@@ -183,15 +183,15 @@ const errors = ref({
 </template>
 
 <style lang="scss">
-.app-user-search-filter {
-    inline-size: 24.0625rem;
-}
+    .app-user-search-filter {
+        inline-size: 24.0625rem;
+    }
 
-.text-capitalize {
-    text-transform: capitalize;
-}
+    .text-capitalize {
+        text-transform: capitalize;
+    }
 
-.user-list-name:not(:hover) {
-    color: rgba(var(--v-theme-on-background), var(--v-high-emphasis-opacity));
-}
+    .user-list-name:not(:hover) {
+        color: rgba(var(--v-theme-on-background), var(--v-high-emphasis-opacity));
+    }
 </style>

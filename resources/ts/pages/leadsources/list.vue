@@ -1,113 +1,113 @@
 <script setup lang="ts">
 
 
-const selectedLeadSource = ref({})
-let leadsourceToDelete: number
+    const selectedLeadSource = ref({})
+    let leadsourceToDelete: number
 
-// Add a ref for the AddNewLeadSourceDrawer & editLeadSourceDrawerRef component
-const addNewLeadSourceDrawerRef = ref()
-const editLeadSourceDrawerRef = ref()
+    // Add a ref for the AddNewLeadSourceDrawer & editLeadSourceDrawerRef component
+    const addNewLeadSourceDrawerRef = ref()
+    const editLeadSourceDrawerRef = ref()
 
-const dataTableRef = ref()
+    const dataTableRef = ref()
 
-// Headers
-const headers = [
-    { title: 'ID', key: 'id' },
-    { title: 'Name', key: 'name' },
-    { title: 'Type', key: 'type' },
-    { title: 'Actions', key: 'actions', sortable: false },
-]
+    // Headers
+    const headers = [
+        { title: 'ID', key: 'id' },
+        { title: 'Name', key: 'name' },
+        { title: 'Type', key: 'type' },
+        { title: 'Actions', key: 'actions', sortable: false },
+    ]
 
-// 👉 Fetching leadsources
-const { leadsources } = await $api('leadsources')
+    // 👉 Fetching leadsources
+    const { leadsources } = await $api('leadsources')
 
-const leadsourcesData = ref(leadsources)
+    const leadsourcesData = ref(leadsources)
 
-const isAddNewLeadSourceDrawerVisible = ref(false)
-const isEditLeadSourceDrawerVisible = ref(false)
-const isSnackBarVisible = ref(false)
-const isDeleteDialogVisible = ref(false)
-const leadsourceResponsemessage = ref('')
+    const isAddNewLeadSourceDrawerVisible = ref(false)
+    const isEditLeadSourceDrawerVisible = ref(false)
+    const isSnackBarVisible = ref(false)
+    const isDeleteDialogVisible = ref(false)
+    const leadsourceResponsemessage = ref('')
 
-// 👉 Add new leadsource
-const addNewLeadSource = async (leadsourceData: any) => {
-    const { success, message, leadsource } = await $api('/leadsources', {
-        method: 'POST',
-        body: leadsourceData,
-        onResponseError({ response }) {
-            errors.value = response._data.errors
-        },
-    })
-
-    isSnackBarVisible.value = true
-    leadsourceResponsemessage.value = message
-    addNewLeadSourceDrawerRef.value.closeNavigationDrawer()
-    if (success) {
-        leadsourcesData.value = [...leadsourcesData.value, leadsource]
-        nextTick(() => {
-            dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollTop = dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollHeight
+    // 👉 Add new leadsource
+    const addNewLeadSource = async (leadsourceData: any) => {
+        const { success, message, leadsource } = await $api('/leadsources', {
+            method: 'POST',
+            body: leadsourceData,
+            onResponseError({ response }) {
+                errors.value = response._data.errors
+            },
         })
-    }
-}
 
-// 👉 Edit leadsource
-const editleadsource = async (leadsourceData: any) => {
-    const { success, message, leadsource } = await $api(`leadsources/${leadsourceData.id}`, {
-        method: 'PUT',
-        body: leadsourceData,
-        onResponseError({ response }) {
-            errors.value = response._data.errors
+        isSnackBarVisible.value = true
+        leadsourceResponsemessage.value = message
+        addNewLeadSourceDrawerRef.value.closeNavigationDrawer()
+        if (success) {
+            leadsourcesData.value = [...leadsourcesData.value, leadsource]
+            nextTick(() => {
+                dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollTop = dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollHeight
+            })
+        }
+    }
+
+    // 👉 Edit leadsource
+    const editleadsource = async (leadsourceData: any) => {
+        const { success, message, leadsource } = await $api(`leadsources/${leadsourceData.id}`, {
+            method: 'PUT',
+            body: leadsourceData,
+            onResponseError({ response }) {
+                errors.value = response._data.errors
+            },
+        })
+        isSnackBarVisible.value = true
+        leadsourceResponsemessage.value = message
+        if (success) {
+            leadsourcesData.value[leadsourceToDelete] = leadsource
+            editLeadSourceDrawerRef.value.closeNavigationDrawer()
+        }
+    }
+
+    const openeditleadsourceForm = (leadsource: any) => {
+        selectedLeadSource.value = leadsource
+        leadsourceToDelete = leadsourcesData.value.indexOf(leadsource)
+        isEditLeadSourceDrawerVisible.value = true
+    }
+
+    // 👉 Delete lead source
+    const deleteLeadSource = async () => {
+        const { success, message } = await $api(`leadsources/${leadsourceToDelete}`, {
+            method: 'DELETE',
+        })
+
+        isDeleteDialogVisible.value = false
+
+        isSnackBarVisible.value = true
+        leadsourceResponsemessage.value = message
+        if (success) {
+            leadsourcesData.value = leadsourcesData.value.filter((leadsource: any) => leadsource.id !== leadsourceToDelete)
+        }
+    }
+
+    const errors = ref({
+        name: undefined,
+        type: undefined
+    })
+
+    const leadSourceTypes = [
+        {
+            title: 'Paid',
+            value: 'paid'
         },
+        {
+            title: 'Unpaid',
+            value: 'unpaid'
+        }
+    ]
+
+    watch(isEditLeadSourceDrawerVisible, newValue => {
+        if (!newValue)
+            selectedLeadSource.value = {}
     })
-    isSnackBarVisible.value = true
-    leadsourceResponsemessage.value = message
-    if (success) {
-        leadsourcesData.value[leadsourceToDelete] = leadsource
-        editLeadSourceDrawerRef.value.closeNavigationDrawer()
-    }
-}
-
-const openeditleadsourceForm = (leadsource: any) => {
-    selectedLeadSource.value = leadsource
-    leadsourceToDelete = leadsourcesData.value.indexOf(leadsource)
-    isEditLeadSourceDrawerVisible.value = true
-}
-
-// 👉 Delete lead source
-const deleteLeadSource = async () => {
-    const { success, message } = await $api(`leadsources/${leadsourceToDelete}`, {
-        method: 'DELETE',
-    })
-
-    isDeleteDialogVisible.value = false
-
-    isSnackBarVisible.value = true
-    leadsourceResponsemessage.value = message
-    if (success) {
-        leadsourcesData.value = leadsourcesData.value.filter((leadsource: any) => leadsource.id !== leadsourceToDelete)
-    }
-}
-
-const errors = ref({
-    name: undefined,
-    type: undefined
-})
-
-const leadSourceTypes = [
-    {
-        title: 'Paid',
-        value: 'paid'
-    },
-    {
-        title: 'Unpaid',
-        value: 'unpaid'
-    }
-]
-
-watch(isEditLeadSourceDrawerVisible, newValue => {
-    if (!newValue)
-        selectedLeadSource.value = {}
-})
 
 </script>
 
@@ -199,15 +199,15 @@ watch(isEditLeadSourceDrawerVisible, newValue => {
 </template>
 
 <style lang="scss">
-.app-user-search-filter {
-    inline-size: 24.0625rem;
-}
+    .app-user-search-filter {
+        inline-size: 24.0625rem;
+    }
 
-.text-capitalize {
-    text-transform: capitalize;
-}
+    .text-capitalize {
+        text-transform: capitalize;
+    }
 
-.user-list-name:not(:hover) {
-    color: rgba(var(--v-theme-on-background), var(--v-high-emphasis-opacity));
-}
+    .user-list-name:not(:hover) {
+        color: rgba(var(--v-theme-on-background), var(--v-high-emphasis-opacity));
+    }
 </style>

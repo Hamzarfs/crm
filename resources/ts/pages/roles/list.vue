@@ -1,100 +1,100 @@
 <script setup lang="ts">
 
-import AddNewRoleDrawer from '@/components/roles/AddNewRoleDrawer.vue';
-import EditRoleDrawer from '@/components/roles/EditRoleDrawer.vue';
+    import AddNewRoleDrawer from '@/components/roles/AddNewRoleDrawer.vue';
+    import EditRoleDrawer from '@/components/roles/EditRoleDrawer.vue';
 
-const selectedRole = ref({
-    name: '',
-})
-let roleToDelete: number
-let roleToUpdateIndex: number
-
-
-// Add a ref for the AddNewUserDrawer & editUserDrawerRef component
-const addNewRoleDrawerRef = ref()
-const editRoleDrawerRef = ref()
-const dataTableRef = ref()
-// Headers
-const headers = [
-    { title: 'ID', key: 'id' },
-    { title: 'Name', key: 'title' },
-    { title: 'Actions', key: 'actions', sortable: false },
-]
-
-// 👉 Fetching roles
-const { roles } = await $api('roles')
-const rolesData = ref(roles)
-
-
-const isAddNewRoleDrawerVisible = ref(false)
-const isEditRoleDrawerVisible = ref(false)
-const isSnackBarVisible = ref(false)
-const isDeleteDialogVisible = ref(false)
-const roleResponsemessage = ref('')
-
-// 👉 Add new role
-const addNewRole = async (roleData: any) => {
-    const { success, message, role } = await $api('/roles', {
-        method: 'POST',
-        body: roleData,
-        onResponseError({ response }) {
-            errors.value = response._data.errors
-        },
+    const selectedRole = ref({
+        name: '',
     })
+    let roleToDelete: number
+    let roleToUpdateIndex: number
 
-    if (success) {
-        isSnackBarVisible.value = true
-        rolesData.value = [...rolesData.value, role]
-        roleResponsemessage.value = message
-        addNewRoleDrawerRef.value.closeNavigationDrawer()
-        nextTick(() => {
-            dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollTop = dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollHeight
+
+    // Add a ref for the AddNewUserDrawer & editUserDrawerRef component
+    const addNewRoleDrawerRef = ref()
+    const editRoleDrawerRef = ref()
+    const dataTableRef = ref()
+    // Headers
+    const headers = [
+        { title: 'ID', key: 'id' },
+        { title: 'Name', key: 'title' },
+        { title: 'Actions', key: 'actions', sortable: false },
+    ]
+
+    // 👉 Fetching roles
+    const { roles } = await $api('roles')
+    const rolesData = ref(roles)
+
+
+    const isAddNewRoleDrawerVisible = ref(false)
+    const isEditRoleDrawerVisible = ref(false)
+    const isSnackBarVisible = ref(false)
+    const isDeleteDialogVisible = ref(false)
+    const roleResponsemessage = ref('')
+
+    // 👉 Add new role
+    const addNewRole = async (roleData: any) => {
+        const { success, message, role } = await $api('/roles', {
+            method: 'POST',
+            body: roleData,
+            onResponseError({ response }) {
+                errors.value = response._data.errors
+            },
         })
-    }
-}
 
-// 👉 Edit role
-const editRole = async (roleData: any) => {
-    const { success, message, role } = await $api(`roles/${roleData.id}`, {
-        method: 'PUT',
-        body: roleData,
-        onResponseError({ response }) {
-            errors.value = response._data.errors
-        },
-    })
-    if (success) {
+        if (success) {
+            isSnackBarVisible.value = true
+            rolesData.value = [...rolesData.value, role]
+            roleResponsemessage.value = message
+            addNewRoleDrawerRef.value.closeNavigationDrawer()
+            nextTick(() => {
+                dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollTop = dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollHeight
+            })
+        }
+    }
+
+    // 👉 Edit role
+    const editRole = async (roleData: any) => {
+        const { success, message, role } = await $api(`roles/${roleData.id}`, {
+            method: 'PUT',
+            body: roleData,
+            onResponseError({ response }) {
+                errors.value = response._data.errors
+            },
+        })
+        if (success) {
+            isSnackBarVisible.value = true
+            rolesData.value[roleToUpdateIndex] = role
+            roleResponsemessage.value = message
+            editRoleDrawerRef.value.closeNavigationDrawer()
+        }
+    }
+
+    const openEditRoleForm = (role: any) => {
+        selectedRole.value = role
+        roleToUpdateIndex = rolesData.value.indexOf(role)
+        isEditRoleDrawerVisible.value = true
+    }
+
+
+    // 👉 Delete role
+    const deleteRole = async () => {
+        const { success, message } = await $api(`roles/${roleToDelete}`, {
+            method: 'DELETE',
+        })
+
+        isDeleteDialogVisible.value = false
+
         isSnackBarVisible.value = true
-        rolesData.value[roleToUpdateIndex] = role
         roleResponsemessage.value = message
-        editRoleDrawerRef.value.closeNavigationDrawer()
+        if (success) {
+            rolesData.value = rolesData.value.filter((role: any) => role.id !== roleToDelete)
+        }
     }
-}
 
-const openEditRoleForm = (role: any) => {
-    selectedRole.value = role
-    roleToUpdateIndex = rolesData.value.indexOf(role)
-    isEditRoleDrawerVisible.value = true
-}
-
-
-// 👉 Delete role
-const deleteRole = async () => {
-    const { success, message } = await $api(`roles/${roleToDelete}`, {
-        method: 'DELETE',
+    const errors = ref({
+        name: undefined
     })
-
-    isDeleteDialogVisible.value = false
-
-    isSnackBarVisible.value = true
-    roleResponsemessage.value = message
-    if (success) {
-        rolesData.value = rolesData.value.filter((role: any) => role.id !== roleToDelete)
-    }
-}
-
-const errors = ref({
-    name: undefined
-})
 
 </script>
 
@@ -181,15 +181,15 @@ const errors = ref({
 </template>
 
 <style lang="scss">
-.app-user-search-filter {
-    inline-size: 24.0625rem;
-}
+    .app-user-search-filter {
+        inline-size: 24.0625rem;
+    }
 
-.text-capitalize {
-    text-transform: capitalize;
-}
+    .text-capitalize {
+        text-transform: capitalize;
+    }
 
-.user-list-name:not(:hover) {
-    color: rgba(var(--v-theme-on-background), var(--v-high-emphasis-opacity));
-}
+    .user-list-name:not(:hover) {
+        color: rgba(var(--v-theme-on-background), var(--v-high-emphasis-opacity));
+    }
 </style>
