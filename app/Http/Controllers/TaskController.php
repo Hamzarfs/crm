@@ -6,7 +6,6 @@ use App\Http\Requests\Task\{Store, Update, Comment\Store as CommentStore};
 use App\Http\Resources\{Tasks\TaskCommentResource, Collections\Tasks\TaskResourceCollection};
 use App\Models\{Task, TaskComment, TaskFile};
 use App\Notifications\Task\Assigned as TaskAssigned;
-use App\Notifications\Task\Comment\Added as TaskCommentAdded;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\DatabaseNotification;
@@ -236,7 +235,7 @@ class TaskController extends Controller
     {
         $data = (object) $request->validated();
 
-        $comment = $task->comments()->create([
+        $comment = $task->comments()->createQuietly([
             'comment' => $data->comment,
             'created_by' => Auth::id(),
         ]);
@@ -252,13 +251,7 @@ class TaskController extends Controller
             }
         }
 
-        $comment->load(['files', 'createdBy', 'task']);
-        Notification::send(
-            $comment->createdBy->is($comment->task->creator) ?
-                $comment->task->assignee :
-                $comment->task->creator,
-            new TaskCommentAdded($comment)
-        );
+        $comment->save();
 
         return response()->json([
             'success' => true,

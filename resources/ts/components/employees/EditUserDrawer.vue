@@ -1,143 +1,143 @@
 <script setup lang="ts">
-import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
-import type { VForm } from 'vuetify/components/VForm';
+    import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
+    import type { VForm } from 'vuetify/components/VForm';
 
 
 
-interface Emit {
-    (e: 'update:isDrawerOpen', value: boolean): void
-    (e: 'userData', value: any): void
-}
+    interface Emit {
+        (e: 'update:isDrawerOpen', value: boolean): void
+        (e: 'userData', value: any): void
+    }
 
-interface Props {
-    isDrawerOpen: boolean
-    status: []
-    roles: []
-    departments: []
-    errors: Record<string, any>
-    user: Record<string, any>
-}
-
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emit>()
+    interface Props {
+        isDrawerOpen: boolean
+        status: []
+        roles: []
+        departments: []
+        errors: Record<string, any>
+        user: Record<string, any>
+    }
 
 
-const isFormValid = ref(false)
-const refForm = ref<VForm>()
-const name = ref(undefined)
-const email = ref(undefined)
-const department = ref(undefined)
-const phone = ref(undefined)
-const role = ref(undefined)
-const status = ref(undefined)
-const optionalDetails = ref({
-    biometricId: undefined,
-    educationDetails: undefined,
-    salary: undefined,
-    emergencyContactName: undefined,
-    emergencyContactNumber: undefined,
-    vehiclePlateNumber: undefined,
-    bloodGroup: undefined,
-    allergyOrDisease: undefined,
-    shiftTimings: undefined,
-    experienceDetails: undefined,
-    designation: undefined,
-    homeAddress: undefined,
-    maritalStatus: undefined,
-    workEmail: undefined,
-    workEmailPassword: undefined,
-    companyEmail: undefined,
-    companyEmailPassword: undefined,
-    pcPassword: undefined,
-    pcDetails: undefined,
-    anyPaidPlatform: undefined,
-    idAndPasswordOfAnyPaidPlatforms: undefined,
-    peripheralDevices: undefined,
-    jobType: undefined,
-    joiningDate: undefined,
-    firstSalaryIncrement: undefined,
-    secondSalaryIncrement: undefined,
-    thirdSalaryIncrement: undefined,
+    const props = defineProps<Props>()
+    const emit = defineEmits<Emit>()
 
-})
 
-const userRoles = props.roles.map((r: any) => ({ title: r.title, value: r.id }))
-const departments = props.departments.map((d: any) => ({ title: d.title, value: d.id }))
+    const isFormValid = ref(false)
+    const refForm = ref<VForm>()
+    const name = ref(undefined)
+    const email = ref(undefined)
+    const department = ref(undefined)
+    const phone = ref(undefined)
+    const role = ref(undefined)
+    const status = ref(undefined)
+    const optionalDetails = ref({
+        biometricId: undefined,
+        educationDetails: undefined,
+        salary: undefined,
+        emergencyContactName: undefined,
+        emergencyContactNumber: undefined,
+        vehiclePlateNumber: undefined,
+        bloodGroup: undefined,
+        allergyOrDisease: undefined,
+        shiftTimings: undefined,
+        experienceDetails: undefined,
+        designation: undefined,
+        homeAddress: undefined,
+        maritalStatus: undefined,
+        workEmail: undefined,
+        workEmailPassword: undefined,
+        companyEmail: undefined,
+        companyEmailPassword: undefined,
+        pcPassword: undefined,
+        pcDetails: undefined,
+        anyPaidPlatform: undefined,
+        idAndPasswordOfAnyPaidPlatforms: undefined,
+        peripheralDevices: undefined,
+        jobType: undefined,
+        joiningDate: undefined,
+        firstSalaryIncrement: undefined,
+        secondSalaryIncrement: undefined,
+        thirdSalaryIncrement: undefined,
 
-watch(() => props.user, newVal => {
-    name.value = newVal.name
-    email.value = newVal.email
-    department.value = newVal.department?.id
-    phone.value = newVal.phone
-    role.value = newVal.role?.id
-    status.value = newVal.status?.value
-
-    optionalDetails.value.biometricId = newVal.details?.biometricId
-    optionalDetails.value.educationDetails = newVal.details?.educationDetails
-    optionalDetails.value.salary = newVal.details?.salary
-    optionalDetails.value.emergencyContactName = newVal.details?.emergencyContactName
-    optionalDetails.value.emergencyContactNumber = newVal.details?.emergencyContactNumber
-    optionalDetails.value.vehiclePlateNumber = newVal.details?.vehiclePlateNumber
-    optionalDetails.value.bloodGroup = newVal.details?.bloodGroup
-    optionalDetails.value.allergyOrDisease = newVal.details?.allergyOrDisease
-    optionalDetails.value.shiftTimings = newVal.details?.shiftTimings
-    optionalDetails.value.experienceDetails = newVal.details?.experienceDetails
-    optionalDetails.value.designation = newVal.details?.designation
-    optionalDetails.value.homeAddress = newVal.details?.homeAddress
-    optionalDetails.value.maritalStatus = newVal.details?.maritalStatus
-    optionalDetails.value.workEmail = newVal.details?.workEmail
-    optionalDetails.value.workEmailPassword = newVal.details?.workEmailPassword
-    optionalDetails.value.companyEmail = newVal.details?.companyEmail
-    optionalDetails.value.companyEmailPassword = newVal.details?.companyEmailPassword
-    optionalDetails.value.pcPassword = newVal.details?.pcPassword
-    optionalDetails.value.pcDetails = newVal.details?.pcDetails
-    optionalDetails.value.anyPaidPlatform = newVal.details?.anyPaidPlatform
-    optionalDetails.value.idAndPasswordOfAnyPaidPlatforms = newVal.details?.idAndPasswordOfAnyPaidPlatforms
-    optionalDetails.value.peripheralDevices = newVal.details?.peripheralDevices
-    optionalDetails.value.jobType = newVal.details?.jobType
-    optionalDetails.value.joiningDate = newVal.details?.joiningDate
-    optionalDetails.value.firstSalaryIncrement = newVal.details?.firstSalaryIncrement
-    optionalDetails.value.secondSalaryIncrement = newVal.details?.secondSalaryIncrement
-    optionalDetails.value.thirdSalaryIncrement = newVal.details?.thirdSalaryIncrement
-}, {
-    deep: true
-})
-
-// 👉 drawer close
-const closeNavigationDrawer = () => {
-    emit('update:isDrawerOpen', false)
-    nextTick(() => {
-        refForm.value?.reset()
-        refForm.value?.resetValidation()
     })
-}
 
-const onSubmit = () => {
-    refForm.value?.validate().then(({ valid }) => {
-        if (valid) {
-            emit('userData', {
-                id: props.user.id,
-                name: name.value,
-                email: email.value,
-                phone: phone.value,
-                role: role.value,
-                department: department.value,
-                status: status.value,
-                details: optionalDetails.value,
+    const userRoles = props.roles.map((r: any) => ({ title: r.title, value: r.id }))
+    const departments = props.departments.map((d: any) => ({ title: d.title, value: d.id }))
 
-            })
-        }
+    watch(() => props.user, newVal => {
+        name.value = newVal.name
+        email.value = newVal.email
+        department.value = newVal.department?.id
+        phone.value = newVal.phone
+        role.value = newVal.role?.id
+        status.value = newVal.status?.value
+
+        optionalDetails.value.biometricId = newVal.details?.biometricId
+        optionalDetails.value.educationDetails = newVal.details?.educationDetails
+        optionalDetails.value.salary = newVal.details?.salary
+        optionalDetails.value.emergencyContactName = newVal.details?.emergencyContactName
+        optionalDetails.value.emergencyContactNumber = newVal.details?.emergencyContactNumber
+        optionalDetails.value.vehiclePlateNumber = newVal.details?.vehiclePlateNumber
+        optionalDetails.value.bloodGroup = newVal.details?.bloodGroup
+        optionalDetails.value.allergyOrDisease = newVal.details?.allergyOrDisease
+        optionalDetails.value.shiftTimings = newVal.details?.shiftTimings
+        optionalDetails.value.experienceDetails = newVal.details?.experienceDetails
+        optionalDetails.value.designation = newVal.details?.designation
+        optionalDetails.value.homeAddress = newVal.details?.homeAddress
+        optionalDetails.value.maritalStatus = newVal.details?.maritalStatus
+        optionalDetails.value.workEmail = newVal.details?.workEmail
+        optionalDetails.value.workEmailPassword = newVal.details?.workEmailPassword
+        optionalDetails.value.companyEmail = newVal.details?.companyEmail
+        optionalDetails.value.companyEmailPassword = newVal.details?.companyEmailPassword
+        optionalDetails.value.pcPassword = newVal.details?.pcPassword
+        optionalDetails.value.pcDetails = newVal.details?.pcDetails
+        optionalDetails.value.anyPaidPlatform = newVal.details?.anyPaidPlatform
+        optionalDetails.value.idAndPasswordOfAnyPaidPlatforms = newVal.details?.idAndPasswordOfAnyPaidPlatforms
+        optionalDetails.value.peripheralDevices = newVal.details?.peripheralDevices
+        optionalDetails.value.jobType = newVal.details?.jobType
+        optionalDetails.value.joiningDate = newVal.details?.joiningDate
+        optionalDetails.value.firstSalaryIncrement = newVal.details?.firstSalaryIncrement
+        optionalDetails.value.secondSalaryIncrement = newVal.details?.secondSalaryIncrement
+        optionalDetails.value.thirdSalaryIncrement = newVal.details?.thirdSalaryIncrement
+    }, {
+        deep: true
     })
-}
 
-defineExpose({
-    closeNavigationDrawer
-})
+    // 👉 drawer close
+    const closeNavigationDrawer = () => {
+        emit('update:isDrawerOpen', false)
+        nextTick(() => {
+            refForm.value?.reset()
+            refForm.value?.resetValidation()
+        })
+    }
 
-const handleDrawerModelValueUpdate = (val: boolean) => {
-    emit('update:isDrawerOpen', val)
-}
+    const onSubmit = () => {
+        refForm.value?.validate().then(({ valid }) => {
+            if (valid) {
+                emit('userData', {
+                    id: props.user.id,
+                    name: name.value,
+                    email: email.value,
+                    phone: phone.value,
+                    role: role.value,
+                    department: department.value,
+                    status: status.value,
+                    details: optionalDetails.value,
+
+                })
+            }
+        })
+    }
+
+    defineExpose({
+        closeNavigationDrawer
+    })
+
+    const handleDrawerModelValueUpdate = (val: boolean) => {
+        emit('update:isDrawerOpen', val)
+    }
 </script>
 
 <template>
@@ -149,7 +149,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
 
         <VDivider />
 
-        <PerfectScrollbar :options="{ wheelPropagation: false }">
+        <PerfectScrollbar :options="{ wheelPropagation: false, suppressScrollX: true }">
             <VCard flat>
                 <VCardText>
                     <!-- 👉 Form -->

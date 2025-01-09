@@ -1,55 +1,55 @@
 <script setup lang="ts">
 
-import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
+    import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
 
 
 
-interface Props {
-    isDrawerOpen: boolean
-    lead: Record<string, any>
-}
+    interface Props {
+        isDrawerOpen: boolean
+        lead: Record<string, any>
+    }
 
-interface Emits {
-    (e: 'update:isDrawerOpen', value: boolean): void
-}
+    interface Emits {
+        (e: 'update:isDrawerOpen', value: boolean): void
+    }
 
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+    const props = defineProps<Props>()
+    const emit = defineEmits<Emits>()
 
-// 👉 Drawer close
-const closeNavigationDrawer = () => {
-    emit('update:isDrawerOpen', false)
-}
+    // 👉 Drawer close
+    const closeNavigationDrawer = () => {
+        emit('update:isDrawerOpen', false)
+    }
 
-const handleDrawerModelValueUpdate = (val: boolean) => {
-    emit('update:isDrawerOpen', val)
-}
+    const handleDrawerModelValueUpdate = (val: boolean) => {
+        emit('update:isDrawerOpen', val)
+    }
 
 
 
-const agentFollowupsTableData = {
-    headers: [
-        { title: '#', key: 'sr' },
-        { title: 'Sales Agent', key: 'agent' },
-        { title: 'Contact Status', key: 'contact_status' },
-        { title: 'Notes', key: 'notes' },
-        { title: 'Follow-up', key: 'follow_up' },
-        { title: 'Final Status', key: 'final_status' },
-        { title: 'Final Status Date/Time', key: 'final_status_date' },
-        { title: 'Call Status', key: 'call_status' },
-        { title: 'Call Status Date/Time', key: 'call_date' },
-        { title: 'Email Status', key: 'email_status' },
-        { title: 'Email Status Date/Time', key: 'email_date' },
-        { title: 'SMS Status', key: 'sms_status' },
-        { title: 'SMS Status Date/Time', key: 'sms_date' },
-        { title: 'Created at', key: 'created_at' },
-    ],
-    data: props.lead?.details
-}
+    const agentFollowupsTableData = {
+        headers: [
+            { title: '#', key: 'sr' },
+            { title: 'Sales Agent', key: 'agent' },
+            { title: 'Contact Status', key: 'contact_status' },
+            { title: 'Notes', key: 'notes' },
+            { title: 'Follow-up', key: 'follow_up' },
+            { title: 'Final Status', key: 'final_status' },
+            { title: 'Final Status Date/Time', key: 'final_status_date' },
+            { title: 'Call Status', key: 'call_status' },
+            { title: 'Call Status Date/Time', key: 'call_date' },
+            { title: 'Email Status', key: 'email_status' },
+            { title: 'Email Status Date/Time', key: 'email_date' },
+            { title: 'SMS Status', key: 'sms_status' },
+            { title: 'SMS Status Date/Time', key: 'sms_date' },
+            { title: 'Created at', key: 'created_at' },
+        ],
+        data: props.lead?.details
+    }
 
-watch(() => props.lead, lead => {
-    agentFollowupsTableData.data = lead.details
-})
+    watch(() => props.lead, lead => {
+        agentFollowupsTableData.data = lead.details
+    })
 
 
 </script>
@@ -63,7 +63,7 @@ watch(() => props.lead, lead => {
 
         <VDivider />
 
-        <PerfectScrollbar :options="{ wheelPropagation: false }">
+        <PerfectScrollbar :options="{ wheelPropagation: false, suppressScrollX: true }">
             <VCard flat>
                 <VCardText>
                     <VRow>

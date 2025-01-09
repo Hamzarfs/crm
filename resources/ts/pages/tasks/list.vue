@@ -26,7 +26,7 @@
 
     // Selected task to edit
     const selectedTask = ref<Record<string, any>>({})
-    let taskToDelete: number
+    let taskToDelete = ref(undefined)
 
     // Data table options
     const itemsPerPage = ref(20)
@@ -194,7 +194,7 @@
 
     // 👉 Delete task
     const deleteTask = async () => {
-        const { success, message } = await $api(`tasks/${taskToDelete}`, {
+        const { success, message } = await $api(`tasks/${taskToDelete.value}`, {
             method: 'DELETE',
         })
 

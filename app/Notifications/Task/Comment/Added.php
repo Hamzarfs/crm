@@ -67,12 +67,13 @@ class Added extends Notification
      */
     public function broadcastOn(): PrivateChannel
     {
-        return new PrivateChannel(sprintf(
-            "Task.Comment.Added.%s",
-            $this->taskComment->createdBy->is($this->taskComment->task->creator) ?
-                $this->taskComment->task->assignee->id :
-                $this->taskComment->task->creator->id
-        ));
+        return new PrivateChannel("Task.Comment.Added.{$this->taskComment->task_id}");
+        // return new PrivateChannel(sprintf(
+        //     "Task.Comment.Added.%s",
+        //     $this->taskComment->createdBy->is($this->taskComment->task->creator) ?
+        //         $this->taskComment->task->assignee->id :
+        //         $this->taskComment->task->creator->id
+        // ));
     }
 
     /**

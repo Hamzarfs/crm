@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\EmployeeStatusesEnum;
 use BackedEnum;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -59,6 +60,11 @@ class User extends Authenticatable
     {
         $this->load('department:id,name');
         return array_search($this->department->name, $departments, true) !== false;
+    }
+
+    public function scopeDepartment(Builder $builder, string ...$departments): Builder
+    {
+        return $builder->whereHas('department', fn(Builder $query) => $query->whereIn('name', $departments));
     }
 
     function details()

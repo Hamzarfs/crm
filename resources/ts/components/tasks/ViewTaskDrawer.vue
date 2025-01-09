@@ -30,9 +30,8 @@
     const task = ref(props.task || {})
 
     watch(() => props.task, newValue => {
-        if (newValue) {
+        if (!isObjectEmpty(newValue)) {
             task.value = newValue
-
             // window.Echo.private(`Task.Comment.Added.${props.task.id}`)
             //     .notification((notification: any) => {
             //         console.log(notification);

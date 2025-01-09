@@ -1,79 +1,79 @@
 <script setup lang="ts">
 
-import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
-import type { VForm } from 'vuetify/components/VForm';
+    import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
+    import type { VForm } from 'vuetify/components/VForm';
 
 
-interface Emit {
-    (e: 'update:isDrawerOpen', value: boolean): void
-    (e: 'leadData', value: any): void
-}
+    interface Emit {
+        (e: 'update:isDrawerOpen', value: boolean): void
+        (e: 'leadData', value: any): void
+    }
 
-interface Props {
-    isDrawerOpen: boolean
-    statuses: string[]
-    customers: any[]
-    leadSources: any[]
-    brands: any[]
-    services: any[]
-    errors: Record<string, any>
-    userData: Record<string, any>
-    campaigns: Record<string, any>[]
-}
+    interface Props {
+        isDrawerOpen: boolean
+        statuses: string[]
+        customers: any[]
+        leadSources: any[]
+        brands: any[]
+        services: any[]
+        errors: Record<string, any>
+        userData: Record<string, any>
+        campaigns: Record<string, any>[]
+    }
 
-const props = defineProps<Props>()
-const emit = defineEmits<Emit>()
+    const props = defineProps<Props>()
+    const emit = defineEmits<Emit>()
 
-const isFormValid = ref(false)
-const refForm = ref<VForm>()
+    const isFormValid = ref(false)
+    const refForm = ref<VForm>()
 
-const lead = ref({
-    customer: undefined,
-    lead_source: undefined,
-    brand: undefined,
-    status: props.userData.department.value === 'lead_generation' ? 'New lead' : undefined,
-    remarks: undefined,
-    lead_closed_date: undefined,
-    lead_closed_amount: undefined,
-    services: [],
-    campaign: undefined,
-})
+    const lead = ref({
+        customer: undefined,
+        lead_source: undefined,
+        brand: undefined,
+        status: props.userData.department.value === 'lead_generation' ? 'New lead' : undefined,
+        remarks: undefined,
+        lead_closed_date: undefined,
+        lead_closed_amount: undefined,
+        services: [],
+        campaign: undefined,
+    })
 
-// 👉 drawer close
-const closeNavigationDrawer = () => {
-    emit('update:isDrawerOpen', false)
-    nextTick(() => {
-        Object.assign(props.errors, {
-            customer: undefined,
-            services: undefined,
-            lead_source: undefined,
-            brand: undefined,
-            status: undefined,
-            remarks: undefined,
-            lead_closed_amount: undefined,
-            lead_closed_date: undefined,
-            campaign: undefined,
+    // 👉 drawer close
+    const closeNavigationDrawer = () => {
+        emit('update:isDrawerOpen', false)
+        nextTick(() => {
+            Object.assign(props.errors, {
+                customer: undefined,
+                services: undefined,
+                lead_source: undefined,
+                brand: undefined,
+                status: undefined,
+                remarks: undefined,
+                lead_closed_amount: undefined,
+                lead_closed_date: undefined,
+                campaign: undefined,
+            })
+            refForm.value?.reset()
+            refForm.value?.resetValidation()
         })
-        refForm.value?.reset()
-        refForm.value?.resetValidation()
+    }
+
+    const onSubmit = () => {
+        refForm.value?.validate().then(({ valid }) => {
+            if (valid) {
+                emit('leadData', lead.value)
+            }
+        })
+    }
+
+    defineExpose({
+        closeNavigationDrawer
     })
-}
 
-const onSubmit = () => {
-    refForm.value?.validate().then(({ valid }) => {
-        if (valid) {
-            emit('leadData', lead.value)
-        }
-    })
-}
-
-defineExpose({
-    closeNavigationDrawer
-})
-
-const handleDrawerModelValueUpdate = (val: boolean) => {
-    emit('update:isDrawerOpen', val)
-}
+    const handleDrawerModelValueUpdate = (val: boolean) => {
+        emit('update:isDrawerOpen', val)
+    }
 
 </script>
 
@@ -86,7 +86,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
 
         <VDivider />
 
-        <PerfectScrollbar :options="{ wheelPropagation: false }">
+        <PerfectScrollbar :options="{ wheelPropagation: false, suppressScrollX: true }">
             <VCard flat>
                 <VCardText>
                     <!-- 👉 Form -->

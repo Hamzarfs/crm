@@ -1,64 +1,64 @@
 <script setup lang="ts">
 
-import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
-import type { VForm } from 'vuetify/components/VForm';
+    import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
+    import type { VForm } from 'vuetify/components/VForm';
 
 
 
-interface Props {
-    isDrawerOpen: boolean
-    statuses: string[]
-}
+    interface Props {
+        isDrawerOpen: boolean
+        statuses: string[]
+    }
 
-interface Emits {
-    (e: 'update:isDrawerOpen', value: boolean): void
-    (e: 'addLeadDetails', value: any): void
-}
+    interface Emits {
+        (e: 'update:isDrawerOpen', value: boolean): void
+        (e: 'addLeadDetails', value: any): void
+    }
 
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+    const props = defineProps<Props>()
+    const emit = defineEmits<Emits>()
 
 
-const isFormValid = ref(false)
-const refForm = ref<VForm>()
+    const isFormValid = ref(false)
+    const refForm = ref<VForm>()
 
-const leadDetails = ref({
-    contact_status: undefined,
-    notes: undefined,
-    follow_up: undefined,
-    final_status: undefined,
-    call_status: undefined,
-    call_date: undefined,
-    email_status: undefined,
-    email_date: undefined,
-    sms_status: undefined,
-    sms_date: undefined,
-})
-
-// 👉 Drawer close
-const closeNavigationDrawer = () => {
-    emit('update:isDrawerOpen', false)
-    nextTick(() => {
-        refForm.value?.reset()
-        refForm.value?.resetValidation()
+    const leadDetails = ref({
+        contact_status: undefined,
+        notes: undefined,
+        follow_up: undefined,
+        final_status: undefined,
+        call_status: undefined,
+        call_date: undefined,
+        email_status: undefined,
+        email_date: undefined,
+        sms_status: undefined,
+        sms_date: undefined,
     })
-}
 
-const onSubmit = () => {
-    refForm.value?.validate().then(({ valid }) => {
-        if (valid) {
-            emit('addLeadDetails', leadDetails.value)
-        }
+    // 👉 Drawer close
+    const closeNavigationDrawer = () => {
+        emit('update:isDrawerOpen', false)
+        nextTick(() => {
+            refForm.value?.reset()
+            refForm.value?.resetValidation()
+        })
+    }
+
+    const onSubmit = () => {
+        refForm.value?.validate().then(({ valid }) => {
+            if (valid) {
+                emit('addLeadDetails', leadDetails.value)
+            }
+        })
+    }
+
+    defineExpose({
+        closeNavigationDrawer
     })
-}
 
-defineExpose({
-    closeNavigationDrawer
-})
-
-const handleDrawerModelValueUpdate = (val: boolean) => {
-    emit('update:isDrawerOpen', val)
-}
+    const handleDrawerModelValueUpdate = (val: boolean) => {
+        emit('update:isDrawerOpen', val)
+    }
 
 </script>
 
@@ -71,7 +71,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
 
         <VDivider />
 
-        <PerfectScrollbar :options="{ wheelPropagation: false }">
+        <PerfectScrollbar :options="{ wheelPropagation: false, suppressScrollX: true }">
             <VCard flat>
                 <VCardText>
                     <!-- 👉 Form -->

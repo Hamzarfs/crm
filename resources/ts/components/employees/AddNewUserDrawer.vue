@@ -1,99 +1,99 @@
 <script setup lang="ts">
-import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
-import type { VForm } from 'vuetify/components/VForm';
+    import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
+    import type { VForm } from 'vuetify/components/VForm';
 
-interface Emit {
-    (e: 'update:isDrawerOpen', value: boolean): void
-    (e: 'userData', value: any): void
-}
+    interface Emit {
+        (e: 'update:isDrawerOpen', value: boolean): void
+        (e: 'userData', value: any): void
+    }
 
-interface Props {
-    isDrawerOpen: boolean
-    status: []
-    roles: []
-    departments: []
-    errors: Record<string, any>
-}
+    interface Props {
+        isDrawerOpen: boolean
+        status: []
+        roles: []
+        departments: []
+        errors: Record<string, any>
+    }
 
-const props = defineProps<Props>()
-const emit = defineEmits<Emit>()
-
-
-const isFormValid = ref(false)
-const refForm = ref<VForm>()
-const name = ref('')
-const email = ref('')
-const department = ref()
-const phone = ref('')
-const role = ref()
-const status = ref()
-const optionalDetails = ref({
-    biometricId: '',
-    educationDetails: '',
-    salary: '',
-    emergencyContactName: '',
-    emergencyContactNumber: '',
-    vehiclePlateNumber: '',
-    bloodGroup: '',
-    allergyOrDisease: '',
-    shiftTimings: '',
-    experienceDetails: '',
-    designation: '',
-    homeAddress: '',
-    maritalStatus: '',
-    workEmail: '',
-    workEmailPassword: '',
-    companyEmail: '',
-    companyEmailPassword: '',
-    pcPassword: '',
-    pcDetails: '',
-    anyPaidPlatform: '',
-    idAndPasswordOfAnyPaidPlatforms: '',
-    peripheralDevices: '',
-    jobType: '',
-    joiningDate: '',
-    firstSalaryIncrement: '',
-    secondSalaryIncrement: '',
-    thirdSalaryIncrement: '',
-
-})
-
-const userRoles = props.roles.map((r: any) => ({ title: r.title, value: r.id }))
-const departments = props.departments.map((d: any) => ({ title: d.title, value: d.id }))
+    const props = defineProps<Props>()
+    const emit = defineEmits<Emit>()
 
 
-// 👉 drawer close
-const closeNavigationDrawer = () => {
-    emit('update:isDrawerOpen', false)
-    nextTick(() => {
-        refForm.value?.reset()
-        refForm.value?.resetValidation()
+    const isFormValid = ref(false)
+    const refForm = ref<VForm>()
+    const name = ref('')
+    const email = ref('')
+    const department = ref()
+    const phone = ref('')
+    const role = ref()
+    const status = ref()
+    const optionalDetails = ref({
+        biometricId: '',
+        educationDetails: '',
+        salary: '',
+        emergencyContactName: '',
+        emergencyContactNumber: '',
+        vehiclePlateNumber: '',
+        bloodGroup: '',
+        allergyOrDisease: '',
+        shiftTimings: '',
+        experienceDetails: '',
+        designation: '',
+        homeAddress: '',
+        maritalStatus: '',
+        workEmail: '',
+        workEmailPassword: '',
+        companyEmail: '',
+        companyEmailPassword: '',
+        pcPassword: '',
+        pcDetails: '',
+        anyPaidPlatform: '',
+        idAndPasswordOfAnyPaidPlatforms: '',
+        peripheralDevices: '',
+        jobType: '',
+        joiningDate: '',
+        firstSalaryIncrement: '',
+        secondSalaryIncrement: '',
+        thirdSalaryIncrement: '',
+
     })
-}
 
-const onSubmit = () => {
-    refForm.value?.validate().then(({ valid }) => {
-        if (valid) {
-            emit('userData', {
-                name: name.value,
-                email: email.value,
-                phone: phone.value,
-                role: role.value,
-                department: department.value,
-                status: status.value,
-                details: optionalDetails.value,
-            })
-        }
+    const userRoles = props.roles.map((r: any) => ({ title: r.title, value: r.id }))
+    const departments = props.departments.map((d: any) => ({ title: d.title, value: d.id }))
+
+
+    // 👉 drawer close
+    const closeNavigationDrawer = () => {
+        emit('update:isDrawerOpen', false)
+        nextTick(() => {
+            refForm.value?.reset()
+            refForm.value?.resetValidation()
+        })
+    }
+
+    const onSubmit = () => {
+        refForm.value?.validate().then(({ valid }) => {
+            if (valid) {
+                emit('userData', {
+                    name: name.value,
+                    email: email.value,
+                    phone: phone.value,
+                    role: role.value,
+                    department: department.value,
+                    status: status.value,
+                    details: optionalDetails.value,
+                })
+            }
+        })
+    }
+
+    defineExpose({
+        closeNavigationDrawer
     })
-}
 
-defineExpose({
-    closeNavigationDrawer
-})
-
-const handleDrawerModelValueUpdate = (val: boolean) => {
-    emit('update:isDrawerOpen', val)
-}
+    const handleDrawerModelValueUpdate = (val: boolean) => {
+        emit('update:isDrawerOpen', val)
+    }
 
 </script>
 
@@ -106,7 +106,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
 
         <VDivider />
 
-        <PerfectScrollbar :options="{ wheelPropagation: false }">
+        <PerfectScrollbar :options="{ wheelPropagation: false, suppressScrollX: true }">
             <VCard flat>
                 <VCardText>
                     <!-- 👉 Form -->

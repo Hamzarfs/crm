@@ -259,3 +259,10 @@ body,
         }
     }
 }
+
+// 👉 Dividers: <VDivider/> / <v-divider/>
+.v-row {
+    .v-divider {
+        margin: 0 -12px;
+    }
+}

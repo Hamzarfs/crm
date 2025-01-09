@@ -36,6 +36,7 @@
     }
 
     const totalUnreadNotifications = computed(() => props.notifications.filter(item => !item.isSeen).length)
+
 </script>
 
 <template>

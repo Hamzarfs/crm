@@ -1,95 +1,95 @@
 <script setup lang="ts">
 
-import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
-import type { VForm } from 'vuetify/components/VForm';
+    import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
+    import type { VForm } from 'vuetify/components/VForm';
 
-interface Emit {
-    (e: 'update:isDrawerOpen', value: boolean): void
-    (e: 'leadData', value: any): void
-}
-
-interface Props {
-    lead: Record<string, any>
-    isDrawerOpen: boolean
-    statuses: string[]
-    customers: any[]
-    leadSources: any[]
-    brands: any[]
-    services: any[]
-    errors: Record<string, any>
-    userData: Record<string, any>
-    campaigns: Record<string, any>[]
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emit>()
-
-const isFormValid = ref(false)
-const refForm = ref<VForm>()
-
-const leadToEdit = ref<Record<string, any>>({
-    customer: undefined,
-    lead_source: undefined,
-    brand: undefined,
-    status: undefined,
-    remarks: undefined,
-    lead_closed_date: undefined,
-    lead_closed_amount: undefined,
-    services: undefined,
-    campaign: undefined,
-})
-
-watch(() => props.lead, newVal => {
-    leadToEdit.value.customer = newVal.customer?.id
-    leadToEdit.value.lead_source = newVal.lead_source?.id
-    leadToEdit.value.brand = newVal.brand?.id
-    leadToEdit.value.status = newVal.status
-    leadToEdit.value.remarks = newVal.remarks
-    if (props.userData.department.value !== 'lead_generation') {
-        leadToEdit.value.lead_closed_date = parseDateWithFormat(newVal.lead_closed_date, 'DD MMM YYYY', 'DD-MM-YYYY')
-        leadToEdit.value.lead_closed_amount = newVal.lead_closed_amount
+    interface Emit {
+        (e: 'update:isDrawerOpen', value: boolean): void
+        (e: 'leadData', value: any): void
     }
-    leadToEdit.value.services = newVal.services_sold?.map((ss: Record<string, any>) => ss.service_id)
-    leadToEdit.value.campaign = newVal.campaign?.id
-}, {
-    deep: true,
-})
 
-// 👉 drawer close
-const closeNavigationDrawer = () => {
-    emit('update:isDrawerOpen', false)
-    nextTick(() => {
-        Object.assign(props.errors, {
-            customer: undefined,
-            services: undefined,
-            lead_source: undefined,
-            brand: undefined,
-            status: undefined,
-            remarks: undefined,
-            lead_closed_amount: undefined,
-            lead_closed_date: undefined,
-            campaign: undefined,
-        })
-        refForm.value?.reset()
-        refForm.value?.resetValidation()
+    interface Props {
+        lead: Record<string, any>
+        isDrawerOpen: boolean
+        statuses: string[]
+        customers: any[]
+        leadSources: any[]
+        brands: any[]
+        services: any[]
+        errors: Record<string, any>
+        userData: Record<string, any>
+        campaigns: Record<string, any>[]
+    }
+
+    const props = defineProps<Props>()
+    const emit = defineEmits<Emit>()
+
+    const isFormValid = ref(false)
+    const refForm = ref<VForm>()
+
+    const leadToEdit = ref<Record<string, any>>({
+        customer: undefined,
+        lead_source: undefined,
+        brand: undefined,
+        status: undefined,
+        remarks: undefined,
+        lead_closed_date: undefined,
+        lead_closed_amount: undefined,
+        services: undefined,
+        campaign: undefined,
     })
-}
 
-const onSubmit = () => {
-    refForm.value?.validate().then(({ valid }) => {
-        if (valid) {
-            emit('leadData', leadToEdit.value)
+    watch(() => props.lead, newVal => {
+        leadToEdit.value.customer = newVal.customer?.id
+        leadToEdit.value.lead_source = newVal.lead_source?.id
+        leadToEdit.value.brand = newVal.brand?.id
+        leadToEdit.value.status = newVal.status
+        leadToEdit.value.remarks = newVal.remarks
+        if (props.userData.department.value !== 'lead_generation') {
+            leadToEdit.value.lead_closed_date = parseDateWithFormat(newVal.lead_closed_date, 'DD MMM YYYY', 'DD-MM-YYYY')
+            leadToEdit.value.lead_closed_amount = newVal.lead_closed_amount
         }
+        leadToEdit.value.services = newVal.services_sold?.map((ss: Record<string, any>) => ss.service_id)
+        leadToEdit.value.campaign = newVal.campaign?.id
+    }, {
+        deep: true,
     })
-}
 
-defineExpose({
-    closeNavigationDrawer
-})
+    // 👉 drawer close
+    const closeNavigationDrawer = () => {
+        emit('update:isDrawerOpen', false)
+        nextTick(() => {
+            Object.assign(props.errors, {
+                customer: undefined,
+                services: undefined,
+                lead_source: undefined,
+                brand: undefined,
+                status: undefined,
+                remarks: undefined,
+                lead_closed_amount: undefined,
+                lead_closed_date: undefined,
+                campaign: undefined,
+            })
+            refForm.value?.reset()
+            refForm.value?.resetValidation()
+        })
+    }
 
-const handleDrawerModelValueUpdate = (val: boolean) => {
-    emit('update:isDrawerOpen', val)
-}
+    const onSubmit = () => {
+        refForm.value?.validate().then(({ valid }) => {
+            if (valid) {
+                emit('leadData', leadToEdit.value)
+            }
+        })
+    }
+
+    defineExpose({
+        closeNavigationDrawer
+    })
+
+    const handleDrawerModelValueUpdate = (val: boolean) => {
+        emit('update:isDrawerOpen', val)
+    }
 
 </script>
 
@@ -103,7 +103,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
 
         <VDivider />
 
-        <PerfectScrollbar :options="{ wheelPropagation: false }">
+        <PerfectScrollbar :options="{ wheelPropagation: false, suppressScrollX: true }">
             <VCard flat>
                 <VCardText>
                     <!-- 👉 Form -->

@@ -10,4 +10,5 @@ Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
 Broadcast::channel('Task.Assigned.{assignedTo}', TaskAssigned::class);
 
-Broadcast::channel('Task.Comment.Added.{task}', TaskCommentAdded::class);
+// Broadcast::channel('Task.Comment.Added.{task}', \App\Broadcasting\Task\Comment\Added::class, ['notification']);
+// Broadcast::channel('Task.Comment.Added.{task}', TaskCommentAdded::class, ['notification']);
