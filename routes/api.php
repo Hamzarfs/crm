@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\{AuthController, DepartmentController, BrandController, CampaignController, CurrencyController, CustomerController, LeadController, LeadPipelineStageController, LeadSourceController, NotificationController, RoleController, ServiceController, TaskController, UserController};
+use App\Http\Controllers\{AuthController, DepartmentController, BrandController, CampaignController, CurrencyController, CustomerController, EmailController, LeadController, LeadPipelineStageController, LeadSourceController, NotificationController, RoleController, ServiceController, TaskController, UserController};
 use Illuminate\Support\Facades\Route;
 
 
@@ -170,5 +170,11 @@ Route::middleware('auth:sanctum')->group(function () {
             // Route::post('', 'store');
             // Route::put('{campaign}', 'update');
             // Route::delete('{campaign}', 'delete');
+        });
+
+    Route::prefix('emails')
+        ->controller(EmailController::class)
+        ->group(function () {
+            Route::post('send', 'send');
         });
 });

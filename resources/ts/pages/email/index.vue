@@ -1,11 +1,12 @@
 <script setup lang="ts">
-    import ComposeDialog from '@/views/apps/email/ComposeDialog.vue'
-    import EmailLeftSidebarContent from '@/views/apps/email/EmailLeftSidebarContent.vue'
-    import EmailView from '@/views/apps/email/EmailView.vue'
-    import type { MoveEmailToAction } from '@/views/apps/email/useEmail'
-    import { useEmail } from '@/views/apps/email/useEmail'
-    import type { Email, EmailLabel } from '@db/apps/email/types'
+    // import ComposeDialog from '@/views/apps/email/ComposeDialog.vue'
+    // import EmailLeftSidebarContent from '@/views/apps/email/EmailLeftSidebarContent.vue'
+    // import EmailView from '@/views/apps/email/EmailView.vue'
+    import type { MoveEmailToAction } from '@/composables/useEmail'
+    // import { useEmail } from '@composables/useEmail'
+    import type { Email, EmailLabel } from '@/types/email'
     import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
+    import { emails as _emails, emailsMeta as _emailsMeta } from './emails'
 
     definePage({
         meta: {
@@ -40,16 +41,19 @@
     const selectedEmails = ref<Email['id'][]>([])
 
     // Fetch Emails
-    const { data: emailData, execute: fetchEmails } = await useApi<any>(createUrl('/apps/email', {
-        query: {
-            q,
-            filter: () => 'filter' in route.params ? route.params.filter : undefined,
-            label: () => 'label' in route.params ? route.params.label : undefined,
-        },
-    }))
+    // const { data: emailData, execute: fetchEmails } = await useApi<any>(createUrl('/apps/email', {
+    //     query: {
+    //         q,
+    //         filter: () => 'filter' in route.params ? route.params.filter : undefined,
+    //         label: () => 'label' in route.params ? route.params.label : undefined,
+    //     },
+    // }))
 
-    const emails = computed<Email[]>(() => emailData.value.emails)
-    const emailsMeta = computed(() => emailData.value.emailsMeta)
+    const emails = computed(() => _emails)
+    const emailsMeta = computed(() => _emailsMeta)
+
+    // const emails = computed<Email[]>(() => emailData.value.emails)
+    // const emailsMeta = computed(() => emailData.value.emailsMeta)
 
     const toggleSelectedEmail = (emailId: Email['id']) => {
         const emailIndex = selectedEmails.value.indexOf(emailId)
@@ -79,7 +83,7 @@
     }
 
     // Email View
-    const openedEmail = ref<Email | null>(null)
+    const openedEmail = ref(null)
 
     const emailViewMeta = computed(() => {
         const returnValue = {

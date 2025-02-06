@@ -58,6 +58,11 @@ export default [
         to: { name: 'tasks' },
     },
     {
+        title: 'Email',
+        icon: { icon: 'ri-mail-line' },
+        to: { name: 'email-filter' },
+    },
+    {
         heading: 'Sales Management',
         department: ['sales', 'admin', 'lead_generation'],
     },

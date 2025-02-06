@@ -13,6 +13,7 @@ const ServicesComponent = () => import('@/pages/services/list.vue')
 const CustomersComponent = () => import('@/pages/customers/list.vue')
 const LeadsComponent = () => import('@/pages/leads/list.vue')
 const LeadsKanbanComponent = () => import('@/pages/leads/kanban.vue')
+const EmailComponent = () => import('@/pages/email/index.vue')
 
 
 
@@ -28,6 +29,7 @@ export const redirects: RouteRecordRaw[] = [
 
             const userData = authStore.user
             const token = authStore.token
+
 
             if (userData && token)
                 return { name: 'dashboard' }
@@ -103,7 +105,7 @@ export const routes: RouteRecordRaw[] = [
     // /SAlES ROUTES
     {
         path: '/sales',
-        name: 'sales',
+        // name: 'sales',
         meta: {
             authenticatedOnly: true,
             departments: ['admin', 'sales', 'lead_generation'],
@@ -165,4 +167,42 @@ export const routes: RouteRecordRaw[] = [
             },
         ],
     },
+
+    // Email routes
+    {
+        path: '/email',
+        meta: {
+            authenticatedOnly: true,
+            // departments: ['admin', 'sales', 'lead_generation'],
+        },
+        children: [
+            // {
+            //     path: '',
+            //     name: 'email',
+            //     component: EmailComponent,
+            //     meta: {
+            //         navActiveLink: 'email',
+            //         layoutWrapperClasses: 'layout-content-height-fixed',
+            //     }
+            // },
+            {
+                path: 'filter/:filter?',
+                name: 'email-filter',
+                component: EmailComponent,
+                meta: {
+                    navActiveLink: 'email',
+                    layoutWrapperClasses: 'layout-content-height-fixed',
+                }
+            },
+            {
+                path: 'label/:label',
+                name: 'email-label',
+                component: EmailComponent,
+                meta: {
+                    navActiveLink: 'email',
+                    layoutWrapperClasses: 'layout-content-height-fixed',
+                }
+            },
+        ],
+    }
 ]
