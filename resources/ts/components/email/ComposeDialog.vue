@@ -1,10 +1,9 @@
 <script lang="ts" setup>
-    import { Image } from '@tiptap/extension-image'
     import { Link } from '@tiptap/extension-link'
     import { Placeholder } from '@tiptap/extension-placeholder'
     import { Underline } from '@tiptap/extension-underline'
     import { StarterKit } from '@tiptap/starter-kit'
-    import { Editor, EditorContent } from '@tiptap/vue-3'
+    import { EditorContent, useEditor } from '@tiptap/vue-3'
 
     const emit = defineEmits<{
         (e: 'close'): void
@@ -12,11 +11,8 @@
 
     const $toast = useToast()
 
-    const content = ref('')
-
     const to = ref('')
     const subject = ref('')
-    const message = ref('')
     const attachments = ref<File[]>([])
     const fileInput = ref()
 
@@ -24,17 +20,19 @@
     const bcc = ref('')
     const isEmailCc = ref(false)
     const isEmailBcc = ref(false)
+    const isEmailSending = ref(false)
 
     const resetValues = () => {
-        to.value = subject.value = message.value = ''
+        to.value = subject.value = cc.value = bcc.value = ''
+        attachments.value = []
+        editor.value.commands.clearContent()
     }
 
-    const editor = new Editor({
-        content: message,
+    const editor = useEditor({
+        content: '',
 
         extensions: [
             StarterKit,
-            Image,
             Placeholder.configure({
                 placeholder: 'Message',
             }),
@@ -44,34 +42,10 @@
                     HTMLAttributes: {
                         class: 'text-decoration-underline cursor-pointer'
                     }
-                    // openOnClick: false,
                 },
             ),
         ],
     })
-    // const editor = useEditor({
-    //     content: '',
-
-    //     extensions: [
-    //         StarterKit,
-    //         Image,
-    //         Placeholder.configure({
-    //             placeholder: 'Message',
-    //         }),
-    //         Underline,
-    //         Link.configure(
-    //             {
-    //                 HTMLAttributes: {
-    //                     class: 'text-decoration-underline cursor-pointer'
-    //                 }
-    //                 // openOnClick: false,
-    //             },
-    //         ),
-    //     ],
-    // })
-
-    // console.log(editor);
-
 
     const setLink = () => {
         const previousUrl = editor.value?.getAttributes('link').href
@@ -93,84 +67,59 @@
         editor.value?.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
     }
 
-    const addImage = () => {
-        // eslint-disable-next-line no-alert
-        const url = window.prompt('URL')
+    // const addImage = () => {
+    //     // eslint-disable-next-line no-alert
+    //     const url = window.prompt('URL')
 
-        if (url)
-            editor.value?.chain().focus().setImage({ src: url }).run()
-    }
+    //     if (url)
+    //         editor.value?.chain().focus().setImage({ src: url }).run()
+    // }
 
     const closeComposeDialog = () => {
-        emit('close')
-        content.value = ''
         resetValues()
         isEmailCc.value = false
         isEmailBcc.value = false
+        emit('close')
     }
 
     const sendEmail = async () => {
-        // console.log(editor.getHTML());
-        // return
+        isEmailSending.value = true
 
         const formData = new FormData();
         formData.append('to', to.value);
-        formData.append('message', editor.getHTML());
+        formData.append('message', editor.value.getHTML());
         formData.append('subject', subject.value);
 
-        // Append each file to FormData
         if (attachments.value?.length) {
             attachments.value.forEach((file, index) => {
                 formData.append(`files[${index}]`, file);
             });
         }
 
-
         const { success, message: responseMessage } = await $api('emails/send', {
             method: 'POST',
             body: formData,
-            // body: {
-            //     to: to.value,
-            //     message: editor.getHTML(),
-            //     subject: subject.value,
-            //     files: attachments.value
-            // },
-            onRequestError: ({ response }) => {
+            onResponseError: ({ response }) => {
+                isEmailSending.value = false
                 $toast.error('Something went wrong! Please try again or contact support.')
                 console.log(response._data.errors)
             },
+        }).then(r => {
+            isEmailSending.value = false
+            return r
         })
 
         if (success) {
             closeComposeDialog()
             $toast.success(responseMessage)
-        } else {
+        } else
             $toast.error(responseMessage ?? 'Something went wrong! Please try again or contact support.')
-        }
+
     }
 
     const attachFiles = () => {
-        // const fileInput = document.createElement('input')
-        // fileInput.setAttribute('accept', 'image/*,video/*,xls,xlsx,docx')
-        // fileInput.setAttribute('multiple', '')
-        // fileInput.setAttribute('type', 'file')
-        // fileInput.click();
-        // fileInput.value.$el.click()
         fileInput.value?.$el.querySelector('input[type="file"]').click();
-        // fileInput.value.$emit('click')
-        // console.log(fileInput.value.$emit());
-
     }
-
-    // watch(() => attachments, (newVal) => {
-    //     console.log(newVal);
-
-    // })
-
-    // watch(to, (newVal) => {
-    //     console.log(newVal);
-
-    // })
 </script>
 
 <template>
@@ -185,7 +134,7 @@
                     <VIcon icon="ri-subtract-line" />
                 </IconBtn>
 
-                <IconBtn @click="$emit('close'); resetValues(); isEmailCc = false; isEmailBcc = false;">
+                <IconBtn @click="closeComposeDialog">
                     <VIcon icon="ri-close-line" />
                 </IconBtn>
             </template>
@@ -285,9 +234,9 @@
                     <VIcon icon="ri-links-line" />
                 </IconBtn>
 
-                <IconBtn rounded @click="addImage">
+                <!-- <IconBtn rounded @click="addImage">
                     <VIcon icon="ri-image-line" />
-                </IconBtn>
+                </IconBtn> -->
             </div>
 
             <VDivider />
@@ -297,9 +246,25 @@
             </div>
         </div>
 
+        <VExpandTransition>
+            <div v-if="attachments.length">
+                <VDivider />
+                <VChipGroup color="primary">
+                    <VChip v-for="(attachment, index) in attachments" :key="index" class="bg-primary">
+                        {{ attachment.name }} ({{ formatBytes(attachment.size) }})
+                    </VChip>
+                </VChipGroup>
+                <VDivider />
+            </div>
+        </VExpandTransition>
+
         <div class="d-flex align-center px-5 py-4 gap-4">
-            <VBtn append-icon="ri-send-plane-line" :disabled="to === '' ? true : false" @click="sendEmail">
+            <VBtn append-icon="ri-send-plane-line" :disabled="to === '' ? true : false" @click="sendEmail"
+                density="comfortable" :loading="isEmailSending" loa>
                 Send
+                <template #loader>
+                    <VProgressCircular indeterminate color="white" />
+                </template>
             </VBtn>
 
             <IconBtn>

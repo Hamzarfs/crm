@@ -5,25 +5,27 @@ namespace App\Http\Controllers;
 use App\Mail\Email;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class EmailController extends Controller
 {
     public function send(Request $request): JsonResponse
     {
+        sleep(3);
         $data = $request->all();
-        // dd($data['files']);
-        $response = [];
-        if ($sentMail = Mail::to($data['to'])->send(new Email($data))) {
+        try {
+            Mail::to($data['to'])->send(new Email($data));
             $response = [
                 'success' => true,
                 'message' => 'Email sent successfully'
             ];
-            // dd($sentMail);
-        } else {
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
+            Log::error($th->getTraceAsString());
             $response = [
                 'success' => false,
-                'message' => 'Something went wrong! Please try again or contact support.'
+                'message' => $th->getMessage()
             ];
         }
         return response()->json($response);

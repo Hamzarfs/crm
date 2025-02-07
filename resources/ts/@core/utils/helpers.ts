@@ -56,3 +56,6 @@ export const resolveLeadStatusVariant = (status: string) => {
     else
         return 'primary'
 }
+
+export const formatBytes = (bytes: number): string =>
+    (bytes >= 1024 * 1024) ? (bytes / (1024 * 1024)).toFixed(2) + ' MB' : (bytes / 1024).toFixed(2) + ' KB'

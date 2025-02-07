@@ -4,7 +4,6 @@ namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
@@ -46,19 +45,12 @@ class Email extends Mailable
     public function attachments(): array
     {
         $attachments = [];
-        foreach ($this->data['files'] as $file) {
-            /**
-             * @var UploadedFile $file
-             */
-
+        foreach ($this?->data['files'] ?? [] as $file) {
             $attachments[] = Attachment::fromPath($file->path())
-                ->as(sprintf("%s.%s", $file->getClientOriginalName(), $file->getClientOriginalExtension()))
+                ->as($file->getClientOriginalName())
                 ->withMime($file->getClientMimeType());
         }
 
         return $attachments;
-        // return [
-        //     Attachment::fromPath($this->;)
-        // ];
     }
 }
