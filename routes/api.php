@@ -176,5 +176,10 @@ Route::middleware('auth:sanctum')->group(function () {
         ->controller(EmailController::class)
         ->group(function () {
             Route::post('send', 'send');
+
+            Route::get('folders-with-meta', 'fetchFoldersAndMeta');
+            Route::get('mails/{folder}', 'fetchMails');
+            // Route::prefix('get')->group(function () {
+            // });
         });
 });

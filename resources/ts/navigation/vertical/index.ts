@@ -60,7 +60,8 @@ export default [
     {
         title: 'Email',
         icon: { icon: 'ri-mail-line' },
-        to: { name: 'email-filter', params: { filter: 'inbox' } },
+        to: { name: 'emails' },
+        // to: { name: 'emails', params: { filter: 'inbox' } },
     },
     {
         heading: 'Sales Management',

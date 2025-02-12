@@ -6,7 +6,7 @@
     // import { useEmail } from '@composables/useEmail'
     import type { Email, EmailLabel } from '@/types/email'
     import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
-    import { emails as _emails, emailsMeta as _emailsMeta } from './emails'
+    // import { emails as _emails, emailsMeta as _emailsMeta } from './emails'
 
     definePage({
         meta: {
@@ -17,7 +17,10 @@
     const { isLeftSidebarOpen } = useResponsiveLeftSidebar()
 
     // Composables
-    const route = useRoute<'apps-email-filter' | 'apps-email-label'>()
+    const route = useRoute()
+    console.log(route);
+
+    // const route = useRoute<'apps-email-filter' | 'apps-email-label'>()
 
     const {
         labels,
@@ -41,13 +44,17 @@
     const selectedEmails = ref<Email['id'][]>([])
 
     // Fetch Emails
-    // const { data: emailData, execute: fetchEmails } = await useApi<any>(createUrl('/apps/email', {
-    //     query: {
-    //         q,
-    //         filter: () => 'filter' in route.params ? route.params.filter : undefined,
-    //         label: () => 'label' in route.params ? route.params.label : undefined,
-    //     },
-    // }))
+    const { data: _emails, execute: fetchEmails } = await useApi<any>(createUrl(`emails/mails/${route.params.filter ? route.params.filter : 'inbox'}`, {
+        query: {
+            q,
+            // filter: () => 'filter' in route.params ? route.params.filter : 'inbox',
+            // label: () => 'label' in route.params ? route.params.label : undefined,
+        },
+    }))
+    // fetchEmails()
+
+    //Fetch email folders & their meta
+    const { data: _emailsMeta } = await $api('emails/folders-with-meta')
 
     const emails = computed(() => _emails)
     const emailsMeta = computed(() => _emailsMeta)

@@ -170,39 +170,43 @@ export const routes: RouteRecordRaw[] = [
 
     // Email routes
     {
-        path: '/email',
+        path: '/email/:filter?',
+        name: 'emails',
+        component: EmailComponent,
         meta: {
             authenticatedOnly: true,
+            navActiveLink: 'email',
+            layoutWrapperClasses: 'layout-content-height-fixed',
             // departments: ['admin', 'sales', 'lead_generation'],
         },
-        children: [
-            // {
-            //     path: '',
-            //     name: 'email',
-            //     component: EmailComponent,
-            //     meta: {
-            //         navActiveLink: 'email',
-            //         layoutWrapperClasses: 'layout-content-height-fixed',
-            //     }
-            // },
-            {
-                path: 'filter/:filter?',
-                name: 'email-filter',
-                component: EmailComponent,
-                meta: {
-                    navActiveLink: 'email',
-                    layoutWrapperClasses: 'layout-content-height-fixed',
-                }
-            },
-            {
-                path: 'label/:label',
-                name: 'email-label',
-                component: EmailComponent,
-                meta: {
-                    navActiveLink: 'email',
-                    layoutWrapperClasses: 'layout-content-height-fixed',
-                }
-            },
-        ],
+        // children: [
+        //     // {
+        //     //     path: '',
+        //     //     name: 'email',
+        //     //     component: EmailComponent,
+        //     //     meta: {
+        //     //         navActiveLink: 'email',
+        //     //         layoutWrapperClasses: 'layout-content-height-fixed',
+        //     //     }
+        //     // },
+        //     {
+        //         path: 'filter/:filter?',
+        //         name: 'email-filter',
+        //         component: EmailComponent,
+        //         meta: {
+        //             navActiveLink: 'email',
+        //             layoutWrapperClasses: 'layout-content-height-fixed',
+        //         }
+        //     },
+        //     // {
+        //     //     path: 'label/:label',
+        //     //     name: 'email-label',
+        //     //     component: EmailComponent,
+        //     //     meta: {
+        //     //         navActiveLink: 'email',
+        //     //         layoutWrapperClasses: 'layout-content-height-fixed',
+        //     //     }
+        //     // },
+        // ],
     }
 ]

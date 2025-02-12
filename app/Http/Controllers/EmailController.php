@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\Email;
+use App\Services\Email as EmailService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -12,7 +13,6 @@ class EmailController extends Controller
 {
     public function send(Request $request): JsonResponse
     {
-        sleep(3);
         $data = $request->all();
         try {
             Mail::to($data['to'])->send(new Email($data));
@@ -29,5 +29,15 @@ class EmailController extends Controller
             ];
         }
         return response()->json($response);
+    }
+
+    public function fetchFoldersAndMeta(EmailService $emailService)
+    {
+        return response()->json($emailService->fetchFoldersAndMeta());
+    }
+
+    public function fetchMails(EmailService $emailService, string $folder)
+    {
+        return response()->json($emailService->fetchMails($folder));
     }
 }
