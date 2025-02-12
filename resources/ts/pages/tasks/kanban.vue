@@ -32,11 +32,11 @@
     const tasksByStatus = ref(tasksByStatusData.value.tasksByStatus)
 
     if (!(userData?.role.value === 'admin')) {
-        window.Echo.private(`Task.Assigned.${userData?.id}`)
-            .notification((notification: any) => {
-                if (toggleAssignedToMe.value)
-                    tasksByStatus.value[notification.task.status].unshift(notification.task)
-            })
+        // window.Echo.private(`Task.Assigned.${userData?.id}`)
+        //     .notification((notification: any) => {
+        //         if (toggleAssignedToMe.value)
+        //             tasksByStatus.value[notification.task.status].unshift(notification.task)
+        //     })
     }
 
     watch(tasksByStatusData, (newVal) => {

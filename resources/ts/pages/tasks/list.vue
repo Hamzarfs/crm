@@ -93,10 +93,10 @@
     const totalTasks = computed(() => tasksData.value.totalTasks)
 
     if (!(userData?.role.value === 'admin')) {
-        window.Echo.private(`Task.Assigned.${userData?.id}`)
-            .notification((notification: any) => {
-                tasks.value.unshift(notification.task)
-            })
+        // window.Echo.private(`Task.Assigned.${userData?.id}`)
+        //     .notification((notification: any) => {
+        //         tasks.value.unshift(notification.task)
+        //     })
     }
 
     watch(tasksData, (newVal) => {

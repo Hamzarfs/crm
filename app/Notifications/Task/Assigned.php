@@ -24,7 +24,7 @@ class Assigned extends Notification
      */
     public function via(): array
     {
-        return ['broadcast', 'database'];
+        return [/*'broadcast', */'database'];
     }
 
     /**
