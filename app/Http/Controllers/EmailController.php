@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Mail;
 
 class EmailController extends Controller
 {
+    public function __construct(
+        public EmailService $emailService
+    ) {}
+
+
     public function send(Request $request): JsonResponse
     {
         $data = $request->all();
@@ -31,13 +36,19 @@ class EmailController extends Controller
         return response()->json($response);
     }
 
-    public function fetchFoldersAndMeta(EmailService $emailService)
+    public function fetchFoldersAndMeta()
     {
-        return response()->json($emailService->fetchFoldersAndMeta());
+        return response()->json($this->emailService->fetchFoldersAndMeta());
     }
 
-    public function fetchMails(EmailService $emailService, string $folder)
+    public function fetchMails(string $folder)
     {
-        return response()->json($emailService->fetchMails($folder));
+        return response()->json($this->emailService->fetchMails($folder));
+    }
+
+    public function test()
+    {
+        dd($this->emailService->test());
+        return $this->emailService->test();
     }
 }

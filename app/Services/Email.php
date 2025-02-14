@@ -5,6 +5,7 @@ namespace App\Services;
 use Webklex\IMAP\Facades\Client;
 use Webklex\PHPIMAP\Client as PHPIMAPClient;
 use Webklex\PHPIMAP\Message;
+use Webklex\PHPIMAP\Query\WhereQuery;
 
 class Email
 {
@@ -67,13 +68,19 @@ class Email
             /**
              * @var Message $mail
              */
+            $attr[] = $mail->getAttributes();
+            continue;
+
+            $abc[] = $mail->getTo()->all();
+
+
+            // dd(
+            //     $mail->getFrom()->first()->personal,
+            //     $mail->getFrom()->first()->mail
+            // );
             dd(
-                $mail->getFrom()->first()->personal,
-                $mail->getFrom()->first()->mail
-            );
-            dd(
-                $mail->getFrom()->first(),
-                $mail->getFrom()->all()['mail']
+                $mail->getTo()->all(),
+                // $mail->getFrom()->all()['mail']
             );
             dd(
                 $mail->getFrom()->get('personal'),
@@ -86,9 +93,21 @@ class Email
             # code...
         }
 
-        dd($mails);
+        dd($attr);
 
         return $mails;
+    }
+
+    public function test()
+    {
+        // $this->client->;
+        $query = new WhereQuery($this->client);
+        $msg = $this->client->getFolder(self::FOLDERS['inbox'])->query()->getMessageByUid(2);
+
+        $msg->getMessageId()->toArray();
+
+        return $msg->getUid();
+        // return $query->getMessage(2);
     }
 
     /**

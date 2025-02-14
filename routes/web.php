@@ -3,21 +3,18 @@
 use App\Events\ExampleEvent;
 use App\Http\Controllers\EmailController;
 use App\Models\User;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Broadcast;
-use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\{Artisan, Broadcast, Route};
+
 
 Broadcast::routes();
 
 Route::get('test', [EmailController::class, 'fetchFoldersAndMeta']);
 
+Route::get('ttest', [EmailController::class, 'test']);
+
 Route::get('test/{folder}', [EmailController::class, 'fetchMails']);
+
 // Route::get('test', function () {
-
-
-
-
-
 //     /** @var \Webklex\PHPIMAP\Client $client */
 //     $client = Webklex\IMAP\Facades\Client::account('default');
 
