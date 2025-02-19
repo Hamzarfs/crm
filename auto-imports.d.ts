@@ -54,6 +54,7 @@ declare global {
   const facebookUrlValidator: typeof import('./resources/ts/@core/utils/validators')['facebookUrlValidator']
   const fileLengthValidator: typeof import('./resources/ts/@core/utils/validators')['fileLengthValidator']
   const fileValidator: typeof import('./resources/ts/@core/utils/validators')['fileValidator']
+  const formatBytes: typeof import('./resources/ts/@core/utils/helpers')['formatBytes']
   const formatDate: typeof import('./resources/ts/@core/utils/formatters')['formatDate']
   const formatDateNew: typeof import('./resources/ts/@core/utils/formatters')['formatDateNew']
   const formatDateToMonthShort: typeof import('./resources/ts/@core/utils/formatters')['formatDateToMonthShort']
@@ -431,6 +432,7 @@ declare module 'vue' {
     readonly facebookUrlValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['facebookUrlValidator']>
     readonly fileLengthValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['fileLengthValidator']>
     readonly fileValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['fileValidator']>
+    readonly formatBytes: UnwrapRef<typeof import('./resources/ts/@core/utils/helpers')['formatBytes']>
     readonly formatDate: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['formatDate']>
     readonly formatDateToMonthShort: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['formatDateToMonthShort']>
     readonly getActivePinia: UnwrapRef<typeof import('pinia')['getActivePinia']>
