@@ -534,7 +534,7 @@
 
                 <!-- Create BY -->
                 <template #item.created_by="{ item }: { item: any }">
-                    {{ item.created_by?.name }}
+                    {{ item.created_by ? item.created_by.name : 'Created from a submission from brand' }}
                 </template>
 
                 <!-- Assigned By -->

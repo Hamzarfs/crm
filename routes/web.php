@@ -6,11 +6,11 @@ use Illuminate\Support\Facades\{Artisan, Broadcast, Route};
 
 Broadcast::routes();
 
-Route::get('test', [EmailController::class, 'fetchFoldersAndMeta']);
+// Route::get('test', [EmailController::class, 'fetchFoldersAndMeta']);
 
-Route::get('ttest', [EmailController::class, 'test']);
+// Route::get('ttest', [EmailController::class, 'test']);
 
-Route::get('test/{folder}', [EmailController::class, 'fetchMails']);
+// Route::get('test/{folder}', [EmailController::class, 'fetchMails']);
 
 Route::prefix('artisan')->group(function () {
     Route::get('migrate', function () {
@@ -37,10 +37,6 @@ Route::prefix('artisan')->group(function () {
         return "<pre>$output</pre>";
     });
 });
-
-Route::get('abcd', [BrandsRestApiController::class, 'abcd']);
-
-Route::post('brands/{brand:slug}/rest-api', [BrandsRestApiController::class, 'createLeadFromBrandFormSubmission']);
 
 Route::get('{any?}', function () {
     return view('application');

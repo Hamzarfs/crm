@@ -27,8 +27,7 @@ class Rest extends FormRequest
             'phone' => ['required', 'string'],
             'message' => ['required', 'string'],
             'campaign' => ['required', 'exists:campaigns,name'],
-            'lead_source' => ['required', 'in:brand'],
-            'services' => ['required', 'exists:services,name'],
+            'service' => ['required', 'exists:services,name'],
         ];
     }
 }
