@@ -19,7 +19,8 @@ class ServiceSeeder extends Seeder
             'Website',
             'SEO',
             'SMM',
-            'Printing'
+            'Printing',
+            'Content Writing',
         ];
 
         foreach ($services as $s) {

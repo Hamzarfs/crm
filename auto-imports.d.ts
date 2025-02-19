@@ -151,6 +151,7 @@ declare global {
   const shallowReadonly: typeof import('vue')['shallowReadonly']
   const shallowRef: typeof import('vue')['shallowRef']
   const slugToTitleCase: typeof import('./resources/ts/@core/utils/formatters')['slugToTitleCase']
+  const slugify: typeof import('./resources/ts/@core/utils/helpers')['slugify']
   const storeToRefs: typeof import('pinia')['storeToRefs']
   const strToTitleCase: typeof import('./resources/ts/@core/utils/formatters')['strToTitleCase']
   const syncRef: typeof import('@vueuse/core')['syncRef']
@@ -528,6 +529,7 @@ declare module 'vue' {
     readonly shallowReadonly: UnwrapRef<typeof import('vue')['shallowReadonly']>
     readonly shallowRef: UnwrapRef<typeof import('vue')['shallowRef']>
     readonly slugToTitleCase: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['slugToTitleCase']>
+    readonly slugify: UnwrapRef<typeof import('./resources/ts/@core/utils/helpers')['slugify']>
     readonly storeToRefs: UnwrapRef<typeof import('pinia')['storeToRefs']>
     readonly strToTitleCase: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['strToTitleCase']>
     readonly syncRef: UnwrapRef<typeof import('@vueuse/core')['syncRef']>

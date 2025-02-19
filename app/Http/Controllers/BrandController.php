@@ -15,6 +15,7 @@ class BrandController extends Controller
                 return [
                     'id' => $brand->id,
                     'name' => $brand->name,
+                    'slug' => $brand->slug,
                     'url' => $brand->url,
                     'fb_url' => $brand->fb_url,
                     'ig_url' => $brand->ig_url,
@@ -40,6 +41,7 @@ class BrandController extends Controller
 
         $brand = Brand::create([
             'name' => $data->name,
+            'slug' => $data->slug,
             'url' => $data->url,
             'fb_url' => $data->fb_url,
             'ig_url' => $data->ig_url,
@@ -56,6 +58,7 @@ class BrandController extends Controller
             'brand' => [
                 'id' => $brand->id,
                 'name' => $brand->name,
+                'slug' => $brand->slug,
                 'url' => $brand->url,
                 'fb_url' => $brand->fb_url,
                 'ig_url' => $brand->ig_url,
@@ -80,6 +83,7 @@ class BrandController extends Controller
 
         $brand->update([
             'name' => $request->name,
+            'slug' => $data->slug,
             'url' => $data->url,
             'fb_url' => $data->fb_url,
             'ig_url' => $data->ig_url,
@@ -96,6 +100,7 @@ class BrandController extends Controller
             'brand' => [
                 'id' => $brand->id,
                 'name' => $brand->name,
+                'slug' => $data->slug,
                 'url' => $brand->url,
                 'fb_url' => $brand->fb_url,
                 'ig_url' => $brand->ig_url,

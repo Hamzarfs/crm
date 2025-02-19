@@ -4,6 +4,7 @@ namespace App\Http\Requests\Sales\Brand;
 
 use App\Enums\RolesEnum;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class Update extends FormRequest
 {
@@ -23,7 +24,9 @@ class Update extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => "required|string|unique:brands,name,{$this->route('brand')->id},id",
+            // 'name' => "required|string|unique:brands,name,{$this->route('brand')->id},id",
+            'name' => ['required', 'string', Rule::unique('brands')->ignoreModel($this->route('brand'))],
+            'slug' => ['required', 'string', Rule::unique('brands')->ignoreModel($this->route('brand'))],
             'url' => 'required|url',
             'fb_url' => 'url|nullable',
             'ig_url' => 'url|nullable',
