@@ -28,7 +28,11 @@ class LeadSourceSeeder extends Seeder
             [
                 'name' => 'Meta Facebook',
                 'type' => 'paid',
-            ]
+            ],
+            [
+                'name' => 'Brand',
+                'type' => 'unpaid',
+            ],
         ];
 
         foreach ($lead_sources as $ls) {

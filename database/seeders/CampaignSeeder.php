@@ -12,7 +12,7 @@ class CampaignSeeder extends Seeder
      */
     public function run(): void
     {
-        $campaigns = ['Logo design', 'Web design', 'E-book'];
+        $campaigns = ['Logo design', 'Web design', 'E-book', 'Content Writing'];
 
         foreach ($campaigns as $campaign) {
             Campaign::create(['name' => $campaign]);

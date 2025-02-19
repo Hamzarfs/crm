@@ -1,90 +1,104 @@
 <script setup lang="ts">
-import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
-import type { VForm } from 'vuetify/components/VForm';
+    import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
+    import type { VForm } from 'vuetify/components/VForm';
 
-interface Emit {
-    (e: 'update:isDrawerOpen', value: boolean): void
-    (e: 'brandData', value: any): void
-}
+    interface Emit {
+        (e: 'update:isDrawerOpen', value: boolean): void
+        (e: 'brandData', value: any): void
+    }
 
-interface Props {
-    isDrawerOpen: boolean
-    errors: Record<string, string | undefined>
-    brand: Record<string, any>
-    currencies: Record<string, string>[]
-    countries: string[]
-}
+    interface Props {
+        isDrawerOpen: boolean
+        errors: Record<string, string | undefined>
+        brand: Record<string, any>
+        currencies: Record<string, string>[]
+        countries: string[]
+    }
 
-const props = defineProps<Props>()
-const emit = defineEmits<Emit>()
-
-
-const isFormValid = ref(false)
-const refForm = ref<VForm>()
-const brand = ref({
-    name: undefined,
-    url: undefined,
-    fb_url: undefined,
-    ig_url: undefined,
-    phone: undefined,
-    whatsapp: undefined,
-    chat_support: undefined,
-    country: undefined,
-    currency: undefined,
-})
+    const props = defineProps<Props>()
+    const emit = defineEmits<Emit>()
 
 
-watch(() => props.brand, newVal => {
-    brand.value.name = newVal.name
-    brand.value.url = newVal.url
-    brand.value.fb_url = newVal.fb_url
-    brand.value.ig_url = newVal.ig_url
-    brand.value.phone = newVal.phone
-    brand.value.whatsapp = newVal.whatsapp
-    brand.value.chat_support = newVal.chat_support
-    brand.value.country = newVal.country ?? undefined
-    brand.value.currency = newVal.currency_id
-}, {
-    deep: true
-})
-
-
-// 👉 drawer close
-const closeNavigationDrawer = () => {
-    emit('update:isDrawerOpen', false)
-    Object.assign(props.errors, {
-        name: undefined,
-        url: undefined,
-        fb_url: undefined,
-        ig_url: undefined,
-        phone: undefined,
-        whatsapp: undefined,
-        chat_support: undefined,
+    const isFormValid = ref(false)
+    const refForm = ref<VForm>()
+    const brand = ref<Record<string, any>>({
+        name: '',
+        slug: '',
+        url: '',
+        fb_url: '',
+        ig_url: '',
+        phone: '',
+        whatsapp: '',
+        chat_support: '',
         country: undefined,
         currency: undefined,
     })
-    nextTick(() => {
-        props.errors.name = ''
-        refForm.value?.reset()
-        refForm.value?.resetValidation()
-    })
-}
 
-const onSubmit = () => {
-    refForm.value?.validate().then(({ valid }) => {
-        if (valid) {
-            emit('brandData', brand.value)
+
+    watch(() => props.brand, newVal => {
+        brand.value.name = newVal.name
+        brand.value.slug = newVal.slug
+        brand.value.url = newVal.url
+        brand.value.fb_url = newVal.fb_url
+        brand.value.ig_url = newVal.ig_url
+        brand.value.phone = newVal.phone
+        brand.value.whatsapp = newVal.whatsapp
+        brand.value.chat_support = newVal.chat_support
+        brand.value.country = newVal.country ?? undefined
+        brand.value.currency = newVal.currency_id
+    }, {
+        deep: true
+    })
+
+
+    // 👉 drawer close
+    const closeNavigationDrawer = () => {
+        emit('update:isDrawerOpen', false)
+        Object.assign(props.errors, {
+            name: undefined,
+            slug: undefined,
+            url: undefined,
+            fb_url: undefined,
+            ig_url: undefined,
+            phone: undefined,
+            whatsapp: undefined,
+            chat_support: undefined,
+            country: undefined,
+            currency: undefined,
+        })
+        nextTick(() => {
+            props.errors.name = ''
+            refForm.value?.reset()
+            refForm.value?.resetValidation()
+        })
+    }
+
+    const onSubmit = () => {
+        refForm.value?.validate().then(({ valid }) => {
+            if (valid) {
+                emit('brandData', brand.value)
+            }
+        })
+    }
+
+    defineExpose({
+        closeNavigationDrawer
+    })
+
+    const handleDrawerModelValueUpdate = (val: boolean) => {
+        emit('update:isDrawerOpen', val)
+    }
+
+    watch(
+        () => [brand.value.name, brand.value.slug], // Watch both name & slug
+        ([newName, newSlug], [oldName, oldSlug]) => {
+            if (newName !== oldName) {
+                brand.value.slug = slugify(newName as string);
+            } else if (newSlug !== oldSlug) {
+                brand.value.slug = slugify(newSlug);
+            }
         }
-    })
-}
-
-defineExpose({
-    closeNavigationDrawer
-})
-
-const handleDrawerModelValueUpdate = (val: boolean) => {
-    emit('update:isDrawerOpen', val)
-}
+    )
 
 </script>
 
@@ -106,7 +120,13 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                             <!-- 👉 Name -->
                             <VCol cols="12">
                                 <VTextField v-model="brand.name" :rules="[requiredValidator]" label="Brand Name"
-                                    :error-messages="props.errors.name" placeholder="Brand Name" />
+                                    clearable :error-messages="props.errors.name" placeholder="Brand Name" />
+                            </VCol>
+
+                            <!-- 👉 Slug -->
+                            <VCol cols="12">
+                                <VTextField v-model="brand.slug" :rules="[requiredValidator]" label="Slug" clearable
+                                    :error-messages="props.errors.slug" placeholder="Slug" />
                             </VCol>
 
                             <!-- 👉 URL -->

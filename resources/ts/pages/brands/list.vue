@@ -1,123 +1,127 @@
 <script setup lang="ts">
 
 
-const selectedBrand = ref<Record<string, any>>({})
-let brandToDelete: number
-let brandToUpdateIndex: number
+    const $toast = useToast()
 
-// Add a ref for the AddNewBrandDrawer & editBrandDrawerRef component
-const addNewBrandDrawerRef = ref()
-const editBrandDrawerRef = ref()
+    const selectedBrand = ref<Record<string, any>>({})
+    let brandToDelete: number
+    let brandToUpdateIndex: number
 
-const dataTableRef = ref()
+    // Add a ref for the AddNewBrandDrawer & editBrandDrawerRef component
+    const addNewBrandDrawerRef = ref()
+    const editBrandDrawerRef = ref()
 
-// Headers
-const headers = [
-    { title: 'ID', key: 'id' },
-    { title: 'Name', key: 'name' },
-    { title: 'URL', key: 'url' },
-    { title: 'FB URL', key: 'fb_url' },
-    { title: 'IG URL', key: 'ig_url' },
-    { title: 'Phone', key: 'phone' },
-    { title: 'Whatsapp', key: 'whatsapp' },
-    { title: 'Chat Support', key: 'chat_support' },
-    { title: 'Country', key: 'country' },
-    { title: 'Currency', key: 'currency' },
-    { title: 'Created at', key: 'created_at' },
-    { title: 'Updated at', key: 'updated_at' },
-    { title: 'Actions', key: 'actions', sortable: false },
-]
+    const dataTableRef = ref()
 
-const isAddNewBrandDrawerVisible = ref(false)
-const isEditBrandDrawerVisible = ref(false)
-const isSnackBarVisible = ref(false)
-const isDeleteDialogVisible = ref(false)
-const brandResponsemessage = ref('')
+    // Headers
+    const headers = [
+        { title: 'ID', key: 'id' },
+        { title: 'Name', key: 'name' },
+        { title: 'Slug', key: 'slug' },
+        { title: 'URL', key: 'url' },
+        { title: 'FB URL', key: 'fb_url' },
+        { title: 'IG URL', key: 'ig_url' },
+        { title: 'Phone', key: 'phone' },
+        { title: 'Whatsapp', key: 'whatsapp' },
+        { title: 'Chat Support', key: 'chat_support' },
+        { title: 'Country', key: 'country' },
+        { title: 'Currency', key: 'currency' },
+        { title: 'Created at', key: 'created_at' },
+        { title: 'Updated at', key: 'updated_at' },
+        { title: 'Actions', key: 'actions', sortable: false, fixed: true },
+    ]
 
-// 👉 Fetching brands
-const { brands } = await $api('brands')
-const brandsData = ref(brands)
+    const isAddNewBrandDrawerVisible = ref(false)
+    const isEditBrandDrawerVisible = ref(false)
+    const isDeleteDialogVisible = ref(false)
 
-const { currencies } = await $api('currencies')
-const _currencies = currencies.map((c: any) => ({ title: c.name.toUpperCase(), value: c.id }))
-// 👉 Add new brand
-const addNewbrand = async (brandData: any) => {
-    const { success, message, brand } = await $api('/brands', {
-        method: 'POST',
-        body: brandData,
-        onResponseError({ response }) {
-            errors.value = response._data.errors
-        },
-    })
+    // 👉 Fetching brands
+    const { brands } = await $api('brands')
+    const brandsData = ref(brands)
 
-    isSnackBarVisible.value = true
-    brandResponsemessage.value = message
-    addNewBrandDrawerRef.value.closeNavigationDrawer()
-    if (success) {
-        brandsData.value = [...brandsData.value, brand]
-        nextTick(() => {
-            dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollTop = dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollHeight
+    const { currencies } = await $api('currencies')
+    const _currencies = currencies.map((c: any) => ({ title: c.name.toUpperCase(), value: c.id }))
+
+    // 👉 Add new brand
+    const addNewbrand = async (brandData: any) => {
+        const { success, message, brand } = await $api('/brands', {
+            method: 'POST',
+            body: brandData,
+            onResponseError({ response }) {
+                errors.value = response._data.errors
+            },
         })
-    }
-}
 
-// 👉 Edit brand
-const editbrand = async (brandData: any) => {
-    const { success, message, brand } = await $api(`brands/${selectedBrand.value.id}`, {
-        method: 'PUT',
-        body: brandData,
-        onResponseError({ response }) {
-            errors.value = response._data.errors
-        },
+        if (success) {
+            $toast.success(message)
+            brandsData.value = [...brandsData.value, brand]
+            addNewBrandDrawerRef.value.closeNavigationDrawer()
+            nextTick(() => {
+                dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollTop = dataTableRef.value.$el.querySelector('.v-table__wrapper').scrollHeight
+            })
+        } else
+            $toast.error(message ?? 'Something went wrong! Please try again or contact support.')
+    }
+
+    // 👉 Edit brand
+    const editBrand = async (brandData: any) => {
+        const { success, message, brand } = await $api(`brands/${selectedBrand.value.id}`, {
+            method: 'PUT',
+            body: brandData,
+            onResponseError({ response }) {
+                errors.value = response._data.errors
+            },
+        })
+        if (success) {
+            $toast.success(message)
+            brandsData.value[brandToUpdateIndex] = brand
+            editBrandDrawerRef.value.closeNavigationDrawer()
+        }
+        else
+            $toast.error(message ?? 'Something went wrong! Please try again or contact support.')
+    }
+
+    const openEditBrandForm = (brand: any) => {
+        selectedBrand.value = brand
+        brandToUpdateIndex = brandsData.value.indexOf(brand)
+        isEditBrandDrawerVisible.value = true
+    }
+
+    // 👉 Delete brand
+    const deleteBrand = async () => {
+        const { success, message } = await $api(`brands/${brandToDelete}`, {
+            method: 'DELETE',
+        })
+
+        isDeleteDialogVisible.value = false
+
+        if (success) {
+            $toast.success(message)
+            brandsData.value = brandsData.value.filter((brand: any) => brand.id !== brandToDelete)
+        }
+        else
+            $toast.error(message ?? 'Something went wrong! Please try again or contact support.')
+    }
+
+    const errors = ref({
+        name: undefined,
+        slug: undefined,
+        url: undefined,
+        fb_url: undefined,
+        ig_url: undefined,
+        phone: undefined,
+        whatsapp: undefined,
+        chat_support: undefined,
+        country: undefined,
+        currency: undefined,
     })
-    if (success) {
-        isSnackBarVisible.value = true
-        brandsData.value[brandToUpdateIndex] = brand
-        brandResponsemessage.value = message
-        editBrandDrawerRef.value.closeNavigationDrawer()
-    }
-}
 
-const openeditbrandForm = (brand: any) => {
-    selectedBrand.value = brand
-    brandToUpdateIndex = brandsData.value.indexOf(brand)
-    isEditBrandDrawerVisible.value = true
-}
+    const countries = ['USA', 'UK']
 
-// 👉 Delete brand
-const deleteBrand = async () => {
-    const { success, message } = await $api(`brands/${brandToDelete}`, {
-        method: 'DELETE',
+    watch(isEditBrandDrawerVisible, newValue => {
+        if (!newValue)
+            selectedBrand.value = {}
     })
-
-    isDeleteDialogVisible.value = false
-
-    isSnackBarVisible.value = true
-    brandResponsemessage.value = message
-
-    if (success) {
-        brandsData.value = brandsData.value.filter((brand: any) => brand.id !== brandToDelete)
-    }
-}
-
-const errors = ref({
-    name: undefined,
-    url: undefined,
-    fb_url: undefined,
-    ig_url: undefined,
-    phone: undefined,
-    whatsapp: undefined,
-    chat_support: undefined,
-    country: undefined,
-    currency: undefined,
-})
-
-const countries = ['USA', 'UK']
-
-watch(isEditBrandDrawerVisible, newValue => {
-    if (!newValue)
-        selectedBrand.value = {}
-})
 
 </script>
 
@@ -160,7 +164,7 @@ watch(isEditBrandDrawerVisible, newValue => {
 
                 <!-- Actions -->
                 <template #item.actions="{ item }: { item: any }">
-                    <IconBtn size="small" @click="openeditbrandForm(item)" color="primary">
+                    <IconBtn size="small" @click="openEditBrandForm(item)" color="primary">
                         <VIcon icon="ri-edit-box-line" />
                         <VTooltip activator="parent" location="top">
                             Edit
@@ -184,17 +188,17 @@ watch(isEditBrandDrawerVisible, newValue => {
             :currencies="_currencies" ref="addNewBrandDrawerRef" :errors="errors" />
 
         <!-- 👉 Edit User -->
-        <EditBrandDrawer v-model:isDrawerOpen="isEditBrandDrawerVisible" @brand-data="editbrand" :brand="selectedBrand"
+        <EditBrandDrawer v-model:isDrawerOpen="isEditBrandDrawerVisible" @brand-data="editBrand" :brand="selectedBrand"
             :countries :currencies="_currencies" ref="editBrandDrawerRef" :errors="errors" />
 
-        <VSnackbar v-model="isSnackBarVisible">
+        <!-- <VSnackbar v-model="isSnackBarVisible">
             {{ brandResponsemessage }}
             <template #actions>
                 <VBtn color="error" @click="isSnackBarVisible = false">
                     Close
                 </VBtn>
             </template>
-        </VSnackbar>
+        </VSnackbar> -->
 
         <VDialog v-model="isDeleteDialogVisible" width="400">
             <!-- Dialog Content -->
@@ -221,15 +225,24 @@ watch(isEditBrandDrawerVisible, newValue => {
 </template>
 
 <style lang="scss">
-.app-user-search-filter {
-    inline-size: 24.0625rem;
-}
+    .app-user-search-filter {
+        inline-size: 24.0625rem;
+    }
 
-.text-capitalize {
-    text-transform: capitalize;
-}
+    .text-capitalize {
+        text-transform: capitalize;
+    }
 
-.user-list-name:not(:hover) {
-    color: rgba(var(--v-theme-on-background), var(--v-high-emphasis-opacity));
-}
+    .user-list-name:not(:hover) {
+        color: rgba(var(--v-theme-on-background), var(--v-high-emphasis-opacity));
+    }
+</style>
+
+<style lang="scss" scoped>
+    .sticky-column {
+        position: sticky;
+        right: 0;
+        background: white;
+        z-index: 2;
+    }
 </style>

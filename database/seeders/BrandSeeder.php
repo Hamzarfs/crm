@@ -16,17 +16,22 @@ class BrandSeeder extends Seeder
             [
                 'name' => 'RFS',
                 'country' => 'USA',
-                'currency_id' => 1
+                'currency_id' => 1,
             ],
             [
                 'name' => 'Creative',
                 'country' => 'UK',
-                'currency_id' => 2
+                'currency_id' => 2,
             ],
             [
-                'name' => 'Mania',
+                'name' => 'Web Design Mania',
                 'country' => 'UK',
-                'currency_id' => 2
+                'currency_id' => 2,
+            ],
+            [
+                'name' => 'Content Writing Pulse',
+                'country' => 'USA',
+                'currency_id' => 1,
             ],
         ];
 

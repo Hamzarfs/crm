@@ -25,6 +25,7 @@ class Store extends FormRequest
     {
         return [
             'name' => 'required|string|unique:brands',
+            'slug' => 'required|string|unique:brands',
             'url' => 'required|url',
             'fb_url' => 'url|nullable',
             'ig_url' => 'url|nullable',

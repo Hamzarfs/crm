@@ -1,12 +1,16 @@
 <?php
 
-use App\Events\ExampleEvent;
-use App\Models\User;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Broadcast;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\{BrandsRestApiController, EmailController};
+use Illuminate\Support\Facades\{Artisan, Broadcast, Route};
+
 
 Broadcast::routes();
+
+// Route::get('test', [EmailController::class, 'fetchFoldersAndMeta']);
+
+// Route::get('ttest', [EmailController::class, 'test']);
+
+// Route::get('test/{folder}', [EmailController::class, 'fetchMails']);
 
 Route::prefix('artisan')->group(function () {
     Route::get('migrate', function () {
@@ -34,10 +38,7 @@ Route::prefix('artisan')->group(function () {
     });
 });
 
-Route::get('/fire-event', function () {
-    event(new ExampleEvent(User::find(1)));
-    return 'Event Fired!';
-});
+Route::post('brands/{brand:slug}/rest-api', [BrandsRestApiController::class, 'createLeadFromBrandFormSubmission']);
 
 Route::get('{any?}', function () {
     return view('application');

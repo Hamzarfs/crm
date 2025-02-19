@@ -52,6 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
                     Route::delete('{department}', 'delete');
                 });
         });
+
     Route::prefix('tasks')
         ->controller(TaskController::class)
         ->group(function () {
@@ -85,6 +86,7 @@ Route::middleware('auth:sanctum')->group(function () {
                 Route::delete('{service}', 'delete');
             });
         });
+
     Route::prefix('brands')
         ->controller(BrandController::class)
         ->group(function () {
@@ -96,6 +98,7 @@ Route::middleware('auth:sanctum')->group(function () {
                 Route::delete('{brand}', 'delete');
             });
         });
+
     Route::prefix('leadsources')
         ->controller(LeadSourceController::class)
         ->group(function () {

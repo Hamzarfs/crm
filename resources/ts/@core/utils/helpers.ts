@@ -56,3 +56,14 @@ export const resolveLeadStatusVariant = (status: string) => {
     else
         return 'primary'
 }
+
+export const formatBytes = (bytes: number): string =>
+    (bytes >= 1024 * 1024) ? (bytes / (1024 * 1024)).toFixed(2) + ' MB' : (bytes / 1024).toFixed(2) + ' KB'
+
+export const slugify =
+    (text: string): string => text
+        ?.toLowerCase() // Convert to lowercase
+        ?.replace(/\s+/g, '-') // Replace spaces with hyphens
+        ?.trim() // Remove leading/trailing spaces
+        ?.replace(/[^a-z0-9 -]/g, '') // Remove special characters except spaces and hyphens
+        ?.replace(/-+/g, '-'); // Remove multiple consecutive hyphens
