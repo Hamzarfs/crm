@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\{BrandsRestApiController, EmailController};
 use Illuminate\Support\Facades\{Artisan, Broadcast, Route};
 
 
@@ -37,8 +36,6 @@ Route::prefix('artisan')->group(function () {
         return "<pre>$output</pre>";
     });
 });
-
-Route::post('brands/{brand:slug}/rest-api', [BrandsRestApiController::class, 'createLeadFromBrandFormSubmission']);
 
 Route::get('{any?}', function () {
     return view('application');

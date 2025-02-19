@@ -3,24 +3,42 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Sales\Brand\Rest;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use App\Models\{Brand, Campaign, Customer, LeadPipelineStage, LeadSource, Service};
 
 class BrandsRestApiController extends Controller
 {
-    public function createLeadFromBrandFormSubmission(Request $request)
+    public function createLeadFromBrandFormSubmission(Rest $request, Brand $brand): void
     {
-        // Log::info("data", $request->all());
-        // return $request->all();
-        // dd(123123444);
-        // var_dump($request->method());
-        // die("Method Check");
+        $data = $request->validated();
 
+        $fullName = explode(' ', trim($data['name']), 2);
+        $cxData = [
+            'email' => $data['email'],
+            'contact' => $data['phone'],
+            'first_name' => $fullName[0],
+            'last_name' => $fullName[1] ?? '',
+        ];
+        $customer = Customer::create($cxData);
 
-        // dd(3123123123, $request->all());
-        dd($request->all());
-        // $data = $request->validated();
+        $lead_source = LeadSource::where('name', 'Brand')->first();
 
-        // dd($data);
+        $campaign = Campaign::where('name', $data['campaign'])->first();
+
+        $pipelineStage = LeadPipelineStage::query()->first();
+
+        $services_sold = Service::where('name', $data['service'])->first();
+
+        $lead = $brand->leads()->make([
+            'status' => 'New lead',
+            'remarks' => $data['message']
+        ]);
+        $lead->customer()->associate($customer);
+        $lead->campaign()->associate($campaign);
+        $lead->leadSource()->associate($lead_source);
+        $lead->pipelineStage()->associate($pipelineStage);
+
+        $lead->save();
+
+        $lead->servicesSold()->sync($services_sold);
     }
 }

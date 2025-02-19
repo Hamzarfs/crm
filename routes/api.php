@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\{AuthController, DepartmentController, BrandController, CampaignController, CurrencyController, CustomerController, LeadController, LeadPipelineStageController, LeadSourceController, NotificationController, RoleController, ServiceController, TaskController, UserController};
+use App\Http\Controllers\{AuthController, DepartmentController, BrandController, BrandsRestApiController, CampaignController, CurrencyController, CustomerController, EmailController, LeadController, LeadPipelineStageController, LeadSourceController, NotificationController, RoleController, ServiceController, TaskController, UserController};
 use Illuminate\Support\Facades\Route;
 
 
@@ -175,3 +175,5 @@ Route::middleware('auth:sanctum')->group(function () {
             // Route::delete('{campaign}', 'delete');
         });
 });
+
+Route::post('brands/{brand:slug}/rest-api', [BrandsRestApiController::class, 'createLeadFromBrandFormSubmission']);
