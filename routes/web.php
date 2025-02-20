@@ -11,6 +11,8 @@ Broadcast::routes();
 
 // Route::get('test/{folder}', [EmailController::class, 'fetchMails']);
 
+
+
 Route::prefix('artisan')->group(function () {
     Route::get('migrate', function () {
         Artisan::call('migrate');
