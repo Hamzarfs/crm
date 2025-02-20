@@ -74,7 +74,7 @@
                             </div>
                             <div class="d-flex justify-space-between align-center border-b mb-2 pb-2">
                                 <span>Created By:</span>
-                                <b>{{ props.lead?.created_by.name }}</b>
+                                <b>{{ props.lead?.created_by?.name }}</b>
                             </div>
                             <div class="d-flex justify-space-between align-center border-b mb-2 pb-2">
                                 <span>Assigned By:</span>

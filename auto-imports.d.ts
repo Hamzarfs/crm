@@ -54,6 +54,7 @@ declare global {
   const facebookUrlValidator: typeof import('./resources/ts/@core/utils/validators')['facebookUrlValidator']
   const fileLengthValidator: typeof import('./resources/ts/@core/utils/validators')['fileLengthValidator']
   const fileValidator: typeof import('./resources/ts/@core/utils/validators')['fileValidator']
+  const formatBytes: typeof import('./resources/ts/@core/utils/helpers')['formatBytes']
   const formatDate: typeof import('./resources/ts/@core/utils/formatters')['formatDate']
   const formatDateNew: typeof import('./resources/ts/@core/utils/formatters')['formatDateNew']
   const formatDateToMonthShort: typeof import('./resources/ts/@core/utils/formatters')['formatDateToMonthShort']
@@ -150,6 +151,7 @@ declare global {
   const shallowReadonly: typeof import('vue')['shallowReadonly']
   const shallowRef: typeof import('vue')['shallowRef']
   const slugToTitleCase: typeof import('./resources/ts/@core/utils/formatters')['slugToTitleCase']
+  const slugify: typeof import('./resources/ts/@core/utils/helpers')['slugify']
   const storeToRefs: typeof import('pinia')['storeToRefs']
   const strToTitleCase: typeof import('./resources/ts/@core/utils/formatters')['strToTitleCase']
   const syncRef: typeof import('@vueuse/core')['syncRef']
@@ -430,6 +432,7 @@ declare module 'vue' {
     readonly facebookUrlValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['facebookUrlValidator']>
     readonly fileLengthValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['fileLengthValidator']>
     readonly fileValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['fileValidator']>
+    readonly formatBytes: UnwrapRef<typeof import('./resources/ts/@core/utils/helpers')['formatBytes']>
     readonly formatDate: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['formatDate']>
     readonly formatDateToMonthShort: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['formatDateToMonthShort']>
     readonly getActivePinia: UnwrapRef<typeof import('pinia')['getActivePinia']>
@@ -525,6 +528,7 @@ declare module 'vue' {
     readonly shallowReadonly: UnwrapRef<typeof import('vue')['shallowReadonly']>
     readonly shallowRef: UnwrapRef<typeof import('vue')['shallowRef']>
     readonly slugToTitleCase: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['slugToTitleCase']>
+    readonly slugify: UnwrapRef<typeof import('./resources/ts/@core/utils/helpers')['slugify']>
     readonly storeToRefs: UnwrapRef<typeof import('pinia')['storeToRefs']>
     readonly strToTitleCase: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['strToTitleCase']>
     readonly syncRef: UnwrapRef<typeof import('@vueuse/core')['syncRef']>

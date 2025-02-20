@@ -1,10 +1,7 @@
 <?php
 
-use App\Http\Middleware\DepartmentMiddleware;
-use App\Http\Middleware\RoleOrDepartmentMiddleware;
-use Illuminate\Foundation\Application;
-use Illuminate\Foundation\Configuration\Exceptions;
-use Illuminate\Foundation\Configuration\Middleware;
+use App\Http\Middleware\{DepartmentMiddleware, RoleOrDepartmentMiddleware};
+use Illuminate\Foundation\{Application, Configuration\Exceptions, Configuration\Middleware};
 use Spatie\Permission\Middleware\RoleMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))

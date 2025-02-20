@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\{AuthController, DepartmentController, BrandController, CampaignController, CurrencyController, CustomerController, LeadController, LeadPipelineStageController, LeadSourceController, NotificationController, RoleController, ServiceController, TaskController, UserController};
+use App\Http\Controllers\{AuthController, DepartmentController, BrandController, BrandsRestApiController, CampaignController, CurrencyController, CustomerController, EmailController, LeadController, LeadPipelineStageController, LeadSourceController, NotificationController, RoleController, ServiceController, TaskController, UserController};
 use Illuminate\Support\Facades\Route;
 
 
@@ -52,6 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
                     Route::delete('{department}', 'delete');
                 });
         });
+
     Route::prefix('tasks')
         ->controller(TaskController::class)
         ->group(function () {
@@ -85,6 +86,7 @@ Route::middleware('auth:sanctum')->group(function () {
                 Route::delete('{service}', 'delete');
             });
         });
+
     Route::prefix('brands')
         ->controller(BrandController::class)
         ->group(function () {
@@ -96,6 +98,7 @@ Route::middleware('auth:sanctum')->group(function () {
                 Route::delete('{brand}', 'delete');
             });
         });
+
     Route::prefix('leadsources')
         ->controller(LeadSourceController::class)
         ->group(function () {
@@ -172,3 +175,5 @@ Route::middleware('auth:sanctum')->group(function () {
             // Route::delete('{campaign}', 'delete');
         });
 });
+
+Route::post('brands/{brand:slug}/rest-api', [BrandsRestApiController::class, 'createLeadFromBrandFormSubmission']);
