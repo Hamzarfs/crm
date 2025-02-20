@@ -25,6 +25,7 @@ Route::prefix('artisan')->group(function () {
         return "<pre>$output</pre>";
     });
 
+
     Route::get('seed', function () {
         Artisan::call('db:seed');
 
