@@ -10,6 +10,7 @@ class DepartmentController extends Controller
 {
     public function all()
     {
+        
         return response()->json([
             'departments' => Department::with('leader')->orderBy('id', 'asc')->get()->map(function ($department) {
                 return [

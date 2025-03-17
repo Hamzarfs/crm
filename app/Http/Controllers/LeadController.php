@@ -24,10 +24,10 @@ class LeadController extends Controller
      */
     public function list(Request $request)
     {
+      
         $page = (int) $request->input('page', 1);
         $itemsPerPage = (int) $request->input('itemsPerPage', 10);
-
-        $users = $request->input('users');
+         $users = $request->input('users');
         $customers = $request->input('customers');
         $leadSources = $request->input('leadSources');
         $brands = $request->input('brands');
@@ -37,7 +37,7 @@ class LeadController extends Controller
         $leadClosedDateRange = $request->input('leadClosedDateRange');
         $createdAtRange = $request->input('createdAtRange');
         $leadClosedAmount = $request->input('leadClosedAmount');
-
+       
         if ($leadClosedDateRange)
             $leadClosedDateRange = explode(' to ', $request->input('leadClosedDateRange'));
         if ($createdAtRange)
@@ -98,7 +98,7 @@ class LeadController extends Controller
             value: fn() => (!is_null($orderByColumn) && !is_null($orderByDir)) ? ['column' => $orderByColumn, 'dir' => $orderByDir] : null,
             callback: fn(Builder $tasksQuery, array $orderBy) => $tasksQuery->orderBy($orderBy['column'], $orderBy['dir'])
         );
-
+        
         // Apply pagination
         $paginatedLeads = $leads->paginate($itemsPerPage, page: $page);
         $currentPage = $paginatedLeads->currentPage();
@@ -106,7 +106,7 @@ class LeadController extends Controller
         $total = $paginatedLeads->total();
 
         $leads = new LeadResourceCollection($paginatedLeads);
-
+        
         return response()->json([
             'leads' => $leads,
             'totalLeads' => $total,

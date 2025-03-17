@@ -126,7 +126,7 @@
             .then(({ users }) => users.map((u: any) => ({ title: u.name, value: u.id })))
         departments.value = await $api('departments')
             .then(({ departments }) => departments.map((d: any) => ({ title: d.title, value: d.value })))
-    } else if (userData?.role.value === 'team_lead') {
+    } else if (userData?.role.value === 'team_lead' || userData?.role.value === 'project_manager' ) {
         users.value = await $api('users', {
             query: {
                 'departments[]': [userData.department.value],
