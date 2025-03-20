@@ -21,6 +21,7 @@ class TaskController extends Controller
      */
     public function list(Request $request)
     {
+        
         $page = (int) $request->input('page', 1);
         $itemsPerPage = (int) $request->input('itemsPerPage', 10);
 
@@ -37,14 +38,16 @@ class TaskController extends Controller
         $tasks = Task::with(['files', 'creator', 'assignee.department', 'comments.files']);
 
         if (!$request->user()->hasRole('admin')) {
-            if ($request->user()->hasRole('team_lead'))
+            if ($request->user()->hasRole('team_lead') || $request->user()->hasRole('project_manager')) {
                 $tasks->where(
-                    fn($query) =>  $query->where('created_by', Auth::id())
+                    fn($query) => $query->where('created_by', Auth::id())
                         ->orWhere('assigned_to', Auth::id())
                 );
-            else
+            } else {
                 $tasks->where('assigned_to', Auth::id());
+            }
         }
+        
 
         // Applying DT filters
         $tasks = $tasks->when(
@@ -111,7 +114,7 @@ class TaskController extends Controller
     {
         $assignedToMe = request()->input('assignedToMe');
 
-        $statuses = ['pending', 'in_progress', 'completed'];
+        $statuses = ['to_do','in_progress', 'pending','sent_to_client_review','revisions',  'completed','submit_to_client','archive'];
 
         $tasksQuery = Task::with(['files', 'creator', 'assignee.department', 'comments.files']);
 

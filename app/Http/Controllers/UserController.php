@@ -23,32 +23,71 @@ class UserController extends Controller
     public function list(Request $request)
     {
         if ($request->hasAny(['q', 'itemsPerPage', 'page'])) {
-            return $this->getUserDT($request);
+             return $this->getUserDT($request);
         } else {
-            return $this->getUserAll($request);
+             return $this->getUserAll($request);
         }
     }
+
 
     private function getUserAll(Request $request)
     {
         $departments = $request->input('departments');
         $roles = $request->input('roles');
+    
+        // If "project_manager" is selected, return all employees
+        if ($departments && in_array('project_manager', $departments)) {
+         $users = User::with('department:id,name')
+        ->where('status', EmployeeStatusesEnum::ACTIVE)
+        ->where('id', '!=', $request->user()->id)
+        ->whereHas('roles', fn(Builder $query) => $query->where('name', 'employee')) // Only fetch users with "employee" role
+        ->get();
 
-        $users = User::with('department:id,name')->where([
-            ['status', EmployeeStatusesEnum::ACTIVE],
-            ['id', '!=', $request->user()->id]
-        ])->when(
-            value: $departments,
-            callback: fn(Builder $userQuery, array $departments) => $userQuery->whereHas('department', fn(Builder $departmentsQuery) => $departmentsQuery->whereIn('name', $departments))
-        )->when(
-            value: $roles,
-            callback: fn(Builder $userQuery, array $roles) => $userQuery->whereHas('roles', fn(Builder $rolesQuery) => $rolesQuery->whereIn('name', $roles))
-        )->get();
-
+        } else {
+            // Otherwise, filter users based on provided departments and roles
+            $users = User::with('department:id,name')->where([
+                ['status', EmployeeStatusesEnum::ACTIVE],
+                ['id', '!=', $request->user()->id]
+            ])->when(
+                value: $departments,
+                callback: fn(Builder $userQuery, array $departments) =>
+                    $userQuery->whereHas('department', fn(Builder $departmentsQuery) =>
+                        $departmentsQuery->whereIn('name', $departments)
+                    )
+            )->when(
+                value: $roles,
+                callback: fn(Builder $userQuery, array $roles) =>
+                    $userQuery->whereHas('roles', fn(Builder $rolesQuery) =>
+                        $rolesQuery->whereIn('name', $roles)
+                    )
+            )->get();
+        }
+    
         return response()->json([
             'users' => new UserResourceCollection($users),
         ]);
     }
+    
+    // private function getUserAll(Request $request)
+    // {
+    //     $departments = $request->input('departments');
+    //     $roles = $request->input('roles');
+
+    //     $users = User::with('department:id,name')->where([
+    //         ['status', EmployeeStatusesEnum::ACTIVE],
+    //         ['id', '!=', $request->user()->id]
+    //     ])->when(
+    //         value: $departments,
+    //         callback: fn(Builder $userQuery, array $departments) => $userQuery->whereHas('department', fn(Builder $departmentsQuery) => $departmentsQuery->whereIn('name', $departments))
+    //     )->when(
+    //         value: $roles,
+    //         callback: fn(Builder $userQuery, array $roles) => $userQuery->whereHas('roles', fn(Builder $rolesQuery) => $rolesQuery->whereIn('name', $roles))
+    //     )->get();
+
+    //     return response()->json([
+    //         'users' => new UserResourceCollection($users),
+    //     ]);
+    // }
 
     private function getUserDT(Request $request)
     {

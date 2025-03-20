@@ -13,7 +13,9 @@ enum RolesEnum: string
     case ACCOUNTANT = 'accountant';
     case SALES_AGENT = 'sales_agent';
     case LEAD_GENERATION_SPECIALIST = 'lead_generation_specialist';
+    case PROJECT_MANAGER = 'project_manager';
 
+    
     // extra helper to allow for greater customization of displayed values, without disclosing the name/value data directly
     public function label(): string
     {
@@ -26,6 +28,8 @@ enum RolesEnum: string
             self::ACCOUNTANT => 'Accountant',
             self::SALES_AGENT => 'Sales Agent',
             self::LEAD_GENERATION_SPECIALIST => 'Lead Generation Specialist',
+            self::PROJECT_MANAGER => 'Project Manager',
+            
         };
     }
 }

@@ -24,7 +24,11 @@
     const editTaskDrawerRef = ref()
     const viewTaskDrawerRef = ref()
 
-    const query = computed(() => userData?.role.value === 'team_lead' ? { assignedToMe } : {})
+    const query = computed(() => 
+        (userData?.role.value === 'team_lead' || userData?.role.value === 'project_manager') 
+            ? { assignedToMe } 
+            : {}
+    );
 
     // 👉 Fetching tasks
     const { data: tasksByStatusData, execute: fetchTasksByStatus } = await useApi<any>(createUrl('tasks/kanban', { query }))
@@ -44,17 +48,40 @@
     })
 
     const statuses = [
-        {
-            title: 'Pending',
-            value: 'pending'
+           {
+            title: 'To Do',
+            value: 'to_do'
         },
         {
             title: 'In Progress',
             value: 'in_progress'
         },
+
+        {
+            title: 'Pending',
+            value: 'pending'
+        },
+
+        {
+            title: 'Sent To Client Review',
+            value: 'sent_to_client_review'
+        },
+        {
+            title: 'Revisions',
+            value: 'revisions'
+        },
+
         {
             title: 'Completed',
             value: 'completed'
+        },
+        {
+            title: 'Submit To Client',
+            value: 'submit_to_client'
+        },
+        {
+            title: 'Archive',
+            value: 'archive'
         },
     ]
 
@@ -236,7 +263,7 @@
 
 
 <template>
-    <template v-if="['admin', 'team_lead'].includes(userData?.role.value)">
+    <template v-if="['admin', 'team_lead', 'project_manager'].includes(userData?.role.value)">
         <VRow align="center" justify="space-between" class="mb-1">
             <!-- 👉 Toggle Assigned to me or assigned by me (only for team_lead role) -->
             <VCol cols="2">
@@ -312,7 +339,7 @@
         margin-inline-start: -0.6rem;
         // min-block-size: calc(100vh - 10.5rem);
         padding-inline-start: 0.6rem;
-
+        min-height: 800px;
         .kanban-board {
             inline-size: 16.875rem;
             min-inline-size: 16.875rem;

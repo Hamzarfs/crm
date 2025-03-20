@@ -17,7 +17,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('users')
         ->controller(UserController::class)
         ->group(function () {
-            Route::get('', 'list')->middleware('role_or_department:admin|hr|team_lead,sales|lead_generation');
+            Route::get('', 'list')->middleware('role_or_department:admin|hr|team_lead,project_manager,sales|lead_generation');
             Route::middleware('role:admin|hr')->group(function () {
                 Route::get('statuses', 'getStatuses');
                 Route::post('', 'store');
@@ -53,21 +53,48 @@ Route::middleware('auth:sanctum')->group(function () {
                 });
         });
 
-    Route::prefix('tasks')
-        ->controller(TaskController::class)
-        ->group(function () {
-            Route::get('', 'list');
-            Route::get('kanban', 'kanbanList');
-            Route::middleware('role:admin|team_lead')->group(function () {
-                Route::post('', 'store');
-                Route::put('{task}', 'update');
-                Route::delete('{task}', 'delete');
+    // Route::prefix('tasks')
+    //     ->controller(TaskController::class)
+    //     ->group(function () {
+    //         Route::get('', 'list');
+    //         Route::get('kanban', 'kanbanList');
+        
+    //         Route::middleware('role:admin|team_lead|project_manager')->group(function () {
+    //             Route::post('', 'store');
+    //             Route::put('{task}', 'update');
+    //             Route::delete('{task}', 'delete');
+    //         });
+
+           
+
+    //         Route::get('files/{taskFile}', 'downloadFile');
+    //         Route::patch('{task}/status', 'updateStatus');
+    //         Route::post('{task}/comments', 'addComment');
+    //         Route::delete('comments/{taskComment}', 'deleteComment');
+    //     });
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::prefix('tasks')
+            ->controller(TaskController::class)
+            ->group(function () {
+                // Publicly accessible tasks
+                Route::get('', 'list');
+                Route::get('kanban', 'kanbanList');
+                
+                // Only admin, team_lead, project_manager can perform these actions
+                Route::middleware('role:admin|team_lead|project_manager')->group(function () {
+                    Route::post('', 'store');
+                    Route::put('{task}', 'update');
+                    Route::delete('{task}', 'delete');
+                });
+    
+                // Other task-related routes
+                Route::get('files/{taskFile}', 'downloadFile');
+                Route::patch('{task}/status', 'updateStatus');
+                Route::post('{task}/comments', 'addComment');
+                Route::delete('comments/{taskComment}', 'deleteComment');
             });
-            Route::get('files/{taskFile}', 'downloadFile');
-            Route::patch('{task}/status', 'updateStatus');
-            Route::post('{task}/comments', 'addComment');
-            Route::delete('comments/{taskComment}', 'deleteComment');
-        });
+    });
 
     Route::prefix('notifications')->controller(NotificationController::class)->group(function () {
         Route::get('all', 'all');

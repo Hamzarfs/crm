@@ -12,7 +12,7 @@ class Update extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->hasRole([RolesEnum::ADMIN, RolesEnum::TEAM_LEAD]);
+        return $this->user()->hasRole([RolesEnum::ADMIN, RolesEnum::TEAM_LEAD,RolesEnum::PROJECT_MANAGER]);
     }
 
     /**

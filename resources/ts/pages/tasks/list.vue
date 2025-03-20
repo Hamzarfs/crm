@@ -53,7 +53,7 @@
         { title: 'Title', key: 'title' },
         { title: 'Status', key: 'status' },
         { title: 'Department', key: 'department', sortable: false, showToOnly: ['admin'] },
-        { title: 'Assigned To', key: 'assigned_to', sortable: false, showToOnly: ['admin', 'team_lead'] },
+        { title: 'Assigned To', key: 'assigned_to', sortable: false, showToOnly: ['admin', 'team_lead','project_manager'] },
         { title: 'Deadline', key: 'deadline' },
         { title: 'Created By', key: 'created_by', sortable: false, showToOnly: ['admin'] },
         { title: 'Creation Date', key: 'created_at' },
@@ -75,7 +75,7 @@
             sortBy,
             orderBy,
         }
-        if (userData?.role.value === 'team_lead')
+        if (userData?.role.value === 'team_lead' || userData?.role.value === 'project_manager')
             query.assignedToMe = assignedToMe
 
         return query
@@ -104,17 +104,40 @@
     })
 
     const statuses = [
-        {
-            title: 'Pending',
-            value: 'pending'
+           {
+            title: 'To Do',
+            value: 'to_do'
         },
         {
             title: 'In Progress',
             value: 'in_progress'
         },
+
+        {
+            title: 'Pending',
+            value: 'pending'
+        },
+
+        {
+            title: 'Sent To Client Review',
+            value: 'sent_to_client_review'
+        },
+        {
+            title: 'Revisions',
+            value: 'revisions'
+        },
+
         {
             title: 'Completed',
             value: 'completed'
+        },
+        {
+            title: 'Submit To Client',
+            value: 'submit_to_client'
+        },
+        {
+            title: 'Archive',
+            value: 'archive'
         },
     ]
 
@@ -126,7 +149,7 @@
             .then(({ users }) => users.map((u: any) => ({ title: u.name, value: u.id })))
         departments.value = await $api('departments')
             .then(({ departments }) => departments.map((d: any) => ({ title: d.title, value: d.value })))
-    } else if (userData?.role.value === 'team_lead' || userData?.role.value === 'project_manager' ) {
+    } else if (userData?.role.value === 'team_lead' || userData?.role.value === 'project_manager') {
         users.value = await $api('users', {
             query: {
                 'departments[]': [userData.department.value],
@@ -290,19 +313,20 @@
         <VCard class="mb-6">
             <div class="d-flex align-center justify-space-between">
                 <VCardTitle class="text-h4 py-5">
-                    {{ ['admin', 'team_lead'].includes(userData?.role.value) ? 'Filters' : 'Tasks' }}
+                    {{ ['admin', 'team_lead','project_manager'].includes(userData?.role.value) ? 'Filters' : 'Tasks' }}
                 </VCardTitle>
 
                 <VBtn prepend-icon="ri-kanban-view" class="mb-3 me-2" :to="{ name: 'tasks-kanban' }">Kanban View</VBtn>
             </div>
 
-            <VCardText v-if="['admin', 'team_lead'].includes(userData?.role.value)">
+            <VCardText v-if="['admin', 'team_lead','project_manager'].includes(userData?.role.value)">
                 <VRow align="center">
                     <!-- 👉 Toggle Assigned to me or assigned by me (only for team_lead role) -->
-                    <VCol cols="2" v-if="userData?.role.value === 'team_lead'">
+                   <VCol cols="2" v-if="userData?.role.value === 'team_lead' || userData?.role.value === 'project_manager'">
                         <VSwitch v-model="toggleAssignedToMe" :inset="false"
                             :label="toggleAssignedToMe ? 'Assigned to me' : 'Assigned by me'" />
                     </VCol>
+
 
                     <!-- 👉 Select Department -->
                     <VCol v-if="userData?.role.value === 'admin'">
@@ -311,7 +335,7 @@
                     </VCol>
 
                     <!-- 👉 Select User -->
-                    <VCol v-if="['admin', 'team_lead'].includes(userData?.role.value)">
+                    <VCol v-if="['admin', 'team_lead','project_manager'].includes(userData?.role.value)">
                         <VAutocomplete v-model="selectedUsers" label="Filter by User" placeholder="Filter by User"
                             multiple :items="users" auto-select-first clearable chips />
                     </VCol>
@@ -323,7 +347,7 @@
                     </VCol>
 
                     <!-- 👉 Select Status -->
-                    <VCol v-if="['admin', 'team_lead'].includes(userData?.role.value)">
+                    <VCol v-if="['admin', 'team_lead','project_manager'].includes(userData?.role.value)">
                         <VSelect v-model="selectedStatuses" label="Filter by Status" placeholder="Filter by Status"
                             multiple :items="statuses" clearable chips />
                     </VCol>
@@ -338,7 +362,7 @@
 
             <VDivider />
 
-            <VCardText v-if="['admin', 'team_lead'].includes(userData?.role.value)" class="d-flex flex-wrap gap-4">
+            <VCardText v-if="['admin', 'team_lead','project_manager'].includes(userData?.role.value)" class="d-flex flex-wrap gap-4">
                 <!-- 👉 Export & import buttons -->
                 <!-- <VBtn color="success" prepend-icon="ri-upload-2-line">
                     Import
@@ -374,8 +398,7 @@
                                 <span>Click to update status</span>
                             </VTooltip>
                         </template>
-
-                        <VList>
+                         <VList>
                             <VListItem v-for="status in statuses" :key="status.value" :value="status.value"
                                 @click="handleStatusUpdate({ id: item.id, status: item.status, newStatus: status.value })">
                                 {{ status.title }}
@@ -485,12 +508,12 @@
         </VCard>
 
         <!-- 👉 Add New Task -->
-        <AddNewTaskDrawer v-if="['admin', 'team_lead'].includes(userData?.role.value)"
+        <AddNewTaskDrawer v-if="['admin', 'team_lead','project_manager'].includes(userData?.role.value)"
             v-model:isDrawerOpen="isAddNewTaskDrawerVisible" @task-data="addNewTask" :users="users" :statuses="statuses"
             ref="addNewTaskDrawerRef" :errors="errors" />
 
         <!-- 👉 Edit Task -->
-        <EditTaskDrawer v-if="['admin', 'team_lead'].includes(userData?.role.value)"
+        <EditTaskDrawer v-if="['admin', 'team_lead','project_manager'].includes(userData?.role.value)"
             v-model:isDrawerOpen="isEditTaskDrawerVisible" @task-data="editTask" :users="users" :statuses="statuses"
             :task="selectedTask" ref="editTaskDrawerRef" :errors="errors" />
 
