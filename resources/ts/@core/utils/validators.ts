@@ -155,20 +155,39 @@ export const alphaDashValidator = (value: unknown) => {
 
 // 👉 File Validator For Tasks & Task Comments
 export const fileValidator = (files: File[]) => {
-    const allowedExtensions = ['image/*', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt']
-    if (isEmpty(files))
-        return true
+    const allowedExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff'];
+    const allowedMimeTypes = [
+        'application/pdf',
+        'application/msword', // .doc
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+        'application/vnd.ms-excel', // .xls
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+        'application/vnd.ms-powerpoint', // .ppt
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
+        'text/plain', // .txt
+        'image/jpeg', // .jpg, .jpeg
+        'image/png',  // .png
+        'image/gif',  // .gif
+        'image/bmp',  // .bmp
+        'image/tiff'  // .tiff
+    ];
+
+    if (isEmpty(files)) return true; // No files, skip validation
 
     for (const file of files) {
-        const fileExtensionInfo = file.type.split('/')
-        const fileType = fileExtensionInfo[0]
-        const fileExtension = fileExtensionInfo[1]
+        const fileExtension = file.name.split('.').pop()?.toLowerCase(); // Get the file extension (lowercased)
+        const fileMimeType = file.type.toLowerCase(); // Get the file's MIME type (lowercased)
 
-        if (!(
-            (fileType === 'image' && allowedExtensions.includes('image/*')) ||
-            allowedExtensions.includes(fileType) ||
-            allowedExtensions.includes(fileExtension)
-        )) return `File type ${file.type} is not allowed`
+        // Check if file extension is allowed
+        const isExtensionAllowed = fileExtension && allowedExtensions.includes(fileExtension);
+
+        // Check if file MIME type is allowed
+        const isMimeTypeAllowed = allowedMimeTypes.includes(fileMimeType);
+
+        if (!(isExtensionAllowed || isMimeTypeAllowed)) {
+            return `File type "${file.type}" is not allowed.`;
+        }
     }
-    return true
-}
+
+    return true; // All files are valid
+};

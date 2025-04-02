@@ -111,38 +111,39 @@ class TaskController extends Controller
      * Get Tasks for kanban view
      */
     public function kanbanList()
-    {
-        $assignedToMe = request()->input('assignedToMe');
+{
+    $assignedToMe = request()->input('assignedToMe');
 
-        $statuses = ['to_do','in_progress', 'pending','sent_to_client_review','revisions',  'completed','submit_to_client','archive'];
+    $statuses = ['to_do', 'in_progress', 'pending', 'sent_to_client_review', 'revisions', 'completed', 'submit_to_client', 'archive'];
 
-        $tasksQuery = Task::with(['files', 'creator', 'assignee.department', 'comments.files']);
+    $tasksQuery = Task::with(['files', 'creator', 'assignee.department', 'comments.files']);
 
-        $tasksQuery->when(
-            value: $assignedToMe,
-            callback: fn(Builder $tasksQuery, $assignedToMe) => $assignedToMe === 'yes' ? $tasksQuery->where('assigned_to', Auth::id()) : $tasksQuery->where('created_by', Auth::id()),
-        );
+    $tasksQuery->when(
+        value: $assignedToMe,
+        callback: fn(Builder $tasksQuery, $assignedToMe) => $assignedToMe === 'yes' ? $tasksQuery->where('assigned_to', Auth::id()) : $tasksQuery->where('created_by', Auth::id()),
+    );
 
-        if (!request()->user()->hasRole('admin')) {
-            if (request()->user()->hasRole('team_lead')) {
-                $tasksQuery->where(function ($query) {
-                    $query->where('created_by', Auth::id())
-                        ->orWhere('assigned_to', Auth::id());
-                });
-            } else {
-                $tasksQuery->where('assigned_to', Auth::id());
-            }
+    if (!request()->user()->hasRole('admin')) {
+        if (request()->user()->hasRole('team_lead') || request()->user()->hasRole('project_manager')) {
+            // Allow both team leads and project managers to see tasks they created or are assigned to
+            $tasksQuery->where(function ($query) {
+                $query->where('created_by', Auth::id())
+                    ->orWhere('assigned_to', Auth::id());
+            });
+        } else {
+            // Regular users can only see tasks they are assigned to
+            $tasksQuery->where('assigned_to', Auth::id());
         }
-
-        $tasksByStatus = $tasksQuery->get()->groupBy('status');
-
-        $formattedTasks = collect($statuses)->mapWithKeys(fn($status) => [$status => new TaskResourceCollection($tasksByStatus->get($status, []))]);
-
-        return response()->json([
-            'tasksByStatus' => $formattedTasks,
-        ]);
     }
 
+    $tasksByStatus = $tasksQuery->get()->groupBy('status');
+
+    $formattedTasks = collect($statuses)->mapWithKeys(fn($status) => [$status => new TaskResourceCollection($tasksByStatus->get($status, []))]);
+
+    return response()->json([
+        'tasksByStatus' => $formattedTasks,
+    ]);
+}
 
     /**
      * Store a newly created resource in storage.

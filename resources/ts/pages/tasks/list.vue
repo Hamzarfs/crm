@@ -53,8 +53,10 @@
         { title: 'Title', key: 'title' },
         { title: 'Status', key: 'status' },
         { title: 'Department', key: 'department', sortable: false, showToOnly: ['admin'] },
-        { title: 'Assigned To', key: 'assigned_to', sortable: false, showToOnly: ['admin', 'team_lead','project_manager'] },
-        { title: 'Deadline', key: 'deadline' },
+        { title: 'Assigned To', key: 'assigned_to', sortable: false },
+         { title: 'Assigned By', key: 'assigned_by', sortable: false },
+      
+       { title: 'Deadline', key: 'deadline' },
         { title: 'Created By', key: 'created_by', sortable: false, showToOnly: ['admin'] },
         { title: 'Creation Date', key: 'created_at' },
         { title: 'Last Updated', key: 'updated_at' },
@@ -282,6 +284,7 @@
     }
 
     const isTasksActionBtnsDisable = (taskCreatorId: number): boolean => (tableLoading.value || !(userData?.role.value === 'admin' || taskCreatorId === userData?.id))
+    const isTasksActionBtnsDisableEdit = (taskCreatorId: number): boolean => (tableLoading.value || !(userData?.role.value === 'admin' || userData?.role.value === 'team_lead' || taskCreatorId === userData?.id))
 
     const deleteComment = async (commentIndex: number) => {
         const comment = selectedTask.value.comments[commentIndex]
@@ -385,7 +388,30 @@
 
                 <!-- Status -->
                 <template #item.status="{ item }: { item: any }">
-                    <VMenu v-if="userData?.id === item.assignee.id" transition="slide-y-transition">
+                    <VMenu  transition="slide-y-transition">
+                        <template #activator="{ props: menuProps }">
+                            <VTooltip location="top">
+                                <template #activator="{ props: tooltipProps }">
+                                    <VChip v-bind="mergeProps(menuProps, tooltipProps)" elevation="5"
+                                        :color="resolveTaskStatusColor(item.status)" size="small"
+                                        class="text-uppercase">
+                                        {{ statuses.find((status: any) => status.value === item.status)?.title }}
+                                    </VChip>
+                                </template>
+                                <span>Click to update status</span>
+                            </VTooltip>
+                        </template>
+                         <VList>
+                            <VListItem v-for="status in statuses" :key="status.value" :value="status.value"
+                                @click="handleStatusUpdate({ id: item.id, status: item.status, newStatus: status.value })">
+                                {{ status.title }}
+                            </VListItem>
+                        </VList>
+                    </VMenu>
+
+                    
+
+                    <!-- <VMenu v-if="userData?.id === item.assignee.id" transition="slide-y-transition">
                         <template #activator="{ props: menuProps }">
                             <VTooltip location="top">
                                 <template #activator="{ props: tooltipProps }">
@@ -409,7 +435,7 @@
                     <VChip v-else :color="resolveTaskStatusColor(item.status)" size="small" class="text-uppercase"
                         elevation="5">
                         {{ statuses.find((status: any) => status.value === item.status)?.title }}
-                    </VChip>
+                    </VChip> -->
                 </template>
 
                 <!-- Department -->
@@ -420,6 +446,11 @@
                 <!-- Assigned To -->
                 <template #item.assigned_to="{ item }: { item: any }">
                     {{ item.assignee.name }}
+                </template>
+                
+                <!-- Assigned By -->
+                <template #item.assigned_by="{ item }: { item: any }">
+                     {{ item.creator.name }}
                 </template>
 
                 <!-- Deadline -->
@@ -457,7 +488,7 @@
 
                     <IconBtn size="small" @click="openEditTaskForm(item)" color="primary"
                         :variant="isTasksActionBtnsDisable(item.creator.id) ? 'text' : 'flat'" class="mx-2"
-                        :disabled="isTasksActionBtnsDisable(item.creator.id)">
+                        :disabled="isTasksActionBtnsDisableEdit(item.creator.id)">
                         <VIcon :icon="isTasksActionBtnsDisable(item.creator.id) ?
                             'ri-edit-box-line' :
                             'ri-edit-box-fill'" />

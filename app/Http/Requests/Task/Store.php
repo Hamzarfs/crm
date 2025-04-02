@@ -26,7 +26,7 @@ class Store extends FormRequest
             'title' => 'required|string',
             'description' => 'required|string',
             'deadline' => 'required|date|after_or_equal:today',
-            'status' => 'required|in:pending,in_progress,completed',
+            'status' => 'required|in:to_do,in_progress,pending,sent_to_client_review,revisions,completed,submit_to_client,archive',
             'assigned_to' => 'required|integer|exists:users,id',
             'files' => 'array|max:5',
             'files.*' => 'file|mimes:jpeg,png,gif,bmp,svg,webp,pdf,doc,docx,xls,xlsx,ppt,pptx,txt'

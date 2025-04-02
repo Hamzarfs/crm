@@ -93,7 +93,7 @@
             .then(({ users }) => users.map((u: any) => ({ title: u.name, value: u.id })))
         departments.value = await $api('departments')
             .then(({ departments }) => departments.map((d: any) => ({ title: d.title, value: d.id })))
-    } else if (userData?.role.value === 'team_lead') {
+    } else if (userData?.role.value === 'team_lead' || userData?.role.value === 'project_manager') {
         users.value = await $api('users', {
             query: {
                 'departments[]': [userData.department.value],
@@ -267,9 +267,11 @@
         <VRow align="center" justify="space-between" class="mb-1">
             <!-- 👉 Toggle Assigned to me or assigned by me (only for team_lead role) -->
             <VCol cols="2">
-                <VSwitch v-if="userData?.role.value === 'team_lead'" v-model="toggleAssignedToMe" :inset="false"
+                <VSwitch v-if="userData?.role.value === 'team_lead' || userData?.role.value === 'project_manager'" 
+                    v-model="toggleAssignedToMe" :inset="false"
                     :label="toggleAssignedToMe ? 'Assigned to me' : 'Assigned by me'" />
             </VCol>
+
 
             <VCol cols="2" class="text-end">
                 <VBtn @click="isAddNewTaskDrawerVisible = true" prepend-icon="ri-task-fill">
@@ -295,7 +297,7 @@
     </div>
 
     <!-- 👉 Add New Task -->
-    <AddNewTaskDrawer v-if="['admin', 'team_lead'].includes(userData?.role.value)"
+    <AddNewTaskDrawer v-if="['admin', 'team_lead','project_manager'].includes(userData?.role.value)"
         v-model:isDrawerOpen="isAddNewTaskDrawerVisible" @task-data="addNewTask" :users="users" :statuses="statuses"
         ref="addNewTaskDrawerRef" :errors="errors" />
 
@@ -305,7 +307,7 @@
         @comment-data="addComment" @status-update="updateTaskStatus" @delete-comment="deleteComment" />
 
     <!-- 👉 Edit Task -->
-    <EditTaskDrawer v-if="['admin', 'team_lead'].includes(userData?.role.value)"
+    <EditTaskDrawer v-if="['admin', 'team_lead','project_manager'].includes(userData?.role.value)"
         v-model:isDrawerOpen="isEditTaskDrawerVisible" @task-data="editTask" :users="users" :statuses="statuses"
         :task="selectedTask" ref="editTaskDrawerRef" :errors="errors" />
 

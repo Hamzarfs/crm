@@ -24,7 +24,7 @@
     const description = ref('')
     const deadline = ref('')
     const assigned_to = ref()
-    const status = ref('pending')
+    const status = ref('to_do')
     const files = ref([])
 
     // 👉 drawer close
@@ -125,7 +125,7 @@
                                     prepend-icon append-icon="$file" chips show-size clearable
                                     :error-messages="props.errors.files"
                                     :rules="[fileValidator, fileLengthValidator(files?.length ?? 0, 5)]"
-                                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt" counter
+                                      accept="image/*,.pdf,.docx,.doc,.xls,.xlsx,.ppt,.pptx,.txt" counter
                                     :counter-size-string="String(files?.length)" />
                             </VCol>
 

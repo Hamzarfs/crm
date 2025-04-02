@@ -37,12 +37,15 @@ class UserController extends Controller
     
         // If "project_manager" is selected, return all employees
         if ($departments && in_array('project_manager', $departments)) {
-         $users = User::with('department:id,name')
-        ->where('status', EmployeeStatusesEnum::ACTIVE)
-        ->where('id', '!=', $request->user()->id)
-        ->whereHas('roles', fn(Builder $query) => $query->where('name', 'employee')) // Only fetch users with "employee" role
-        ->get();
-
+           
+            $users = User::with('department:id,name')
+            ->where('status', EmployeeStatusesEnum::ACTIVE)
+            ->where('id', '!=', $request->user()->id)
+            ->whereHas('roles', function (Builder $query) {
+                $query->whereIn('name', ['employee', 'team_lead']);
+            })
+            ->get();
+        
         } else {
             // Otherwise, filter users based on provided departments and roles
             $users = User::with('department:id,name')->where([
