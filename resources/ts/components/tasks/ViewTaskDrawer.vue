@@ -1,93 +1,93 @@
 <script setup lang="ts">
-    import { useAuthStore } from '@/@core/stores/auth';
-    import { mergeProps } from 'vue';
-    import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
-    import type { VForm } from 'vuetify/components/VForm';
+import { useAuthStore } from '@/@core/stores/auth';
+import { mergeProps } from 'vue';
+import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
+import type { VForm } from 'vuetify/components/VForm';
 
-    const authStore = useAuthStore()
+const authStore = useAuthStore()
 
-    // Get currently logged in user data
-    const userData = authStore.user
+// Get currently logged in user data
+const userData = authStore.user
 
-    interface Props {
-        isDrawerOpen: boolean
-        task: Record<string, any>
-        statuses: Record<string, string>[]
-        errors: any
-        resolveTaskStatusColor: (status: string) => string
+interface Props {
+    isDrawerOpen: boolean
+    task: Record<string, any>
+    statuses: Record<string, string>[]
+    errors: any
+    resolveTaskStatusColor: (status: string) => string
+}
+
+interface Emit {
+    (e: 'update:isDrawerOpen', value: boolean): void
+    (e: 'commentData', value: FormData): void
+    (e: 'statusUpdate', value: { id: number, status: string, newStatus: string }): void
+    (e: 'deleteComment', value: number): void
+}
+
+const props = defineProps<Props>()
+const emit = defineEmits<Emit>()
+
+const task = ref(props.task || {})
+
+watch(() => props.task, newValue => {
+    if (!isObjectEmpty(newValue)) {
+        task.value = newValue
+        // window.Echo.private(`Task.Comment.Added.${props.task.id}`)
+        //     .notification((notification: any) => {
+        //         console.log(notification);
+
+        //     })
     }
+})
 
-    interface Emit {
-        (e: 'update:isDrawerOpen', value: boolean): void
-        (e: 'commentData', value: FormData): void
-        (e: 'statusUpdate', value: { id: number, status: string, newStatus: string }): void
-        (e: 'deleteComment', value: number): void
-    }
-
-    const props = defineProps<Props>()
-    const emit = defineEmits<Emit>()
-
-    const task = ref(props.task || {})
-
-    watch(() => props.task, newValue => {
-        if (!isObjectEmpty(newValue)) {
-            task.value = newValue
-            // window.Echo.private(`Task.Comment.Added.${props.task.id}`)
-            //     .notification((notification: any) => {
-            //         console.log(notification);
-
-            //     })
-        }
+const handleDrawerModelValueUpdate = (val: boolean) => {
+    emit('update:isDrawerOpen', val)
+    !val && nextTick(() => {
+        refForm.value?.reset()
+        refForm.value?.resetValidation()
     })
+}
 
-    const handleDrawerModelValueUpdate = (val: boolean) => {
-        emit('update:isDrawerOpen', val)
-        !val && nextTick(() => {
-            refForm.value?.reset()
-            refForm.value?.resetValidation()
-        })
-    }
-
-    // 👉 drawer close
-    const closeNavigationDrawer = () => {
-        emit('update:isDrawerOpen', false)
-        nextTick(() => {
-            refForm.value?.reset()
-            refForm.value?.resetValidation()
-        })
-    }
-
-    const downloadFile = async (file: any, index: number) => {
-        const fileBlob = await $api(`/tasks/files/${file.id}`, { responseType: 'blob' })
-        const url = URL.createObjectURL(new Blob([fileBlob]))
-        const link = document.createElement('a')
-        link.href = url
-        link.setAttribute('download', `File ${index + 1}.${extractFileExtension(file.file)}`)
-        document.body.appendChild(link)
-        link.click()
-        link.parentNode?.removeChild(link)
-    }
-
-    const files = ref([])
-    const refForm = ref<VForm>()
-    const isFormValid = ref(false)
-    const isDeleteDialogVisible = ref(false)
-    let commentIndexToDelete: number
-
-    const onSubmit = (e: SubmitEvent) => {
-        refForm.value?.validate()
-            .then(async ({ valid: isValid }) => {
-                if (isValid) {
-                    const data = new FormData(e.target as HTMLFormElement)
-
-                    emit('commentData', data)
-                }
-            })
-    }
-
-    defineExpose({
-        commentForm: refForm
+// 👉 drawer close
+const closeNavigationDrawer = () => {
+    emit('update:isDrawerOpen', false)
+    nextTick(() => {
+        refForm.value?.reset()
+        refForm.value?.resetValidation()
     })
+}
+
+const downloadFile = async (file: any, index: number) => {
+    const fileBlob = await $api(`/tasks/files/${file.id}`, { responseType: 'blob' })
+    const url = URL.createObjectURL(new Blob([fileBlob]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `File ${index + 1}.${extractFileExtension(file.file)}`)
+    document.body.appendChild(link)
+    link.click()
+    link.parentNode?.removeChild(link)
+}
+
+const files = ref([])
+const refForm = ref<VForm>()
+const isFormValid = ref(false)
+const isDeleteDialogVisible = ref(false)
+let commentIndexToDelete: number
+
+const onSubmit = (e: SubmitEvent) => {
+    refForm.value?.validate()
+        .then(async ({ valid: isValid }) => {
+            if (isValid) {
+                const data = new FormData(e.target as HTMLFormElement)
+
+                emit('commentData', data)
+            }
+        })
+}
+
+defineExpose({
+    commentForm: refForm
+})
 
 
 
@@ -138,8 +138,8 @@
                                                 <VChip v-bind="mergeProps(menuProps, tooltipProps)" elevation="5"
                                                     :color="resolveTaskStatusColor(task.status)" size="small"
                                                     class="text-uppercase">
-                                                    {{ statuses.find(
-                                                        (status: any) => status.value === task.status)?.title }}
+                                                    {{statuses.find(
+                                                        (status: any) => status.value === task.status)?.title}}
                                                 </VChip>
                                             </template>
                                             <span>Click to update status</span>
@@ -156,7 +156,7 @@
 
                                 <VChip v-else :color="resolveTaskStatusColor(task.status)" size="small"
                                     class="text-uppercase" elevation="5">
-                                    {{ statuses.find((status: any) => status.value === task.status)?.title }}
+                                    {{statuses.find((status: any) => status.value === task.status)?.title}}
                                     <!-- {{ slugToTitleCase(item.status) }} -->
                                 </VChip>
                             </div>
@@ -198,7 +198,9 @@
                         <!-- 👉 Description -->
                         <VCol cols="12">
                             <h3 class="text-h6 mb-3">Description</h3>
-                            <p>{{ task.description }}</p>
+                            <p style="white-space: pre-line;">
+                                {{ task.description }}
+                            </p>
                         </VCol>
 
                         <VDivider />

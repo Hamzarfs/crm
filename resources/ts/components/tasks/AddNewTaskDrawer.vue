@@ -1,73 +1,119 @@
 <script setup lang="ts">
-    import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
-    import type { VForm } from 'vuetify/components/VForm';
-
-    interface Emit {
-        (e: 'update:isDrawerOpen', value: boolean): void
-        (e: 'taskData', value: FormData): void
-    }
-
-    interface Props {
-        isDrawerOpen: boolean
-        users: Record<number, any>[]
-        statuses: Record<number, any>[]
-        errors: any
-    }
-
-    const props = defineProps<Props>()
-    const emit = defineEmits<Emit>()
+import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
+import type { VForm } from 'vuetify/components/VForm';
 
 
-    const isFormValid = ref(false)
-    const refForm = ref<VForm>()
-    const title = ref('')
-    const description = ref('')
-    const deadline = ref('')
-    const assigned_to = ref()
-    const status = ref('to_do')
-    const files = ref([])
 
-    // 👉 drawer close
-    const closeNavigationDrawer = () => {
-        emit('update:isDrawerOpen', false)
-        nextTick(() => {
-            refForm.value?.reset()
-            refForm.value?.resetValidation()
-        })
-    }
 
-    const onSubmit = () => {
-        refForm.value?.validate().then(({ valid }) => {
-            if (valid) {
-                const formData = new FormData()
 
-                // Append non-file data
-                formData.append('title', title.value)
-                formData.append('description', description.value)
-                formData.append('deadline', deadline.value)
-                formData.append('assigned_to', assigned_to.value)
-                formData.append('status', status.value)
+interface Emit {
+    (e: 'update:isDrawerOpen', value: boolean): void
+    (e: 'taskData', value: FormData): void
+}
 
-                // Append files
-                files.value?.length && files.value.forEach((file: File, index: number) => {
-                    formData.append(`files[${index}]`, file)
-                })
+interface Props {
+    isDrawerOpen: boolean
+    users: Record<number, any>[]
+    statuses: Record<number, any>[]
+    errors: any
+}
 
-                emit('taskData', formData)
-            }
-        })
-    }
+const props = defineProps<Props>()
+const emit = defineEmits<Emit>()
 
-    defineExpose({
-        closeNavigationDrawer
+
+const isFormValid = ref(false)
+const refForm = ref<VForm>()
+const title = ref('')
+const description = ref('')
+const deadline = ref('')
+const assigned_to = ref()
+const status = ref('to_do')
+const files = ref([])
+
+
+
+
+const isSubmitting = ref(false)
+
+const onSubmit = () => {
+    if (isSubmitting.value) return // prevent multiple clicks
+
+    isSubmitting.value = true
+
+    refForm.value?.validate().then(({ valid }) => {
+        if (valid) {
+            const formData = new FormData()
+
+            // Append non-file data
+            formData.append('title', title.value)
+            //formData.append('description', description.value)
+            formData.append('description', description.value?.toString().trim())
+
+            formData.append('deadline', deadline.value)
+            formData.append('assigned_to', assigned_to.value)
+            formData.append('status', status.value)
+
+            // Append files
+            files.value?.length && files.value.forEach((file: File, index: number) => {
+                formData.append(`files[${index}]`, file)
+            })
+
+            emit('taskData', formData)
+        }
+
+        // Re-enable after 10 seconds
+        setTimeout(() => {
+            isSubmitting.value = false
+        }, 5000)
     })
+}
 
-    const handleDrawerModelValueUpdate = (val: boolean) => {
-        emit('update:isDrawerOpen', val)
-        !val && nextTick(() => {
-            refForm.value?.resetValidation()
-        })
-    }
+
+
+// 👉 drawer close
+const closeNavigationDrawer = () => {
+    emit('update:isDrawerOpen', false)
+    nextTick(() => {
+        refForm.value?.reset()
+        refForm.value?.resetValidation()
+    })
+}
+
+// const onSubmit = () => {
+//     refForm.value?.validate().then(({ valid }) => {
+//         if (valid) {
+//             const formData = new FormData()
+
+//             // Append non-file data
+//             formData.append('title', title.value)
+//             formData.append('description', description.value)
+//             formData.append('deadline', deadline.value)
+//             formData.append('assigned_to', assigned_to.value)
+//             formData.append('status', status.value)
+
+//             // Append files
+//             files.value?.length && files.value.forEach((file: File, index: number) => {
+//                 formData.append(`files[${index}]`, file)
+//             })
+
+//             emit('taskData', formData)
+//         }
+//     })
+// }
+
+defineExpose({
+    closeNavigationDrawer
+})
+
+const handleDrawerModelValueUpdate = (val: boolean) => {
+    emit('update:isDrawerOpen', val)
+    !val && nextTick(() => {
+        refForm.value?.resetValidation()
+    })
+}
+
+
 
 </script>
 
@@ -125,19 +171,25 @@
                                     prepend-icon append-icon="$file" chips show-size clearable
                                     :error-messages="props.errors.files"
                                     :rules="[fileValidator, fileLengthValidator(files?.length ?? 0, 5)]"
-                                      accept="image/*,.pdf,.docx,.doc,.xls,.xlsx,.ppt,.pptx,.txt" counter
+                                    accept="image/*,.pdf,.docx,.doc,.xls,.xlsx,.ppt,.pptx,.txt" counter
                                     :counter-size-string="String(files?.length)" />
                             </VCol>
 
                             <!-- 👉 Submit and Cancel -->
-                            <VCol cols="12">
+                            <!-- <VCol cols="12">
                                 <VBtn type="submit" class="me-4">
                                     Submit
                                 </VBtn>
                                 <VBtn type="reset" variant="outlined" color="error" @click="closeNavigationDrawer">
                                     Cancel
                                 </VBtn>
-                            </VCol>
+                            </VCol> -->
+
+                            <VBtn type="button" :disabled="isSubmitting" class="me-4" color="primary" @click="onSubmit">
+                                {{ isSubmitting ? 'Please wait...' : 'Submit' }}
+                            </VBtn>
+
+
                         </VRow>
                     </VForm>
                 </VCardText>
